@@ -8,8 +8,8 @@ st.set_page_config(
     layout="centered"
 )
 
-# URL del backend en FastAPI (local o en Render)
-API_URL = "http://127.0.0.1:8000/api"
+# URL del backend en la nube (Render)
+API_URL = "https://somos-libres-de-ansiedad-1.onrender.com/api"
 
 st.title("🌿 Somos Libres de Ansiedad")
 st.markdown("Tu refugio seguro, anónimo y guiado por expertos.")
