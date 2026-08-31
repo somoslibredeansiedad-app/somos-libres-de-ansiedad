@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pydantic
+streamlit
+requests
+google-api-python-client
