@@ -6,7 +6,7 @@ import random
 
 app = FastAPI(
     title="Somos Libres de Ansiedad Core API",
-    version="2.0.0",
+    version="2.1.0",
     description="Backend definitivo y unificado para el ecosistema Somos Libres de Ansiedad."
 )
 
@@ -37,21 +37,36 @@ PENSAMIENTOS_BIENVENIDA = [
     "Está bien hacer una pausa. El descanso también es parte del camino."
 ]
 
-class UserPlanStatus(BaseModel):
-    user_id: str
-    plan_actual: str  # 'gratis', 'comunicador', 'amigo_todos'
-    fecha_expiracion: Optional[datetime] = None
-    tiempo_acumulado_interaccion_horas: float = 0.0
-    referidos_totales: int = 0
-    referidos_vip_compraron: int = 0
-
-class PlanesEngine:
-    def __init__(self):
-        self.usuarios_planes: Dict[str, UserPlanStatus] = {}
-
-planes_engine = PlanesEngine()
-
-AVATARS_DRIVE_FOLDER_ID = "1tyIBnoptE0RUt-DDv8wqhlJO_1Dqff5g"
+# Catálogo oficial de Avatares vinculado a Google Drive (1tyIBnoptE0RUt-DDv8wqhlJO_1Dqff5g)
+CATALOGO_AVATARES = [
+    {
+        "avatar_id": "av_valeria",
+        "nombre": "Valeria Sofía",
+        "edad": 34,
+        "nacionalidad": "Venezuela",
+        "personalidad": "Empática y Cálida",
+        "foto_url": "https://drive.google.com/uc?id=1tyIBnoptE0RUt-DDv8wqhlJO_1Dqff5g",
+        "descripcion": "Especialista en contención emocional y respiración consciente."
+    },
+    {
+        "avatar_id": "av_mateo",
+        "nombre": "Mateo Alejandro",
+        "edad": 38,
+        "nacionalidad": "Argentina",
+        "personalidad": "Resiliente y Motivacional",
+        "foto_url": "https://drive.google.com/uc?id=1tyIBnoptE0RUt-DDv8wqhlJO_1Dqff5g",
+        "descripcion": "Enfocado en reestructuración cognitiva y superación de crisis."
+    },
+    {
+        "avatar_id": "av_elena",
+        "nombre": "Elena Rincón",
+        "edad": 42,
+        "nacionalidad": "España",
+        "personalidad": "Escucha Activa y Serena",
+        "foto_url": "https://drive.google.com/uc?id=1tyIBnoptE0RUt-DDv8wqhlJO_1Dqff5g",
+        "descripcion": "Guía experta en meditación profunda y anclaje al presente."
+    }
+]
 
 class AvatarConfig(BaseModel):
     avatar_id: str
@@ -61,41 +76,22 @@ class AvatarConfig(BaseModel):
     plan_usuario: str
 
 class AvatarEngine:
-    def __init__(self):
-        self.folder_id = AVATARS_DRIVE_FOLDER_ID
+    def obtener_catalogo(self) -> List[dict]:
+        return CATALOGO_AVATARES
 
-    def procesar_respuesta_avatar(self, mensaje_usuario: str, avatar: AvatarConfig) -> str:
+    def procesar_respuesta_avatar(self, mensaje_usuario: str, avatar_nombre: str) -> str:
         return (
-            f"Te escucho con atención y respeto. Entiendo perfectamente cuando me compartes lo que sientes. "
+            f"Te escucho con atención y respeto. Entiendo perfectamente cuando me compartes '{mensaje_usuario}'. "
             f"Respira hondo, no tienes que cargar con todo al mismo tiempo. Estoy aquí para acompañarte paso a paso, con calma y sin juicios."
         )
 
 avatar_engine = AvatarEngine()
 
-class AdminLoginRequest(BaseModel):
-    correo: EmailStr
-    nombre_dueno: str
-
-class NotificacionSistema(BaseModel):
-    tipo: str
-    descripcion: str
-    timestamp: datetime
-
-class AdminEngine:
-    def __init__(self):
-        self.notificaciones_activas: List[NotificacionSistema] = []
-        self.sesion_admin_activa: bool = False
-
-    def registrar_evento_notificacion(self, tipo_evento: str, detalle: str):
-        evento = NotificacionSistema(tipo=tipo_evento, descripcion=detalle, timestamp=datetime.now())
-        self.notificaciones_activas.append(evento)
-
-admin_engine = AdminEngine()
-
 class UserMessage(BaseModel):
     user_id: str
     message: str
     plan_nivel: str = "gratis"
+    avatar_nombre: str = "Valeria Sofía"
 
 CRISIS_KEYWORDS = ["me estoy muriendo", "no aguanto", "no puedo respirar", "corazón acelerado", "me quiero rendir"]
 
@@ -118,19 +114,18 @@ def evaluar_capa_emergencia(mensaje: str) -> Optional[str]:
 def registrar_usuario(data: UserRegister):
     if not data.terms_accepted or not data.disclaimer_accepted:
         raise HTTPException(status_code=400, detail="Debes aceptar los términos y el descargo de responsabilidad.")
-    admin_engine.registrar_evento_notificacion("registro", f"Nuevo usuario: {data.apodo}")
     return {"status": "success", "message": f"¡Bienvenido/a {data.apodo}!", "codigo_generado": "ABC123"}
 
 @app.post("/api/auth/login", summary="Acceso de usuarios")
 def acceder_usuario(data: UserLogin):
     pensamiento_del_dia = random.choice(PENSAMIENTOS_BIENVENIDA)
-    admin_engine.registrar_evento_notificacion("login", f"Ingreso: {data.correo}")
-    
-    # Si es el administrador global, otorgar de una vez plan 'amigo_todos'
     if data.correo == "somos.libredeansiedad@gmail.com":
         return {"status": "success", "message": "Acceso concedido.", "bienvenida_avatar": pensamiento_del_dia, "plan_actual": "amigo_todos"}
-    
     return {"status": "success", "message": "Acceso concedido.", "bienvenida_avatar": pensamiento_del_dia, "plan_actual": "gratis"}
+
+@app.get("/api/avatares/catalogo", summary="Obtener lista de avatares")
+def obtener_avatares():
+    return {"avatares": avatar_engine.obtener_catalogo()}
 
 @app.post("/api/chat", summary="Chat con Avatar")
 def chat_con_avatar(data: UserMessage):
@@ -138,6 +133,5 @@ def chat_con_avatar(data: UserMessage):
     if respuesta_emergencia:
         return {"status": "crisis detected", "response": respuesta_emergencia, "source": "Emergency_Protocol"}
     
-    avatar_config = AvatarConfig(avatar_id="av_1", nombre="Guía de Apoyo", personalidad="Resiliente y empático", pais_usuario="Venezuela", plan_usuario=data.plan_nivel)
-    respuesta_avatar = avatar_engine.procesar_respuesta_avatar(data.message, avatar_config)
+    respuesta_avatar = avatar_engine.procesar_respuesta_avatar(data.message, data.avatar_nombre)
     return {"status": "success", "response": respuesta_avatar, "source": f"Avatar_Engine_{data.plan_nivel}"}

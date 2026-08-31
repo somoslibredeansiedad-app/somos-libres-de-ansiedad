@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 import os
-import re
 
 THEME_COLORS = {
     "primary": "#A8E6CF",
@@ -52,8 +51,14 @@ if "user_role" not in st.session_state:
     st.session_state.user_role = "guest"
 if "user_plan" not in st.session_state:
     st.session_state.user_plan = "gratis"
-if "avatar_enfoque" not in st.session_state:
-    st.session_state.avatar_enfoque = "Empático y Cálido"
+if "avatar_activo" not in st.session_state:
+    st.session_state.avatar_activo = {
+        "nombre": "Valeria Sofía",
+        "edad": 34,
+        "nacionalidad": "Venezuela",
+        "personalidad": "Empática y Cálida",
+        "foto_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
+    }
 
 st.title("🌿 Somos Libres de Ansiedad")
 st.markdown("Tu refugio seguro, anónimo y guiado por expertos.")
@@ -71,7 +76,7 @@ if not st.session_state.authenticated:
             if correo_log == ADMIN_EMAIL and pass_log == ADMIN_PASSWORD:
                 st.session_state.authenticated = True
                 st.session_state.user_role = "admin"
-                st.session_state.user_plan = "amigo_todos"  # Plan máximo asignado automáticamente al administrador
+                st.session_state.user_plan = "amigo_todos"
                 st.success("Acceso concedido como Administrador con Plan Amigo de Todos.")
                 st.rerun()
             else:
@@ -136,13 +141,13 @@ else:
 
     if menu == "Chat con Avatar":
         st.subheader("💬 Sala de Apoyo Emocional")
-        st.caption(f"Plan activo: **{st.session_state.get('user_plan', 'GRATIS').upper()}** | Enfoque: *{st.session_state.avatar_enfoque}*")
+        st.caption(f"Plan activo: **{st.session_state.get('user_plan', 'GRATIS').upper()}** | Guía actual: *{st.session_state.avatar_activo['nombre']}*")
         
         if "messages" not in st.session_state:
             st.session_state.messages = [
                 {
                     "role": "assistant",
-                    "content": "Hola. Estoy aquí para escucharte y acompañarte sin juzgarte. Tómate tu tiempo, ¿qué pasa por tu mente en este momento?"
+                    "content": f"Hola, soy {st.session_state.avatar_activo['nombre']}. Estoy aquí para escucharte y acompañarte sin juzgarte. Tómate tu tiempo, ¿qué pasa por tu mente en este momento?"
                 }
             ]
         
@@ -162,7 +167,8 @@ else:
                     res = requests.post(f"{API_URL}/chat", json={
                         "user_id": "user_demo",
                         "message": user_input,
-                        "plan_nivel": st.session_state.get('user_plan', 'gratis')
+                        "plan_nivel": st.session_state.get('user_plan', 'gratis'),
+                        "avatar_nombre": st.session_state.avatar_activo['nombre']
                     })
                     if res.status_code == 200:
                         data = res.json()
@@ -175,14 +181,38 @@ else:
             st.session_state.messages.append({"role": "assistant", "content": bot_response})
 
     elif menu == "Configurar Avatar":
-        st.subheader("🛠️ Configuración y Personalización del Avatar")
-        nuevo_enfoque = st.selectbox(
-            "Enfoque Terapéutico / Acompañamiento",
-            ["Empático y Cálido", "Resiliente y Motivacional", "Escucha Activa y Serena", "Práctico y Breve"]
-        )
-        if st.button("Guardar Preferencias"):
-            st.session_state.avatar_enfoque = nuevo_enfoque
-            st.success("¡Preferencias actualizadas con éxito!")
+        st.subheader("🛠️ Selección y Personalización de tu Guía")
+        st.markdown("Elige al especialista que mejor se adapte a tu momento actual:")
+        
+        # Obtener catálogo de avatares desde el backend o usar lista local de respaldo
+        try:
+            res = requests.get(f"{API_URL}/avatares/catalogo")
+            avatares = res.json().get("avatares", []) if res.status_code == 200 else []
+        except Exception:
+            avatares = []
+
+        if not avatares:
+            avatares = [
+                {"nombre": "Valeria Sofía", "edad": 34, "nacionalidad": "Venezuela", "personalidad": "Empática y Cálida", "foto_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"},
+                {"nombre": "Mateo Alejandro", "edad": 38, "nacionalidad": "Argentina", "personalidad": "Resiliente y Motivacional", "foto_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150"},
+                {"nombre": "Elena Rincón", "edad": 42, "nacionalidad": "España", "personalidad": "Escucha Activa y Serena", "foto_url": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150"}
+            ]
+
+        col1, col2, col3 = st.columns(3)
+        cols = [col1, col2, col3]
+
+        for idx, av in enumerate(avatares):
+            with cols[idx % 3]:
+                st.image(av["foto_url"], width=120)
+                st.markdown(f"**{av['nombre']}** ({av['edad']} años)")
+                st.markdown(f"🌍 **País:** {av['nacionalidad']}")
+                st.markdown(f"💡 **Enfoque:** {av['personalidad']}")
+                if st.button(f"Seleccionar a {av['nombre']}", key=f"btn_{idx}"):
+                    st.session_state.avatar_activo = av
+                    if "messages" in st.session_state:
+                        del st.session_state.messages  # Reiniciar chat con el nuevo guía
+                    st.success(f"¡Has seleccionado a {av['nombre']} como tu guía!")
+                    st.rerun()
 
     elif menu == "Muro de Los Lamentos":
         st.subheader("🛡️ El Muro de Los Lamentos")
