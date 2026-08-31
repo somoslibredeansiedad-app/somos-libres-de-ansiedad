@@ -1,6 +1,7 @@
 fastapi
 uvicorn
-pydantic
+pydantic[email]
+email-validator
 streamlit
 requests
 google-api-python-client
