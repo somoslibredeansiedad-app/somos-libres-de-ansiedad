@@ -27,10 +27,15 @@ st.markdown(f"""
     h1, h2, h3, h4, h5, h6, p, label, span {{
         color: {THEME_COLORS['text_primary']} !important;
     }}
-    .stTextInput input, .stNumberInput input, .stTextArea textarea, .stSelectbox select {{
-        background-color: {THEME_COLORS['surface']} !important;
-        color: {THEME_COLORS['text_primary']} !important;
-        border-color: {THEME_COLORS['border']} !important;
+    .welcome-banner {{
+        background: linear-gradient(135deg, #4E8A72 0%, #A8E6CF 100%);
+        padding: 20px;
+        border-radius: 12px;
+        color: #1E4D3B;
+        text-align: center;
+        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
     }}
     .stButton button {{
         background-color: {THEME_COLORS['secondary']} !important;
@@ -51,20 +56,20 @@ if "user_role" not in st.session_state:
     st.session_state.user_role = "guest"
 if "user_plan" not in st.session_state:
     st.session_state.user_plan = "gratis"
+if "avatar_configurado" not in st.session_state:
+    st.session_state.avatar_configurado = False
 if "avatar_activo" not in st.session_state:
-    st.session_state.avatar_activo = {
-        "nombre": "Valeria Sofía",
-        "edad": 34,
-        "nacionalidad": "Venezuela",
-        "personalidad": "Empática y Cálida",
-        "foto_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
-    }
+    st.session_state.avatar_activo = None
 
 st.title("🌿 Somos Libres de Ansiedad")
-st.markdown("Tu refugio seguro, anónimo y guiado por expertos.")
 
 if not st.session_state.authenticated:
-    st.subheader("Bienvenido a tu Espacio Seguro")
+    st.markdown("""
+        <div class="welcome-banner">
+            <h2>✨ ¡Bienvenido a tu Refugio Seguro! ✨</h2>
+            <p>Un espacio confidencial, anónimo y guiado por expertos para recuperar tu calma interior.</p>
+        </div>
+    """, unsafe_allow_html=True)
     
     tab_login, tab_register = st.tabs(["Iniciar Sesión", "Registrarse"])
     
@@ -77,7 +82,7 @@ if not st.session_state.authenticated:
                 st.session_state.authenticated = True
                 st.session_state.user_role = "admin"
                 st.session_state.user_plan = "amigo_todos"
-                st.success("Acceso concedido como Administrador con Plan Amigo de Todos.")
+                st.success("Acceso concedido como Administrador.")
                 st.rerun()
             else:
                 try:
@@ -92,7 +97,7 @@ if not st.session_state.authenticated:
                     else:
                         st.error("Correo o contraseña incorrectos.")
                 except Exception as e:
-                    st.error(f"No se pudo conectar con el servidor: {e}")
+                    st.error(f"Error de conexión con el servidor: {e}")
 
     with tab_register:
         nombre = st.text_input("Nombre Completo (*)")
@@ -102,7 +107,7 @@ if not st.session_state.authenticated:
         edad = st.number_input("Edad (*)", min_value=12, max_value=100, value=25)
         
         st.markdown("---")
-        terms = st.checkbox("He leído y acepto los Términos de Servicio y la Política de Privacidad. (*)")
+        terms = st.checkbox("He leído y acepto los Términos de Servicio y Política de Privacidad. (*)")
         disclaimer = st.checkbox("Acepto que este programa es una herramienta de apoyo educativo y no un servicio médico. (*)")
         
         if st.button("Registrarme"):
@@ -124,10 +129,22 @@ if not st.session_state.authenticated:
                     st.error(f"Error de conexión: {e}")
 
 else:
-    opciones = ["Chat con Avatar", "Configurar Avatar", "Muro de Los Lamentos", "Biblioteca"]
-    
-    if st.session_state.user_role == "admin":
-        opciones.append("Panel de Administración")
+    # Mensaje de bienvenida llamativo tras iniciar sesión
+    st.markdown("""
+        <div class="welcome-banner">
+            <h2>🌟 Tu Espacio de Sanación está Activo</h2>
+            <p>Configura tu guía de apoyo para comenzar la sesión de acompañamiento.</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # Definir opciones de navegación según si el avatar está configurado o no
+    if not st.session_state.avatar_configurado:
+        opciones = ["Configurar Avatar"]
+        st.warning("⚠️ **Paso Obligatorio:** Debes configurar y seleccionar tu guía espiritual/emocional antes de desbloquear el chat.")
+    else:
+        opciones = ["Chat con Avatar", "Configurar Avatar", "Muro de Los Lamentos", "Biblioteca"]
+        if st.session_state.user_role == "admin":
+            opciones.append("Panel de Administración")
     
     menu = st.sidebar.selectbox("Navegación", opciones)
     
@@ -135,19 +152,49 @@ else:
         st.session_state.authenticated = False
         st.session_state.user_role = "guest"
         st.session_state.user_plan = "gratis"
+        st.session_state.avatar_configurado = False
+        st.session_state.avatar_activo = None
         if "messages" in st.session_state:
             del st.session_state.messages
         st.rerun()
 
-    if menu == "Chat con Avatar":
-        st.subheader("💬 Sala de Apoyo Emocional")
-        st.caption(f"Plan activo: **{st.session_state.get('user_plan', 'GRATIS').upper()}** | Guía actual: *{st.session_state.avatar_activo['nombre']}*")
+    if menu == "Configurar Avatar":
+        st.subheader("🛠️ Selección y Personalización de tu Guía")
+        st.markdown("Elige al especialista que mejor se adapte a tu momento actual:")
+        
+        try:
+            res = requests.get(f"{API_URL}/avatares/catalogo")
+            avatares = res.json().get("avatares", []) if res.status_code == 200 else []
+        except Exception:
+            avatares = []
+
+        col1, col2, col3 = st.columns(3)
+        cols = [col1, col2, col3]
+
+        for idx, av in enumerate(avatares):
+            with cols[idx % 3]:
+                st.image(av["foto_url"], width=120)
+                st.markdown(f"**{av['nombre']}** ({av['edad']} años)")
+                st.markdown(f"🌍 **País:** {av['nacionalidad']}")
+                st.markdown(f"💡 **Enfoque:** {av['personalidad']}")
+                if st.button(f"Seleccionar a {av['nombre']}", key=f"btn_{idx}"):
+                    st.session_state.avatar_activo = av
+                    st.session_state.avatar_configurado = True
+                    if "messages" in st.session_state:
+                        del st.session_state.messages
+                    st.success(f"¡Has seleccionado a {av['nombre']} como tu guía!")
+                    st.rerun()
+
+    elif menu == "Chat con Avatar" and st.session_state.avatar_configurado:
+        avatar_actual = st.session_state.avatar_activo
+        st.subheader(f"💬 Sala de Apoyo Emocional con {avatar_actual['nombre']}")
+        st.caption(f"Plan: **{st.session_state.get('user_plan', 'GRATIS').upper()}** | Especialista: *{avatar_actual['personalidad']}*")
         
         if "messages" not in st.session_state:
             st.session_state.messages = [
                 {
                     "role": "assistant",
-                    "content": f"Hola, soy {st.session_state.avatar_activo['nombre']}. Estoy aquí para escucharte y acompañarte sin juzgarte. Tómate tu tiempo, ¿qué pasa por tu mente en este momento?"
+                    "content": f"Hola, soy {avatar_actual['nombre']}. He leído detenidamente mi guía de vida y estoy aquí para escucharte y apoyarte desde nuestra biblioteca de recursos. ¿Qué pasa por tu mente hoy?"
                 }
             ]
         
@@ -162,13 +209,14 @@ else:
                 st.markdown(user_input)
             
             with st.chat_message("assistant", avatar="🌿"):
-                bot_response = "Te escucho con atención y respeto. Estoy aquí contigo, respira hondo y cuéntame un poco más."
+                bot_response = "Te escucho con atención. Respira hondo, estoy aquí contigo."
                 try:
                     res = requests.post(f"{API_URL}/chat", json={
                         "user_id": "user_demo",
                         "message": user_input,
                         "plan_nivel": st.session_state.get('user_plan', 'gratis'),
-                        "avatar_nombre": st.session_state.avatar_activo['nombre']
+                        "avatar_id": avatar_actual['avatar_id'],
+                        "avatar_nombre": avatar_actual['nombre']
                     })
                     if res.status_code == 200:
                         data = res.json()
@@ -180,44 +228,10 @@ else:
             
             st.session_state.messages.append({"role": "assistant", "content": bot_response})
 
-    elif menu == "Configurar Avatar":
-        st.subheader("🛠️ Selección y Personalización de tu Guía")
-        st.markdown("Elige al especialista que mejor se adapte a tu momento actual:")
-        
-        # Obtener catálogo de avatares desde el backend o usar lista local de respaldo
-        try:
-            res = requests.get(f"{API_URL}/avatares/catalogo")
-            avatares = res.json().get("avatares", []) if res.status_code == 200 else []
-        except Exception:
-            avatares = []
-
-        if not avatares:
-            avatares = [
-                {"nombre": "Valeria Sofía", "edad": 34, "nacionalidad": "Venezuela", "personalidad": "Empática y Cálida", "foto_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"},
-                {"nombre": "Mateo Alejandro", "edad": 38, "nacionalidad": "Argentina", "personalidad": "Resiliente y Motivacional", "foto_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150"},
-                {"nombre": "Elena Rincón", "edad": 42, "nacionalidad": "España", "personalidad": "Escucha Activa y Serena", "foto_url": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150"}
-            ]
-
-        col1, col2, col3 = st.columns(3)
-        cols = [col1, col2, col3]
-
-        for idx, av in enumerate(avatares):
-            with cols[idx % 3]:
-                st.image(av["foto_url"], width=120)
-                st.markdown(f"**{av['nombre']}** ({av['edad']} años)")
-                st.markdown(f"🌍 **País:** {av['nacionalidad']}")
-                st.markdown(f"💡 **Enfoque:** {av['personalidad']}")
-                if st.button(f"Seleccionar a {av['nombre']}", key=f"btn_{idx}"):
-                    st.session_state.avatar_activo = av
-                    if "messages" in st.session_state:
-                        del st.session_state.messages  # Reiniciar chat con el nuevo guía
-                    st.success(f"¡Has seleccionado a {av['nombre']} como tu guía!")
-                    st.rerun()
-
     elif menu == "Muro de Los Lamentos":
         st.subheader("🛡️ El Muro de Los Lamentos")
         st.markdown("Un espacio seguro para compartir lo que cargas y encontrar lectura afín según tu plan.")
-        st.info("Espacio comunitario protegido activo con privilegios de administrador.")
+        st.info("Espacio comunitario protegido activo.")
 
     elif menu == "Biblioteca":
         st.subheader("📚 Biblioteca Documental y Recursos")
@@ -225,5 +239,5 @@ else:
 
     elif menu == "Panel de Administración" and st.session_state.user_role == "admin":
         st.subheader("🔒 Panel de Administración Maestro")
-        st.markdown("### 📊 Alertas y Actividad Reciente del Sistema")
-        st.write("Modo supervisor activado con acceso total al Plan Amigo de Todos.")
+        st.markdown("### 📊 Actividad del Sistema")
+        st.write("Modo supervisor activado con acceso total.")
