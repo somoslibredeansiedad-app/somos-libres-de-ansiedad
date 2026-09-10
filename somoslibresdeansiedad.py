@@ -8,7 +8,7 @@ from urllib.parse import quote
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
-from passlib.context import CryptContext
+import bcrypt
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -24,12 +24,11 @@ SECRET_KEY = os.getenv("SECRET_KEY", "somos-libres-seguridad-produccion-2026-cla
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 horas
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
 app = FastAPI(
     title="Somos Libres de Ansiedad Core API",
-    version="3.5.0",
+    version="3.5.1",
     description="Backend oficial con persistencia SQLite/Render, JWT, motor RAG desde JSON y Muro de los Lamentos."
 )
 
@@ -114,12 +113,15 @@ class UserMessage(BaseModel):
     message: str
     avatar_id: str
 
-# Utilidades Criptográficas
+# Utilidades Criptográficas con bcrypt directo
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    pwd_bytes = password.encode('utf-8')[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    pwd_bytes = plain_password.encode('utf-8')[:72]
+    return bcrypt.checkpw(pwd_bytes, hashed_password.encode('utf-8'))
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
