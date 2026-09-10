@@ -76,6 +76,49 @@ if "perfil_social_creado" not in st.session_state:
 if "token" not in st.session_state:
     st.session_state.token = None
 
+
+def obtener_ruta_o_url_avatar(avatar_data: dict) -> str:
+    """Resuelve la ruta local o la URL cruda de GitHub para la imagen del avatar."""
+    if not isinstance(avatar_data, dict):
+        return ""
+    
+    nombre_archivo = (
+        avatar_data.get("archivos", {}).get("imagen")
+        or avatar_data.get("foto_url")
+        or avatar_data.get("foto")
+        or ""
+    )
+    
+    if not nombre_archivo:
+        return ""
+    
+    if nombre_archivo.startswith("http://") or nombre_archivo.startswith("https://"):
+        return nombre_archivo
+    
+    ruta_local = os.path.join("avatares", nombre_archivo)
+    if os.path.exists(ruta_local):
+        return ruta_local
+        
+    ruta_directa = nombre_archivo
+    if os.path.exists(ruta_directa):
+        return ruta_directa
+        
+    nombre_escapado = nombre_archivo.replace(" ", "%20")
+    return f"https://raw.githubusercontent.com/lacontadoraia-hub/somoslibredeansiedad-app/main/avatares/{nombre_escapado}"
+
+
+def mostrar_imagen_avatar(avatar_data: dict, ancho: int = 120):
+    """Muestra la imagen del avatar o un ícono genérico si no se encuentra."""
+    src = obtener_ruta_o_url_avatar(avatar_data)
+    if src:
+        try:
+            st.image(src, width=ancho)
+        except Exception:
+            st.markdown(f"<div style='font-size:{ancho//2}px; text-align:center;'>👤</div>", unsafe_allow_html=True)
+    else:
+        st.markdown(f"<div style='font-size:{ancho//2}px; text-align:center;'>👤</div>", unsafe_allow_html=True)
+
+
 # Carga limpia de imágenes locales
 if os.path.exists("Logo.png"):
     st.image("Logo.png", width=120)
@@ -101,7 +144,7 @@ if not st.session_state.authenticated:
 
         if st.button("Ingresar"):
             try:
-                res = requests.post(f"{API_URL}/auth/login", json={"correo": correo_log, "password": pass_log})
+                res = requests.post(f"{API_URL}/auth/login", json={"correo": correo_log.strip(), "password": pass_log})
                 if res.status_code == 200:
                     data = res.json()
                     st.session_state.authenticated = True
@@ -136,12 +179,12 @@ if not st.session_state.authenticated:
                 st.warning("Por favor completa todos los campos obligatorios marcados con (*).")
             else:
                 payload = {
-                    "nombre_completo": nombre,
-                    "apodo": apodo,
-                    "correo": correo_reg,
+                    "nombre_completo": nombre.strip(),
+                    "apodo": apodo.strip(),
+                    "correo": correo_reg.strip(),
                     "password": pass_reg,
                     "edad": int(edad),
-                    "codigo_referido": codigo_ref or None,
+                    "codigo_referido": codigo_ref.strip() if codigo_ref else None,
                     "terms_accepted": terms,
                     "disclaimer_accepted": disclaimer
                 }
@@ -206,16 +249,17 @@ else:
 
         for idx, av in enumerate(avatares):
             with cols[idx % 3]:
-                st.image(av["foto_url"], width=130)
-                st.markdown(f"**{av['nombre']}** ({av['edad']} años)")
-                st.markdown(f"{av['bandera']} **País:** {av['nacionalidad']}")
-                st.caption(f"💡 {av['especialidad']}")
-                if st.button(f"Seleccionar", key=f"btn_avatar_{av['avatar_id']}"):
+                mostrar_imagen_avatar(av, ancho=130)
+                st.markdown(f"**{av.get('nombre', 'Guía')}** ({av.get('edad', '')} años)")
+                st.markdown(f"{av.get('bandera', '')} **País:** {av.get('nacionalidad', av.get('pais', ''))}")
+                st.caption(f"💡 {av.get('especialidad', '')}")
+                avatar_key = av.get('avatar_id') or av.get('id_avatar') or f"avatar_{idx}"
+                if st.button("Seleccionar", key=f"btn_{avatar_key}"):
                     st.session_state.avatar_activo = av
                     st.session_state.avatar_configurado = True
                     if "messages" in st.session_state:
                         del st.session_state.messages
-                    st.success(f"¡Has seleccionado a {av['nombre']}!")
+                    st.success(f"¡Has seleccionado a {av.get('nombre', 'tu guía')}!")
                     st.rerun()
 
     elif menu == "Chat con Avatar" and st.session_state.avatar_configurado:
@@ -223,22 +267,25 @@ else:
 
         col_foto, col_info = st.columns([1, 4])
         with col_foto:
-            st.image(avatar_actual['foto_url'], width=90)
+            mostrar_imagen_avatar(avatar_actual, ancho=90)
         with col_info:
-            st.subheader(f"💬 Sala con {avatar_actual['nombre']}")
-            st.caption(f"{avatar_actual['bandera']} {avatar_actual['especialidad']}")
+            st.subheader(f"💬 Sala con {avatar_actual.get('nombre', 'Guía')}")
+            st.caption(f"{avatar_actual.get('bandera', '')} {avatar_actual.get('especialidad', '')}")
+
+        avatar_src = obtener_ruta_o_url_avatar(avatar_actual)
+        chat_avatar_icon = avatar_src if avatar_src.startswith("http") else "🤖"
 
         if "messages" not in st.session_state:
             st.session_state.messages = [
                 {
                     "role": "assistant",
-                    "content": f"Hola, soy {avatar_actual['nombre']}. Estoy aquí para acompañarte sin juicios. ¿Qué sientes en este momento?"
+                    "content": f"Hola, soy {avatar_actual.get('nombre', 'tu guía')}. Estoy aquí para acompañarte sin juicios. ¿Qué sientes en este momento?"
                 }
             ]
 
         for msg in st.session_state.messages:
-            avatar_icon = avatar_actual['foto_url'] if msg["role"] == "assistant" else "👤"
-            with st.chat_message(msg["role"], avatar=avatar_icon):
+            icon = chat_avatar_icon if msg["role"] == "assistant" else "👤"
+            with st.chat_message(msg["role"], avatar=icon):
                 st.markdown(msg["content"])
 
         if user_input := st.chat_input("Escribe lo que sientes..."):
@@ -246,12 +293,12 @@ else:
             with st.chat_message("user", avatar="👤"):
                 st.markdown(user_input)
 
-            with st.chat_message("assistant", avatar=avatar_actual['foto_url']):
+            with st.chat_message("assistant", avatar=chat_avatar_icon):
                 bot_response = "Te escucho atentamente. Respira despacio; estoy procesando tu mensaje."
                 try:
                     payload = {
                         "message": user_input,
-                        "avatar_id": avatar_actual['avatar_id']
+                        "avatar_id": avatar_actual.get('avatar_id') or avatar_actual.get('id_avatar')
                     }
                     res = requests.post(f"{API_URL}/chat", headers=headers_auth, json=payload)
                     if res.status_code == 200:
@@ -280,7 +327,7 @@ else:
                     res = requests.post(
                         f"{API_URL}/muro",
                         headers=headers_auth,
-                        json={"contenido": lamento_pub, "is_anonimo": anonimo}
+                        json={"contenido": lamento_pub.strip(), "is_anonimo": anonimo}
                     )
                     if res.status_code == 201:
                         st.success("Mensaje publicado en el muro.")
@@ -296,7 +343,7 @@ else:
             res = requests.get(f"{API_URL}/muro", headers=headers_auth)
             if res.status_code == 200:
                 for post in res.json().get("posts", []):
-                    st.info(f"**{post['autor']}**: {post['contenido']}")
+                    st.info(f"**{post.get('autor', 'Anónimo')}**: {post.get('contenido', '')}")
             elif res.status_code == 403:
                 st.warning("Tu plan actual tiene restricciones para leer el Muro. Adquiere el plan Comunicador o Amigo de Todos.")
         except requests.RequestException:
@@ -331,7 +378,7 @@ else:
                             json={"codigo": codigo_cupon.strip()}
                         )
                         if res.status_code == 200:
-                            st.success(res.json().get("message"))
+                            st.success(res.json().get("message", "¡Cupón canjeado con éxito!"))
                             st.rerun()
                         else:
                             st.error(res.json().get("detail", "Cupón inválido o expirado."))
@@ -354,7 +401,7 @@ else:
                 res = requests.post(f"{API_URL}/admin/cupones", headers=headers_auth, json={"tipo": color})
                 if res.status_code == 200:
                     d = res.json()
-                    st.success(f"Código generado: `{d['codigo']}` | Plan: {d['tipo_plan']} | Válido: {d['expira_en_minutos']} minutos.")
+                    st.success(f"Código generado: `{d.get('codigo')}` | Plan: {d.get('tipo_plan')} | Válido: {d.get('expira_en_minutos')} minutos.")
                 else:
                     st.error(res.json().get("detail", "Error al generar cupón."))
             except requests.RequestException:
