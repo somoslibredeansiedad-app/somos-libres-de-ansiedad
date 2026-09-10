@@ -78,7 +78,7 @@ if "token" not in st.session_state:
 
 
 def obtener_ruta_o_url_avatar(avatar_data: dict) -> str:
-    """Resuelve la ruta local o la URL cruda de GitHub para la imagen del avatar."""
+    """Resuelve la ruta local o externa de la imagen del avatar."""
     if not isinstance(avatar_data, dict):
         return ""
     
@@ -94,21 +94,25 @@ def obtener_ruta_o_url_avatar(avatar_data: dict) -> str:
     
     if nombre_archivo.startswith("http://") or nombre_archivo.startswith("https://"):
         return nombre_archivo
-    
-    ruta_local = os.path.join("avatares", nombre_archivo)
-    if os.path.exists(ruta_local):
-        return ruta_local
         
-    ruta_directa = nombre_archivo
-    if os.path.exists(ruta_directa):
-        return ruta_directa
+    if os.path.exists(nombre_archivo):
+        return nombre_archivo
         
+    ruta_en_carpeta = os.path.join("avatares", nombre_archivo)
+    if os.path.exists(ruta_en_carpeta):
+        return ruta_en_carpeta
+        
+    ruta_absoluta = os.path.join(os.path.dirname(__file__), "avatares", nombre_archivo)
+    if os.path.exists(ruta_absoluta):
+        return ruta_absoluta
+
+    # Fallback con el nombre exacto de tu repositorio GitHub
     nombre_escapado = nombre_archivo.replace(" ", "%20")
-    return f"https://raw.githubusercontent.com/lacontadoraia-hub/somoslibredeansiedad-app/main/avatares/{nombre_escapado}"
+    return f"https://raw.githubusercontent.com/lacontadoraia-hub/somos-libres-de-ansiedad/main/avatares/{nombre_escapado}"
 
 
 def mostrar_imagen_avatar(avatar_data: dict, ancho: int = 120):
-    """Muestra la imagen del avatar o un ícono genérico si no se encuentra."""
+    """Renderiza la foto del avatar en pantalla o un fallback si no se ubica."""
     src = obtener_ruta_o_url_avatar(avatar_data)
     if src:
         try:
@@ -119,7 +123,7 @@ def mostrar_imagen_avatar(avatar_data: dict, ancho: int = 120):
         st.markdown(f"<div style='font-size:{ancho//2}px; text-align:center;'>👤</div>", unsafe_allow_html=True)
 
 
-# Carga limpia de imágenes locales
+# Carga de imágenes locales
 if os.path.exists("Logo.png"):
     st.image("Logo.png", width=120)
 
