@@ -188,7 +188,7 @@
       "autor": "Dr. Myhill y Craig Robinson",
       "categoria": "Hábitos / Insomnio",
       "sintomas_asociados": ["fallo bioenergético", "malestar post-esfuerzo", "agotamiento mitocondrial"],
-      "resumen_terapeutico": "Aborda el SFC/EM como fallo bioenergético celular, proponiendo suplementación, dieta cetogénica y 'pacing' (gestión energética dosificada).",
+      "resumen_terapeutico": "Abordaje del SFC/EM como fallo bioenergético celular, proponiendo suplementación, dieta cetogénica y 'pacing' (gestión energética dosificada).",
       "consejo_aplicable": "Practica el 'pacing': aprende a dosificar tu energía diaria sin agotarla por completo, permitiendo que tus células se regeneren."
     },
     {
@@ -270,7 +270,7 @@
       "categoria": "Ansiedad / Hábitos",
       "sintomas_asociados": ["agotamiento suprarrenal", "fatiga matutina", "hipoglucemia", "estrés"],
       "resumen_terapeutico": "Diagnóstico y tratamiento holístico del agotamiento suprarrenal mediante nutrición, adaptógenos y sincronización del descanso.",
-      "consejo_aplicable": "Protege tus glándulas suprarrenales durmiendo temprano y evitando estimulantes artificiales que exprimirán tu energía vital."
+      "consejo_aplicable": "Protege tu sistema suprarrenal durmiendo temprano y evitando estimulantes artificiales que exprimirán tu energía vital."
     },
     {
       "id_libro": "atencion_plena_williams_penman",
@@ -521,7 +521,7 @@
       "autor": "Pema Chödrön",
       "categoria": "Ira / Ansiedad",
       "sintomas_asociados": ["shenpa (anzuelo)", "reactividad", "blindaje defensivo"],
-      "resumen_terapeutico": "Aborda el concepto de *shenpa* (el anzuelo del impulso reactivo) y la práctica de *Tonglen* (enviar y recibir compasión).",
+      "resumen_terapeutico": "Abordaje del concepto de *shenpa* (el anzuelo del impulso reactivo) y la práctica de *Tonglen* (enviar y recibir compasión).",
       "consejo_aplicable": "Detente en el milimétrico instante en que muerdes el anzuelo (*shenpa*) y habita la incomodidad con amistad hacia ti mismo (*maitri*)."
     },
     {
@@ -1220,8 +1220,8 @@
         "especialidad": "Abogado Penalista, Mediador Penitenciario, Director de Fundación"
       },
       "archivos": {
-        "texto": "Rodrigo Javier Navas Serrano.txt",
-        "imagen": "Rodrigo Javier Navas Serrano.jpg"
+        "texto": "rodrigo_navas.txt",
+        "imagen": "rodrigo_navas.jpg"
       },
       "libros_rag_afines": [
         "el_hombre_en_busca_de_sentido_frankl",
@@ -1255,8 +1255,8 @@
         "especialidad": "Economista Comunitaria, Directora de Fundación, Orfebre Ética"
       },
       "archivos": {
-        "texto": "Ananya Priya Sharma Iyer.txt",
-        "imagen": "Ananya Priya Sharma Iyer.jpg"
+        "texto": "ananya_sharma.txt",
+        "imagen": "ananya_sharma.jpg"
       },
       "libros_rag_afines": [
         "el_hombre_en_busca_de_sentido_frankl",
@@ -1290,8 +1290,8 @@
         "especialidad": "Neuropsicóloga Clínica, Terapeuta del Lenguaje, Investigadora"
       },
       "archivos": {
-        "texto": "Anastasia Yurievna Volkova.txt",
-        "imagen": "Anastasia Yurievna Volkova.jpg"
+        "texto": "anastasia_volkova.txt",
+        "imagen": "anastasia_volkova.jpg"
       },
       "libros_rag_afines": [
         "el_poder_del_ahora_tolle",
@@ -1325,8 +1325,8 @@
         "especialidad": "Médico General Integral, Fisioterapeuta, Líder Comunitario"
       },
       "archivos": {
-        "texto": "Camilo Ernesto Valdés Portuondo.txt",
-        "imagen": "Camilo Ernesto Valdés Portuondo.jpg"
+        "texto": "camilo_valdes.txt",
+        "imagen": "camilo_valdes.jpg"
       },
       "libros_rag_afines": [
         "el_hombre_en_busca_de_sentido_frankl",
@@ -1360,8 +1360,8 @@
         "especialidad": "Científico de Datos, Consultor en Salud Digital, Autor"
       },
       "archivos": {
-        "texto": "Chen Wei-Ming.txt",
-        "imagen": "Chen Wei-Ming.jpg"
+        "texto": "chen_weiming.txt",
+        "imagen": "chen_weiming.jpg"
       },
       "libros_rag_afines": [
         "hyperfocus_bailey",
@@ -1395,8 +1395,8 @@
         "especialidad": "Consultora en Ética Corporativa, Mediadora, Ensayista"
       },
       "archivos": {
-        "texto": "Éléonore Claire Dubois Laurent.txt",
-        "imagen": "Éléonore Claire Dubois Laurent.jpg"
+        "texto": "eleonore_dubois.txt",
+        "imagen": "eleonore_dubois.jpg"
       },
       "libros_rag_afines": [
         "los_dones_de_la_imperfeccion_brown",
@@ -1430,8 +1430,8 @@
         "especialidad": "Psicóloga Clínica, Arteterapeuta Corporal, Educadora Comunitaria"
       },
       "archivos": {
-        "texto": "Larissa Beatriz Fonseca de Oliveira.txt",
-        "imagen": "Larissa Beatriz Fonseca de Oliveira.jpg"
+        "texto": "larissa_fonseca.txt",
+        "imagen": "larissa_fonseca.jpg"
       },
       "libros_rag_afines": [
         "el_cuerpo_lleva_la_cuenta_van_der_kolk",
@@ -1465,8 +1465,8 @@
         "especialidad": "Kinesiólogo Clínico, Especialista en Trauma Somático, Autor"
       },
       "archivos": {
-        "texto": "Lucas Alexander Miller.txt",
-        "imagen": "Lucas Alexander Miller.jpg"
+        "texto": "lucas_miller.txt",
+        "imagen": "lucas_miller.jpg"
       },
       "libros_rag_afines": [
         "el_cuerpo_lleva_la_cuenta_van_der_kolk",
@@ -1500,8 +1500,8 @@
         "especialidad": "Sociólogo Comunitario, Mediador Tradicional, Defensor Cívico"
       },
       "archivos": {
-        "texto": "Manuel Francisco dos Santos Nzita.txt",
-        "imagen": "Manuel Francisco dos Santos Nzita.jpg"
+        "texto": "manuel_nzita.txt",
+        "imagen": "manuel_nzita.jpg"
       },
       "libros_rag_afines": [
         "el_hombre_en_busca_de_sentido_frankl",
@@ -1535,8 +1535,8 @@
         "especialidad": "Relacionista Industrial, Consultora de RRHH, Autora y Mentora"
       },
       "archivos": {
-        "texto": "Mariana Elena Rivas Delgado.txt",
-        "imagen": "Mariana Elena Rivas Delgado.jpg"
+        "texto": "mariana_rivas.txt",
+        "imagen": "mariana_rivas.jpg"
       },
       "libros_rag_afines": [
         "el_hombre_en_busca_de_sentido_frankl",

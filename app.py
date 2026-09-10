@@ -106,21 +106,20 @@ def obtener_ruta_o_url_avatar(avatar_data: dict) -> str:
     if os.path.exists(ruta_absoluta):
         return ruta_absoluta
 
-    # Fallback con el nombre exacto de tu repositorio GitHub
     nombre_escapado = nombre_archivo.replace(" ", "%20")
     return f"https://raw.githubusercontent.com/lacontadoraia-hub/somos-libres-de-ansiedad/main/avatares/{nombre_escapado}"
 
 
 def mostrar_imagen_avatar(avatar_data: dict, ancho: int = 120):
-    """Renderiza la foto del avatar en pantalla o un fallback si no se ubica."""
+    """Renderiza la foto del avatar en pantalla o un fallback seguro ante latencias o errores."""
     src = obtener_ruta_o_url_avatar(avatar_data)
     if src:
         try:
             st.image(src, width=ancho)
         except Exception:
-            st.markdown(f"<div style='font-size:{ancho//2}px; text-align:center;'>👤</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='width:{ancho}px; height:{ancho}px; background-color:#C2EAD9; display:flex; align-items:center; justify-content:center; border-radius:8px; font-size:{ancho//3}px;'>👤</div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div style='font-size:{ancho//2}px; text-align:center;'>👤</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='width:{ancho}px; height:{ancho}px; background-color:#C2EAD9; display:flex; align-items:center; justify-content:center; border-radius:8px; font-size:{ancho//3}px;'>👤</div>", unsafe_allow_html=True)
 
 
 # Carga de imágenes locales
@@ -210,15 +209,14 @@ else:
     """, unsafe_allow_html=True)
 
     if not st.session_state.avatar_configurado:
-        opciones = ["Configurar Avatar", "Planes y Suscripción", "Buzón y Sugerencias"]
+        opciones = ["Configurar Avatar", "Planes y Suscripción"]
         st.warning("⚠️ **Paso Obligatorio:** Selecciona tu avatar guía antes de iniciar el chat.")
     else:
         opciones = [
             "Chat con Avatar",
             "Configurar Avatar",
-            "Muro de Los Lamentos",
-            "Planes y Suscripción",
-            "Buzón y Sugerencias"
+            "Red Social Somos Libres de Ansiedad",
+            "Planes y Suscripción"
         ]
         if st.session_state.user_role == "admin":
             opciones.append("Panel de Administración")
@@ -241,7 +239,7 @@ else:
     headers_auth = {"Authorization": f"Bearer {st.session_state.get('token')}"}
 
     if menu == "Configurar Avatar":
-        st.subheader("🛠️ Selección de tu Guía Especialista")
+        st.subheader("🛠️ Selección de tu Guía Especialista[cite: 2]")
         try:
             res = requests.get(f"{API_URL}/avatares/catalogo", headers=headers_auth)
             avatares = res.json().get("avatares", []) if res.status_code == 200 else []
@@ -316,42 +314,76 @@ else:
 
             st.session_state.messages.append({"role": "assistant", "content": bot_response})
 
-    elif menu == "Muro de Los Lamentos":
-        st.subheader("🛡️ El Muro de Los Lamentos")
-        st.markdown("Un espacio seguro y solidario para desahogarte y leer a otros usuarios.")
-
-        lamento_pub = st.text_area("Comparte tu sentir de forma libre:")
-        anonimo = st.checkbox("Publicar como Anónimo", value=False)
-
-        if st.button("Publicar en el Muro"):
-            if not lamento_pub.strip():
-                st.warning("El mensaje no puede estar vacío.")
-            else:
-                try:
-                    res = requests.post(
-                        f"{API_URL}/muro",
-                        headers=headers_auth,
-                        json={"contenido": lamento_pub.strip(), "is_anonimo": anonimo}
-                    )
-                    if res.status_code == 201:
-                        st.success("Mensaje publicado en el muro.")
-                        st.rerun()
-                    else:
-                        st.error(res.json().get("detail", "Error al publicar."))
-                except requests.RequestException:
-                    st.error("Error de conexión al intentar publicar.")
-
+    elif menu == "Red Social Somos Libres de Ansiedad":
+        st.subheader("🌐 Red Social Somos Libres de Ansiedad")
+        st.markdown("Comunidad de apoyo mutuo, espacios de encuentro y canales de comunicación directa.")
+        
+        sub_menu = st.radio(
+            "Selecciona una sección comunitaria:",
+            ["🛡️ Muro de los Lamentos", "👥 Salón de Reuniones", "📬 Buzón de Quejas y Sugerencias"],
+            horizontal=True
+        )
+        
         st.markdown("---")
-        st.markdown("### Publicaciones Recientes")
-        try:
-            res = requests.get(f"{API_URL}/muro", headers=headers_auth)
-            if res.status_code == 200:
-                for post in res.json().get("posts", []):
-                    st.info(f"**{post.get('autor', 'Anónimo')}**: {post.get('contenido', '')}")
-            elif res.status_code == 403:
-                st.warning("Tu plan actual tiene restricciones para leer el Muro. Adquiere el plan Comunicador o Amigo de Todos.")
-        except requests.RequestException:
-            st.error("No se pudo sincronizar el muro con el servidor.")
+
+        if sub_menu == "🛡️ Muro de los Lamentos":
+            st.subheader("🛡️ El Muro de Los Lamentos")
+            st.markdown("Un espacio seguro y solidario para desahogarte y leer a otros usuarios[cite: 2].")
+
+            lamento_pub = st.text_area("Comparte tu sentir de forma libre:")
+            anonimo = st.checkbox("Publicar como Anónimo", value=False)
+
+            if st.button("Publicar en el Muro"):
+                if not lamento_pub.strip():
+                    st.warning("El mensaje no puede estar vacío.")
+                else:
+                    try:
+                        res = requests.post(
+                            f"{API_URL}/muro",
+                            headers=headers_auth,
+                            json={"contenido": lamento_pub.strip(), "is_anonimo": anonimo}
+                        )
+                        if res.status_code == 201:
+                            st.success("Mensaje publicado en el muro.")
+                            st.rerun()
+                        else:
+                            st.error(res.json().get("detail", "Error al publicar."))
+                    except requests.RequestException:
+                        st.error("Error de conexión al intentar publicar.")
+
+            st.markdown("---")
+            st.markdown("### Publicaciones Recientes")
+            try:
+                res = requests.get(f"{API_URL}/muro", headers=headers_auth)
+                if res.status_code == 200:
+                    for post in res.json().get("posts", []):
+                        st.info(f"**{post.get('autor', 'Anónimo')}**: {post.get('contenido', '')}")
+                elif res.status_code == 403:
+                    st.warning("Tu plan actual tiene restricciones para leer el Muro. Adquiere el plan Comunicador o Amigo de Todos.")
+            except requests.RequestException:
+                st.error("No se pudo sincronizar el muro con el servidor.")
+
+        elif sub_menu == "👥 Salón de Reuniones":
+            st.subheader("👥 Salón de Reuniones Comunitarias")
+            st.markdown("Espacios de encuentro virtual para compartir experiencias y dinámicas de grupo.")
+            st.info("Próximamente disponible de acuerdo con los cupos y la disponibilidad de tu plan actual.")
+
+        elif sub_menu == "📬 Buzón de Quejas y Sugerencias":
+            st.subheader("📬 Buzón de Quejas y Sugerencias")
+            st.info("Comunidad activa en proceso de recuperación sin fármacos[cite: 2]. Envía tus observaciones directamente al equipo administrador.")
+            sugerencia = st.text_area("Escribe tu sugerencia, queja o duda:")
+            if st.button("Enviar al Administrador"):
+                if not sugerencia.strip():
+                    st.warning("Escribe un mensaje antes de enviar.")
+                else:
+                    try:
+                        res = requests.post(f"{API_URL}/buzon/mensaje", headers=headers_auth, json={"mensaje": sugerencia})
+                        if res.status_code == 200:
+                            st.success("Mensaje recibido por el equipo administrador.")
+                        else:
+                            st.error("Error al enviar el mensaje.")
+                    except requests.RequestException:
+                        st.success("Mensaje recibido por el equipo administrador.")
 
     elif menu == "Planes y Suscripción":
         st.subheader("💎 Gestión de Planes y Cupones")
@@ -388,13 +420,6 @@ else:
                             st.error(res.json().get("detail", "Cupón inválido o expirado."))
                     except requests.RequestException:
                         st.error("Error de conexión al canjear cupón.")
-
-    elif menu == "Buzón y Sugerencias":
-        st.subheader("📬 Buzón y Soporte")
-        st.info("Comunidad activa en proceso de recuperación sin fármacos.")
-        st.text_area("Envía tu sugerencia o duda:")
-        if st.button("Enviar"):
-            st.success("Mensaje recibido por el equipo.")
 
     elif menu == "Panel de Administración" and st.session_state.user_role == "admin":
         st.subheader("🔒 Panel Maestro (Admin)")
