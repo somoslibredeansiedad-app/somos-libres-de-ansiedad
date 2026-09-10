@@ -1,7 +1,22 @@
+# Servidor y API Backend
 fastapi
-uvicorn
+uvicorn[standard]
 pydantic[email]
 email-validator
+python-multipart
+
+# Base de Datos y Persistencia Asíncrona
+sqlalchemy
+aiosqlite
+greenlet
+
+# Seguridad y Criptografía
+passlib[bcrypt]
+pyjwt
+
+# Interfaz de Usuario y Clientes
 streamlit
 requests
-google-api-python-client
+
+# Conectividad e Inteligencia Artificial
+google-genai

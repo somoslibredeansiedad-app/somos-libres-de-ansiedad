@@ -1,6 +1,7 @@
-import streamlit as st
-import requests
+import io
 import os
+import requests
+import streamlit as st
 
 THEME_COLORS = {
     "primary": "#A8E6CF",
@@ -37,7 +38,6 @@ st.markdown(f"""
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         margin-bottom: 20px;
     }}
-    /* Alta visibilidad y contraste para el cuadro de chat y entradas */
     .stTextInput input, .stNumberInput input, .stTextArea textarea, .stSelectbox select, div[data-baseweb="input"] input {{
         background-color: #FFFFFF !important;
         color: #1E4D3B !important;
@@ -54,14 +54,11 @@ st.markdown(f"""
         color: #FFFFFF !important;
         border-radius: 8px;
     }}
-    /* Ocultar logs de consola Streamlit Cloud para usuarios */
     #MainMenu, header, footer {{ visibility: hidden; }}
     </style>
 """, unsafe_allow_html=True)
 
 API_URL = "https://somos-libres-de-ansiedad-1.onrender.com/api"
-GITHUB_IMG_BASE = "https://raw.githubusercontent.com/somoslibreansiedad-app/somos-libres-de-ansiedad/main"
-
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "somos.libredeansiedad@gmail.com")
 
 if "authenticated" not in st.session_state:
@@ -76,20 +73,18 @@ if "avatar_activo" not in st.session_state:
     st.session_state.avatar_activo = None
 if "perfil_social_creado" not in st.session_state:
     st.session_state.perfil_social_creado = False
+if "token" not in st.session_state:
+    st.session_state.token = None
 
-# Mostrar logo principal en cabecera
-try:
-    st.image(f"{GITHUB_IMG_BASE}/Logo.png", width=120)
-except Exception:
-    pass
+# Carga limpia de imágenes locales
+if os.path.exists("Logo.png"):
+    st.image("Logo.png", width=120)
 
 st.title("🌿 Somos Libres de Ansiedad")
 
 if not st.session_state.authenticated:
-    try:
-        st.image(f"{GITHUB_IMG_BASE}/Bienvenida.png", use_container_width=True)
-    except Exception:
-        pass
+    if os.path.exists("Bienvenida.png"):
+        st.image("Bienvenida.png", use_container_width=True)
 
     st.markdown("""
         <div class="welcome-banner">
@@ -97,35 +92,29 @@ if not st.session_state.authenticated:
             <p>Un espacio confidencial guiado por expertos para recuperar tu calma interior.</p>
         </div>
     """, unsafe_allow_html=True)
-    
+
     tab_login, tab_register = st.tabs(["Iniciar Sesión", "Registrarse"])
-    
+
     with tab_login:
         correo_log = st.text_input("Correo Electrónico", key="log_correo")
         pass_log = st.text_input("Contraseña", type="password", key="log_pass")
-        
+
         if st.button("Ingresar"):
-            if correo_log == ADMIN_EMAIL:
-                st.session_state.authenticated = True
-                st.session_state.user_role = "admin"
-                st.session_state.user_plan = "amigo_todos"
-                st.success("Acceso concedido como Administrador Maestro (Juan Carlos).")
-                st.rerun()
-            else:
-                try:
-                    res = requests.post(f"{API_URL}/auth/login", json={"correo": correo_log, "password": pass_log})
-                    if res.status_code == 200:
-                        data = res.json()
-                        st.success(data.get("message", "Bienvenido"))
-                        st.info(f"💡 Pensamiento del día: {data.get('pensamiento_dia', '')}")
-                        st.session_state.authenticated = True
-                        st.session_state.user_role = "user"
-                        st.session_state.user_plan = data.get("plan_actual", "gratis")
-                        st.rerun()
-                    else:
-                        st.error("Correo o contraseña incorrectos.")
-                except Exception as e:
-                    st.error(f"Error de conexión con el servidor: {e}")
+            try:
+                res = requests.post(f"{API_URL}/auth/login", json={"correo": correo_log, "password": pass_log})
+                if res.status_code == 200:
+                    data = res.json()
+                    st.session_state.authenticated = True
+                    st.session_state.user_role = data.get("role", "user")
+                    st.session_state.user_plan = data.get("plan_actual", "gratis")
+                    st.session_state.token = data.get("access_token")
+                    st.success("¡Bienvenido/a de nuevo!")
+                    st.info(f"💡 Pensamiento del día: {data.get('pensamiento_dia', '')}")
+                    st.rerun()
+                else:
+                    st.error("Credenciales incorrectas o usuario no registrado.")
+            except requests.RequestException as e:
+                st.error(f"Error de conexión con el servidor API: {e}")
 
     with tab_register:
         nombre = st.text_input("Nombre Completo (*)")
@@ -133,28 +122,36 @@ if not st.session_state.authenticated:
         correo_reg = st.text_input("Correo Electrónico (*)", key="reg_correo")
         pass_reg = st.text_input("Contraseña (*)", type="password", key="reg_pass")
         edad = st.number_input("Edad (*)", min_value=12, max_value=100, value=25)
+
         codigo_ref = st.text_input("Código de Referido (opcional)")
-        
+
         st.markdown("---")
         terms = st.checkbox("He leído y acepto los Términos de Servicio y Política de Privacidad. (*)")
         disclaimer = st.checkbox("Acepto que este programa es una herramienta de apoyo educativo y no un servicio médico. (*)")
-        
+
         if st.button("Registrarme"):
             if not terms or not disclaimer:
                 st.warning("Debes aceptar las casillas obligatorias.")
+            elif not nombre or not apodo or not correo_reg or not pass_reg:
+                st.warning("Por favor completa todos los campos obligatorios marcados con (*).")
             else:
                 payload = {
-                    "nombre_completo": nombre, "apodo": apodo, "correo": correo_reg,
-                    "password": pass_reg, "edad": edad, "codigo_referido": codigo_ref,
-                    "terms_accepted": terms, "disclaimer_accepted": disclaimer
+                    "nombre_completo": nombre,
+                    "apodo": apodo,
+                    "correo": correo_reg,
+                    "password": pass_reg,
+                    "edad": int(edad),
+                    "codigo_referido": codigo_ref or None,
+                    "terms_accepted": terms,
+                    "disclaimer_accepted": disclaimer
                 }
                 try:
                     res = requests.post(f"{API_URL}/auth/register", json=payload)
-                    if res.status_code == 200:
-                        st.success(res.json()["message"])
+                    if res.status_code == 201:
+                        st.success(res.json().get("message", "¡Registro exitoso! Ya puedes iniciar sesión."))
                     else:
-                        st.error(res.json().get("detail", "Error en el registro."))
-                except Exception as e:
+                        st.error(res.json().get("detail", "Error al procesar el registro."))
+                except requests.RequestException as e:
                     st.error(f"Error de conexión: {e}")
 
 else:
@@ -165,28 +162,23 @@ else:
         </div>
     """, unsafe_allow_html=True)
 
-    # Navegación estricta y profesional
     if not st.session_state.avatar_configurado:
         opciones = ["Configurar Avatar", "Planes y Suscripción", "Buzón y Sugerencias"]
-        st.warning("⚠️ **Paso Obligatorio:** Debes configurar y seleccionar tu guía espiritual/emocional antes de desbloquear el chat.")
+        st.warning("⚠️ **Paso Obligatorio:** Selecciona tu avatar guía antes de iniciar el chat.")
     else:
         opciones = [
-            "Chat con Avatar", 
-            "Configurar Avatar", 
-            "Crear Perfil Red Social", 
-            "Muro de Los Lamentos", 
-            "Reunidos para Compartir", 
-            "Planes y Suscripción", 
+            "Chat con Avatar",
+            "Configurar Avatar",
+            "Muro de Los Lamentos",
+            "Planes y Suscripción",
             "Buzón y Sugerencias"
         ]
         if st.session_state.user_role == "admin":
             opciones.append("Panel de Administración")
-    
+
     menu = st.sidebar.selectbox("Navegación", opciones)
-    
-    # Estatus del plan y tiempo en letras rojas en la barra lateral
+
     st.sidebar.markdown(f"<span style='color:red; font-weight:bold;'>Plan Activo: {st.session_state.user_plan.upper()}</span>", unsafe_allow_html=True)
-    st.sidebar.markdown("<span style='color:red; font-size:12px;'>Tiempo activo: Sesión en curso</span>", unsafe_allow_html=True)
 
     if st.sidebar.button("Cerrar Sesión"):
         st.session_state.authenticated = False
@@ -194,19 +186,19 @@ else:
         st.session_state.user_plan = "gratis"
         st.session_state.avatar_configurado = False
         st.session_state.avatar_activo = None
-        st.session_state.perfil_social_creado = False
+        st.session_state.token = None
         if "messages" in st.session_state:
             del st.session_state.messages
         st.rerun()
 
+    headers_auth = {"Authorization": f"Bearer {st.session_state.get('token')}"}
+
     if menu == "Configurar Avatar":
-        st.subheader("🛠️ Selección y Personalización de tu Guía")
-        st.markdown("Elige al especialista que mejor se adapte a tu momento actual:")
-        
+        st.subheader("🛠️ Selección de tu Guía Especialista")
         try:
-            res = requests.get(f"{API_URL}/avatares/catalogo")
+            res = requests.get(f"{API_URL}/avatares/catalogo", headers=headers_auth)
             avatares = res.json().get("avatares", []) if res.status_code == 200 else []
-        except Exception:
+        except requests.RequestException:
             avatares = []
 
         col1, col2, col3 = st.columns(3)
@@ -216,147 +208,154 @@ else:
             with cols[idx % 3]:
                 st.image(av["foto_url"], width=130)
                 st.markdown(f"**{av['nombre']}** ({av['edad']} años)")
-                st.markdown(f"🌍 **País:** {av['nacionalidad']}")
-                st.markdown(f"💡 **Enfoque:** {av['personalidad']}")
-                if st.button(f"Seleccionar a {av['nombre']}", key=f"btn_{idx}"):
+                st.markdown(f"{av['bandera']} **País:** {av['nacionalidad']}")
+                st.caption(f"💡 {av['especialidad']}")
+                if st.button(f"Seleccionar", key=f"btn_avatar_{av['avatar_id']}"):
                     st.session_state.avatar_activo = av
                     st.session_state.avatar_configurado = True
                     if "messages" in st.session_state:
                         del st.session_state.messages
-                    st.success(f"¡Has seleccionado a {av['nombre']} como tu guía!")
+                    st.success(f"¡Has seleccionado a {av['nombre']}!")
                     st.rerun()
 
     elif menu == "Chat con Avatar" and st.session_state.avatar_configurado:
         avatar_actual = st.session_state.avatar_activo
-        
+
         col_foto, col_info = st.columns([1, 4])
         with col_foto:
             st.image(avatar_actual['foto_url'], width=90)
         with col_info:
             st.subheader(f"💬 Sala con {avatar_actual['nombre']}")
-            st.caption(f"Especialidad: *{avatar_actual['personalidad']}* | Audios permitidos según plan")
-        
+            st.caption(f"{avatar_actual['bandera']} {avatar_actual['especialidad']}")
+
         if "messages" not in st.session_state:
             st.session_state.messages = [
                 {
                     "role": "assistant",
-                    "content": f"Hola, te habla {avatar_actual['nombre']}. Desde mi perspectiva y experiencia, comprendo profundamente lo que cargas. ¿Qué pasa por tu mente hoy?"
+                    "content": f"Hola, soy {avatar_actual['nombre']}. Estoy aquí para acompañarte sin juicios. ¿Qué sientes en este momento?"
                 }
             ]
-        
+
         for msg in st.session_state.messages:
             avatar_icon = avatar_actual['foto_url'] if msg["role"] == "assistant" else "👤"
             with st.chat_message(msg["role"], avatar=avatar_icon):
                 st.markdown(msg["content"])
-        
-        if user_input := st.chat_input("Escribe lo que sientes o graba tu nota de voz..."):
+
+        if user_input := st.chat_input("Escribe lo que sientes..."):
             st.session_state.messages.append({"role": "user", "content": user_input})
             with st.chat_message("user", avatar="👤"):
                 st.markdown(user_input)
-            
-            with st.chat_message("assistant", avatar=avatar_actual['foto_url']):
-                bot_response = "Te escucho con atención y respeto absoluto. Respira hondo, estoy aquí contigo."
-                try:
-                    res = requests.post(f"{API_URL}/chat", json={
-                        "user_id": "user_demo",
-                        "message": user_input,
-                        "plan_nivel": st.session_state.get('user_plan', 'gratis'),
-                        "avatar_id": avatar_actual['avatar_id'],
-                        "avatar_nombre": avatar_actual['nombre']
-                    })
-                    if res.status_code == 200:
-                        data = res.json()
-                        bot_response = data.get("response", bot_response)
-                except Exception:
-                    pass
-                
-                st.markdown(bot_response)
-            
-            st.session_state.messages.append({"role": "assistant", "content": bot_response})
 
-    elif menu == "Crear Perfil Red Social":
-        st.subheader("🌐 Configuración de Perfil Comunitario")
-        st.markdown("Crea tu identidad anónima verificada en nuestra red de apoyo.")
-        nombre_verificacion = st.text_input("Nombre completo de verificación (*)")
-        bio_usuario = st.text_area("Breve descripción sobre ti:")
-        st.file_uploader("Sube tu fotografía de perfil visible (*)", type=["jpg", "png", "jpeg"])
-        st.file_uploader("Sube tu documento de identificación (Cédula/Pasaporte - Solo respaldo seguro) (*)", type=["jpg", "png", "jpeg"])
-        
-        if st.button("Guardar y Verificar Perfil"):
-            st.session_state.perfil_social_creado = True
-            st.success("¡Perfil comunitario verificado y creado con éxito! Ya puedes acceder al Muro de Los Lamentos y círculos.")
+            with st.chat_message("assistant", avatar=avatar_actual['foto_url']):
+                bot_response = "Te escucho atentamente. Respira despacio; estoy procesando tu mensaje."
+                try:
+                    payload = {
+                        "message": user_input,
+                        "avatar_id": avatar_actual['avatar_id']
+                    }
+                    res = requests.post(f"{API_URL}/chat", headers=headers_auth, json=payload)
+                    if res.status_code == 200:
+                        bot_response = res.json().get("response", bot_response)
+                    elif res.status_code == 403:
+                        bot_response = "⚠️ Has alcanzado el límite de mensajes de tu plan actual. Considera renovar o canjear un cupón."
+                except requests.RequestException:
+                    bot_response = "Error al conectar con el asistente. Inténtalo de nuevo en unos segundos."
+
+                st.markdown(bot_response)
+
+            st.session_state.messages.append({"role": "assistant", "content": bot_response})
 
     elif menu == "Muro de Los Lamentos":
         st.subheader("🛡️ El Muro de Los Lamentos")
-        if not st.session_state.perfil_social_creado:
-            st.warning("⚠️ **Acceso Restringido:** Para ingresar al Muro de Los Lamentos, primero debes crear y verificar tu perfil personal de Red Social.")
-        else:
-            st.markdown("Un espacio seguro para compartir lo que cargas y encontrar lectura afín según tu plan.")
-            lamento_pub = st.text_area("Comparte tu sentir de forma anónima o con tu perfil:")
-            if st.button("Publicar en el Muro"):
-                st.success("Publicación guardada en el muro bajo los filtros de tu plan.")
-            st.info("Visualización activa según las restricciones de tu plan actual.")
+        st.markdown("Un espacio seguro y solidario para desahogarte y leer a otros usuarios.")
 
-    elif menu == "Reunidos para Compartir":
-        st.subheader("👥 Círculos de Apoyo y Reuniones Grupales")
-        st.markdown("Espacios de encuentro guiado para compartir experiencias de superación.")
-        if st.session_state.user_plan == "gratis":
-            st.info("Tu plan actual te permite unirte a reuniones mediante invitación de otros usuarios.")
-        else:
-            if st.button("Solicitar Nueva Reunión Grupal"):
-                st.success("¡Reunión solicitada con éxito! Puedes enviar invitaciones según los límites de tu plan.")
+        lamento_pub = st.text_area("Comparte tu sentir de forma libre:")
+        anonimo = st.checkbox("Publicar como Anónimo", value=False)
+
+        if st.button("Publicar en el Muro"):
+            if not lamento_pub.strip():
+                st.warning("El mensaje no puede estar vacío.")
+            else:
+                try:
+                    res = requests.post(
+                        f"{API_URL}/muro",
+                        headers=headers_auth,
+                        json={"contenido": lamento_pub, "is_anonimo": anonimo}
+                    )
+                    if res.status_code == 201:
+                        st.success("Mensaje publicado en el muro.")
+                        st.rerun()
+                    else:
+                        st.error(res.json().get("detail", "Error al publicar."))
+                except requests.RequestException:
+                    st.error("Error de conexión al intentar publicar.")
+
+        st.markdown("---")
+        st.markdown("### Publicaciones Recientes")
+        try:
+            res = requests.get(f"{API_URL}/muro", headers=headers_auth)
+            if res.status_code == 200:
+                for post in res.json().get("posts", []):
+                    st.info(f"**{post['autor']}**: {post['contenido']}")
+            elif res.status_code == 403:
+                st.warning("Tu plan actual tiene restricciones para leer el Muro. Adquiere el plan Comunicador o Amigo de Todos.")
+        except requests.RequestException:
+            st.error("No se pudo sincronizar el muro con el servidor.")
 
     elif menu == "Planes y Suscripción":
-        st.subheader("💎 Gestión de Planes, Referidos y Cupones")
-        
-        tab_p, tab_r, tab_c, tab_pay = st.tabs(["Niveles de Planes", "Código de Referido", "Canjear Cupones", "Métodos de Pago"])
-        
+        st.subheader("💎 Gestión de Planes y Cupones")
+        tab_p, tab_c = st.tabs(["Niveles de Planes", "Canjear Cupones"])
+
         with tab_p:
-            col_1, col_2, col_3 = st.columns(3)
-            with col_1:
-                st.markdown("### 🌿 Plan Gratis")
-                st.markdown("- 1 Avatar / 25 chats sem.\n- Red Social restringida\n- Muro de lamentos en lectura")
-            with col_2:
-                st.markdown("### ⭐ Plan Comunicador")
-                st.markdown("- 3 Avatares / 100 chats sem.\n- $5 USD (30 días)\n- Muro y círculos activos")
-            with col_3:
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.markdown("### 🌿 Gratis")
+                st.markdown("- 1 Avatar\n- 25 chats/semana\n- Muro en modo lectura")
+            with c2:
+                st.markdown("### ⭐ Comunicador")
+                st.markdown("- 3 Avatares\n- 100 chats/semana\n- Acceso completo al Muro")
+            with c3:
                 st.markdown("### 👑 Amigo de Todos")
-                st.markdown("- 10 Avatares / Ilimitado\n- $10 USD (40 días)\n- Acceso total y avatar invitado")
-        
-        with tab_r:
-            st.markdown("### Programa de Referidos")
-            st.write("Comparte tu código personal. Al registrar 10 personas y 5 compras VIP, obtén 1 semana de Plan Todos Amigos.")
-            st.text_input("Ingresa el código de referido de un amigo para ganar 1 día VIP:")
-            if st.button("Aplicar Código de Referido"):
-                st.success("¡Código aplicado! 1 día de acceso VIP otorgado.")
+                st.markdown("- 10 Avatares ilimitados\n- Sin límites de chat\n- Círculos de apoyo")
 
         with tab_c:
-            st.markdown("### Canje de Cupones Autorizados")
-            color_cupon = st.selectbox("Color del Cupón", ["Verde (3 días Comunicador)", "Azul (1 sem. Comunicador)", "Rojo (3 días Todos Amigos)", "Morado (1 sem. Todos Amigos)"])
-            codigo_cupon = st.text_input("Código de Cupón (Válido por 30 minutos)")
+            codigo_cupon = st.text_input("Código del Cupón (ej. SL-VERDE-1234):")
             if st.button("Canjear Cupón"):
-                st.success("¡Cupón canjeado con éxito!")
-
-        with tab_pay:
-            st.markdown("### Métodos de Pago Disponibles")
-            metodo = st.selectbox("Selecciona método de pago", ["Pago Móvil Banco en Venezuela", "Binance", "PayPal"])
-            st.info(f"Has seleccionado {metodo}. Recibirás los datos correspondientes en tu buzón interno para completar la transferencia y adjuntar tu capture.")
-            st.file_uploader("Adjuntar comprobante de pago (Capture)", type=["jpg", "png", "jpeg"])
-            if st.button("Enviar Comprobante al Administrador"):
-                st.success("Comprobante enviado al administrador para su validación inmediata.")
+                if not codigo_cupon.strip():
+                    st.warning("Ingresa un código válido.")
+                else:
+                    try:
+                        res = requests.post(
+                            f"{API_URL}/cupones/canjear",
+                            headers=headers_auth,
+                            json={"codigo": codigo_cupon.strip()}
+                        )
+                        if res.status_code == 200:
+                            st.success(res.json().get("message"))
+                            st.rerun()
+                        else:
+                            st.error(res.json().get("detail", "Cupón inválido o expirado."))
+                    except requests.RequestException:
+                        st.error("Error de conexión al canjear cupón.")
 
     elif menu == "Buzón y Sugerencias":
-        st.subheader("📬 Buzón de Quejas, Sugerencias y Actualizaciones")
-        st.markdown("### 📰 Últimas Noticias del Sistema")
-        st.info("¡Bienvenido a nuestra nueva actualización sin fármacos! Contamos con más de 1,250 usuarios registrados y 48 registros en las últimas 24 horas.")
-        
-        sugerencia = st.text_area("Escribe tu consulta o sugerencia directa al Administrador:")
-        if st.button("Enviar al Administrador"):
-            st.success("Tu mensaje ha sido entregado directamente al administrador.")
+        st.subheader("📬 Buzón y Soporte")
+        st.info("Comunidad activa en proceso de recuperación sin fármacos.")
+        st.text_area("Envía tu sugerencia o duda:")
+        if st.button("Enviar"):
+            st.success("Mensaje recibido por el equipo.")
 
     elif menu == "Panel de Administración" and st.session_state.user_role == "admin":
-        st.subheader("🔒 Panel de Administración Maestro (Juan Carlos)")
-        st.markdown("### 📊 Observación, Control y Base de Datos")
-        st.write("Acceso total maestro sin restricciones. Puedes alternar visualizaciones, revisar registros de usuarios, aprobar pagos, generar cupones activos (vigencia 30 min) y enviar notificaciones de sistema.")
-        if st.button("Descargar Base de Datos Completa (CSV)"):
-            st.success("Base de datos descargada con éxito.")
+        st.subheader("🔒 Panel Maestro (Admin)")
+        st.markdown("### Generador de Cupones de Emergencia (30 min de validez)")
+        color = st.selectbox("Tipo de Cupón:", ["verde", "azul", "rojo", "morado"])
+        if st.button("Generar Cupón"):
+            try:
+                res = requests.post(f"{API_URL}/admin/cupones", headers=headers_auth, json={"tipo": color})
+                if res.status_code == 200:
+                    d = res.json()
+                    st.success(f"Código generado: `{d['codigo']}` | Plan: {d['tipo_plan']} | Válido: {d['expira_en_minutos']} minutos.")
+                else:
+                    st.error(res.json().get("detail", "Error al generar cupón."))
+            except requests.RequestException:
+                st.error("Error de conexión al generar cupón.")
