@@ -8,6 +8,7 @@ python-multipart
 # Base de Datos y Persistencia Asíncrona
 sqlalchemy
 aiosqlite
+asyncpg
 greenlet
 
 # Seguridad y Criptografía
@@ -17,6 +18,7 @@ pyjwt
 # Interfaz de Usuario y Clientes
 streamlit
 requests
+Pillow
 
 # Conectividad e Inteligencia Artificial
 google-genai

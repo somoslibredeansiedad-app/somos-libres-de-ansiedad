@@ -1,5 +1,9 @@
+import base64
+import io
 import json
 import os
+import urllib.parse
+from PIL import Image
 import requests
 import streamlit as st
 
@@ -13,7 +17,8 @@ THEME_COLORS = {
     "border": "#C2EAD9"
 }
 
-st.set_page_config(page_title="Somos Libres de Ansiedad", page_icon="🌿", layout="centered")
+# APROVECHAR EL 100% DEL ANCHO DE PANTALLA
+st.set_page_config(page_title="Somos Libres de Ansiedad", page_icon="🌿", layout="wide")
 
 st.markdown(f"""
     <style>
@@ -31,13 +36,13 @@ st.markdown(f"""
     
     .welcome-banner {{
         background: linear-gradient(135deg, #4E8A72 0%, #A8E6CF 100%);
-        padding: 18px;
+        padding: 20px;
         border-radius: 12px;
         color: #1E4D3B;
         text-align: center;
         font-weight: bold;
         box-shadow: 0 4px 6px rgba(0,0,0,0.08);
-        margin-bottom: 18px;
+        margin-bottom: 20px;
     }}
     .stTextInput input, .stNumberInput input, .stTextArea textarea, .stSelectbox select {{
         background-color: #FFFFFF !important;
@@ -50,6 +55,24 @@ st.markdown(f"""
         border-radius: 8px;
         font-weight: bold;
     }}
+    .social-btn {{
+        display: inline-block;
+        padding: 8px 14px;
+        margin: 4px;
+        border-radius: 6px;
+        text-decoration: none;
+        color: white !important;
+        font-weight: bold;
+        font-size: 13px;
+    }}
+    .post-card {{
+        background: #FFFFFF;
+        padding: 14px 18px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        border-left: 5px solid #4E8A72;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    }}
     #MainMenu, header, footer {{ visibility: hidden; }}
     </style>
 """, unsafe_allow_html=True)
@@ -57,7 +80,6 @@ st.markdown(f"""
 API_URL = os.getenv("API_URL", "https://somos-libres-de-ansiedad-1.onrender.com/api")
 CRON_SECRET_KEY = os.getenv("CRON_SECRET_KEY", "somos-libres-cron-mantenimiento-2026")
 
-# Inicialización limpia de variables de sesión
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "user_id" not in st.session_state:
@@ -74,6 +96,20 @@ if "token" not in st.session_state:
     st.session_state.token = None
 
 ref_url = st.query_params.get("ref", "")
+
+def comprimir_imagen(imagen_archivo) -> str:
+    """Comprime cualquier foto subida a un avatar liviano de máx 50KB."""
+    try:
+        img = Image.open(imagen_archivo)
+        img = img.convert("RGB")
+        img.thumbnail((150, 150))
+        buffer = io.BytesIO()
+        img.save(buffer, format="JPEG", quality=75, optimize=True)
+        img_bytes = buffer.getvalue()
+        b64 = base64.b64encode(img_bytes).decode("utf-8")
+        return f"data:image/jpeg;base64,{b64}"
+    except Exception:
+        return ""
 
 def obtener_ruta_avatar(avatar_data: dict) -> str:
     if not isinstance(avatar_data, dict):
@@ -222,8 +258,13 @@ else:
             del st.session_state[key]
         st.rerun()
 
+    # BANNERS ESPECÍFICOS SEGÚN CADA SECCIÓN
     if menu == "Red Social y Comunidad":
         banner_msg = "Bienvenido a tu red de apoyo emocional y crecimiento mutuo."
+    elif menu == "Planes y Suscripción":
+        banner_msg = "Adquiere o extiende tu plan para disfrutar de mayor acompañamiento y funciones exclusivas."
+    elif menu == "Panel de Administración":
+        banner_msg = "Consola Maestra de Operaciones, Finanzas y Métricas de la Comunidad."
     elif st.session_state.avatar_activo:
         banner_msg = f"Tu guía activo es {st.session_state.avatar_activo.get('nombre')}. Puedes consultar en 'Chat con Avatar'."
     else:
@@ -279,9 +320,9 @@ else:
             st.warning("Selecciona un guía primero en la pestaña 'Seleccionar Avatar'.")
         else:
             av = st.session_state.avatar_activo
-            col_f, col_t = st.columns([1, 4])
+            col_f, col_t = st.columns([1, 6])
             with col_f:
-                mostrar_imagen(av, ancho=80)
+                mostrar_imagen(av, ancho=85)
             with col_t:
                 st.subheader(f"Conversando con {av.get('nombre')}")
                 st.caption(f"{av.get('bandera')} {av.get('tono')}")
@@ -325,7 +366,7 @@ else:
                 except Exception as e:
                     st.error(f"Error de conexión: {e}")
 
-    # 3. RED SOCIAL Y COMUNIDAD (CON SEMÁFORO EMOCIONAL EN EL MURO)
+    # 3. RED SOCIAL Y COMUNIDAD
     elif menu == "Red Social y Comunidad":
         tab_mi_perfil, tab_amigos, tab_muro, tab_reuniones, tab_buzon = st.tabs([
             "Mi Perfil", "Comunidad y Amigos", "Muro de Desahogo", "Reuniones", "Buzón de Sugerencias"
@@ -337,9 +378,12 @@ else:
                 res_me = requests.get(f"{API_URL}/usuario/mi-perfil", headers=headers_auth)
                 if res_me.status_code == 200:
                     mi_p = res_me.json().get("perfil", {})
-                    col_p1, col_p2 = st.columns([1, 3])
+                    col_p1, col_p2 = st.columns([1, 4])
                     with col_p1:
-                        st.markdown(f"<div style='width:90px; height:90px; background:#C2EAD9; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:40px;'>👤</div>", unsafe_allow_html=True)
+                        if mi_p.get("foto_perfil"):
+                            st.image(mi_p.get("foto_perfil"), width=100)
+                        else:
+                            st.markdown(f"<div style='width:90px; height:90px; background:#C2EAD9; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:40px;'>👤</div>", unsafe_allow_html=True)
                     with col_p2:
                         st.write(f"**Nombre:** {mi_p.get('nombre_completo')} | **Apodo:** {mi_p.get('apodo')}")
                         st.write(f"**Edad:** {mi_p.get('edad')} años | **Sexo:** {mi_p.get('sexo') or 'No especificado'}")
@@ -348,17 +392,27 @@ else:
                     
                     st.markdown("---")
                     st.markdown("#### Actualizar Datos")
+                    
+                    archivo_foto = st.file_uploader("Actualizar foto de perfil (se optimizará a 50 KB automáticamente):", type=["jpg", "jpeg", "png"])
+                    foto_b64 = mi_p.get("foto_perfil")
+                    if archivo_foto:
+                        foto_b64 = comprimir_imagen(archivo_foto)
+                        st.success("Foto optimizada con éxito.")
+                    
                     nueva_prof = st.text_input("Profesión u Oficio:", value=mi_p.get("profesion") or "")
                     nuevo_estado = st.selectbox("Situación Sentimental:", ["Prefiero no decir", "Soltero/a", "En pareja / Casado/a", "Divorciado/a", "Viudo/a"], index=0)
                     nuevos_hijos = st.number_input("Hijos:", min_value=0, max_value=10, value=mi_p.get("cantidad_hijos") or 0)
-                    nueva_bio = st.text_area("Biografía / Pensamiento de Serenidad:", value=mi_p.get("biografia") or "")
+                    
+                    st.caption("💡 **Tip para tu biografía:** *Defínete como eres, cómo quieres que te vean, qué es lo que haces y cómo es tu día. Escribe entre 100 y 1000 palabras para que tu avatar guía te conozca en profundidad.*")
+                    nueva_bio = st.text_area("Biografía / Pensamiento de Serenidad:", value=mi_p.get("biografia") or "", height=150)
                     
                     if st.button("Guardar Cambios de Perfil"):
                         r_up = requests.put(f"{API_URL}/usuario/mi-perfil", headers=headers_auth, json={
                             "profesion": nueva_prof,
                             "situacion_sentimental": None if nuevo_estado == "Prefiero no decir" else nuevo_estado,
                             "cantidad_hijos": int(nuevos_hijos),
-                            "biografia": nueva_bio
+                            "biografia": nueva_bio,
+                            "foto_perfil": foto_b64
                         })
                         if r_up.status_code == 200:
                             st.success("Perfil actualizado con éxito.")
@@ -367,63 +421,71 @@ else:
                 st.error(f"Error: {e}")
 
         with tab_amigos:
-            st.markdown("### 👥 Miembros de la Comunidad y Amistades")
+            st.markdown("### 👥 Miembros de la Comunidad")
             if st.session_state.user_plan == "gratis":
-                st.warning("🔒 En el Plan Gratis puedes ver los perfiles de la comunidad, pero no puedes enviar solicitudes de amistad. Pasa a Plan Comunicador para conectar.")
+                st.info("ℹ️ Estás explorando la comunidad en Plan Gratis. Los miembros de planes superiores aparecen en modo incógnito. Para enviar solicitudes de amistad, asciende a Plan Comunicador.")
 
             try:
                 res_perf = requests.get(f"{API_URL}/comunidad/perfiles", headers=headers_auth)
                 if res_perf.status_code == 200:
                     for p in res_perf.json().get("perfiles", []):
-                        with st.expander(f"👤 {p.get('apodo')} ({p.get('edad')} años) - {p.get('profesion')}"):
+                        es_incog = p.get("es_incognito", False)
+                        titulo_exp = f"👤 {p.get('apodo')}" if es_incog else f"👤 {p.get('apodo')} ({p.get('edad')} años) - {p.get('profesion')}"
+                        
+                        with st.expander(titulo_exp):
+                            if p.get("foto_perfil") and not es_incog:
+                                st.image(p.get("foto_perfil"), width=70)
                             st.write(f"**Biografía:** {p.get('biografia')}")
-                            st.caption(f"Situación: {p.get('situacion_sentimental')}")
+                            if not es_incog:
+                                st.caption(f"Situación: {p.get('situacion_sentimental')}")
                             
-                            estatus_a = p.get("amistad_estatus")
-                            if estatus_a == "ninguna":
-                                if st.session_state.user_plan == "gratis":
-                                    st.caption("⚠️ Para enviar solicitud de amistad a este usuario debes ascender a Plan Comunicador.")
-                                else:
-                                    if st.button("Enviar Solicitud de Amistad", key=f"sol_{p.get('id')}"):
-                                        requests.post(f"{API_URL}/comunidad/amistad/solicitar", headers=headers_auth, json={"usuario_id": p.get("id")})
-                                        st.success("Solicitud enviada.")
-                                        st.rerun()
-                            elif estatus_a == "pendiente":
-                                if p.get("soy_solicitante"):
-                                    st.info("⏳ Solicitud enviada (En espera de confirmación).")
-                                else:
-                                    st.warning("📩 Te ha enviado una solicitud de amistad:")
-                                    col_si, col_no = st.columns(2)
-                                    if col_si.button("Aceptar", key=f"ac_{p.get('amistad_id')}"):
-                                        requests.post(f"{API_URL}/comunidad/amistad/{p.get('amistad_id')}/responder?aceptar=true", headers=headers_auth)
-                                        st.rerun()
-                                    if col_no.button("Rechazar", key=f"rc_{p.get('amistad_id')}"):
-                                        requests.post(f"{API_URL}/comunidad/amistad/{p.get('amistad_id')}/responder?aceptar=false", headers=headers_auth)
-                                        st.rerun()
-                            elif estatus_a == "aceptada":
-                                st.success("🤝 ¡Son Amigos! (Chat directo ilimitado habilitado)")
+                            if es_incog:
+                                st.warning("🔒 Para descubrir este perfil y chatear, asciende a Plan Comunicador.")
+                            else:
+                                estatus_a = p.get("amistad_estatus")
+                                if estatus_a == "ninguna":
+                                    if st.session_state.user_plan == "gratis":
+                                        st.caption("⚠️ Para enviar solicitud de amistad a este usuario debes ascender a Plan Comunicador.")
+                                    else:
+                                        if st.button("Enviar Solicitud de Amistad", key=f"sol_{p.get('id')}"):
+                                            requests.post(f"{API_URL}/comunidad/amistad/solicitar", headers=headers_auth, json={"usuario_id": p.get("id")})
+                                            st.success("Solicitud enviada.")
+                                            st.rerun()
+                                elif estatus_a == "pendiente":
+                                    if p.get("soy_solicitante"):
+                                        st.info("⏳ Solicitud enviada (En espera de confirmación).")
+                                    else:
+                                        st.warning("📩 Te ha enviado una solicitud de amistad:")
+                                        col_si, col_no = st.columns(2)
+                                        if col_si.button("Aceptar", key=f"ac_{p.get('amistad_id')}"):
+                                            requests.post(f"{API_URL}/comunidad/amistad/{p.get('amistad_id')}/responder?aceptar=true", headers=headers_auth)
+                                            st.rerun()
+                                        if col_no.button("Rechazar", key=f"rc_{p.get('amistad_id')}"):
+                                            requests.post(f"{API_URL}/comunidad/amistad/{p.get('amistad_id')}/responder?aceptar=false", headers=headers_auth)
+                                            st.rerun()
+                                elif estatus_a == "aceptada":
+                                    st.success("🤝 ¡Son Amigos! (Chat directo ilimitado habilitado)")
 
-                            msg_dm = st.text_input("Mensaje privado:", key=f"dm_in_{p.get('id')}")
-                            if st.button("Enviar Mensaje", key=f"btn_dm_{p.get('id')}"):
-                                r_dm = requests.post(f"{API_URL}/comunidad/dm", headers=headers_auth, json={"destinatario_id": p.get("id"), "contenido": msg_dm})
-                                if r_dm.status_code == 200:
-                                    st.success("Mensaje enviado.")
-                                else:
-                                    st.error(r_dm.json().get("detail", "Límite alcanzado."))
+                                msg_dm = st.text_input("Mensaje privado:", key=f"dm_in_{p.get('id')}")
+                                if st.button("Enviar Mensaje", key=f"btn_dm_{p.get('id')}"):
+                                    r_dm = requests.post(f"{API_URL}/comunidad/dm", headers=headers_auth, json={"destinatario_id": p.get("id"), "contenido": msg_dm})
+                                    if r_dm.status_code == 200:
+                                        st.success("Mensaje enviado.")
+                                    else:
+                                        st.error(r_dm.json().get("detail", "Límite alcanzado."))
 
-                            if st.checkbox("Ver conversación previa", key=f"chk_conv_{p.get('id')}"):
-                                r_c = requests.get(f"{API_URL}/comunidad/conversacion/{p.get('id')}", headers=headers_auth)
-                                if r_c.status_code == 200:
-                                    for cm in r_c.json().get("mensajes", []):
-                                        rem = "Tú" if cm.get("remitente_id") != p.get("id") else p.get("apodo")
-                                        st.write(f"**{rem}:** {cm.get('contenido')}")
+                                if st.checkbox("Ver conversación previa", key=f"chk_conv_{p.get('id')}"):
+                                    r_c = requests.get(f"{API_URL}/comunidad/conversacion/{p.get('id')}", headers=headers_auth)
+                                    if r_c.status_code == 200:
+                                        for cm in r_c.json().get("mensajes", []):
+                                            rem = "Tú" if cm.get("remitente_id") != p.get("id") else p.get("apodo")
+                                            st.write(f"**{rem}:** {cm.get('contenido')}")
             except Exception as e:
                 st.error(f"Error: {e}")
 
         with tab_muro:
             st.markdown("### 💬 Muro de Desahogo y Esperanza")
             
-            # Formulario de publicación con Semáforo Emocional
             if st.session_state.user_plan != "gratis":
                 with st.expander("✍️ Compartir una reflexión en el Muro", expanded=False):
                     post_txt = st.text_area("¿Qué deseas compartir hoy?:")
@@ -472,13 +534,24 @@ else:
                 if not posts:
                     st.info("No hay testimonios en esta categoría por el momento.")
                 for post in posts:
-                    tag_color = {
-                        "superacion": "🟢 Superación",
+                    borde_color = {
+                        "superacion": "#2ECC71",
+                        "ansiedad_cotidiana": "#F1C40F",
+                        "momento_dificil": "#E67E22"
+                    }.get(post.get("categoria_emocional"), "#4E8A72")
+                    
+                    tag_nombre = {
+                        "superacion": "🟢 Superación / Gratitud",
                         "ansiedad_cotidiana": "🟡 Ansiedad Cotidiana",
                         "momento_dificil": "🟠 Momento Difícil"
                     }.get(post.get("categoria_emocional"), "🌿 Reflexión")
                     
-                    st.info(f"**[{tag_color}] {post.get('autor')}:**\n\n{post.get('contenido')}")
+                    st.markdown(f"""
+                        <div class="post-card" style="border-left: 5px solid {borde_color};">
+                            <span style="font-size:12px; font-weight:bold; color:{THEME_COLORS['text_secondary']};">[{tag_nombre}] {post.get('autor')}</span>
+                            <p style="margin-top:6px; font-size:15px; color:{THEME_COLORS['text_primary']};">{post.get('contenido')}</p>
+                        </div>
+                    """, unsafe_allow_html=True)
 
         with tab_reuniones:
             st.markdown("### 👥 Reunidos para Compartir (Salas de Círculos)")
@@ -496,9 +569,9 @@ else:
                 requests.post(f"{API_URL}/buzon/ticket", headers=headers_auth, json={"categoria": cat, "asunto": asu, "mensaje": det})
                 st.success("Ticket registrado correctamente.")
 
-    # 4. PLANES Y CONCILIACIÓN DE PAGOS GUIADA
+    # 4. PLANES Y CONCILIACIÓN DE PAGOS PROTEGIDA
     elif menu == "Planes y Suscripción":
-        tab_p, tab_c, tab_pago_guiado = st.tabs(["Planes Oficiales", "Canjear Cupón", "Coordinar Pago con Administrador"])
+        tab_p, tab_c, tab_pago_guiado = st.tabs(["Planes Oficiales", "Canjear y Compartir Referido", "Coordinar Pago Privado con Admin"])
 
         with tab_p:
             c1, c2, c3 = st.columns(3)
@@ -507,6 +580,7 @@ else:
             c3.markdown("### 👑 Amigo de Todos\n- $10 USD / 40 días\n- 10 Avatares activos\n- Chats ilimitados\n- Acceso total sin restricciones")
 
         with tab_c:
+            st.markdown("### 🎟️ Canjear Cupón Promocional")
             cod = st.text_input("Introduce tu Código de Cupón (Ej: SL-VERDE-4821):")
             if st.button("Canjear Cupón"):
                 r = requests.post(f"{API_URL}/cupones/canjear", headers=headers_auth, json={"codigo": cod.strip()})
@@ -516,11 +590,34 @@ else:
                 else:
                     st.error(r.json().get("detail", "Cupón inexistente, expirado o previamente utilizado."))
 
-        with tab_pago_guiado:
-            st.markdown("### 💬 Coordinación de Pago Directo")
-            st.caption("Selecciona tu requerimiento para ver las coordenadas bancarias y reportar tu pago de forma privada.")
+            st.markdown("---")
+            st.markdown("### 📢 Comparte tu Enlace y Gana Recompensas")
+            try:
+                res_me = requests.get(f"{API_URL}/usuario/mi-perfil", headers=headers_auth)
+                cod_ref_mio = res_me.json().get("perfil", {}).get("codigo_referido", "") if res_me.status_code == 200 else ""
+            except Exception:
+                cod_ref_mio = ""
 
-            opcion_tramite = st.selectbox("¿Qué operación deseas realizar?:", [
+            enlace_invitacion = f"https://somoslibresdeansiedad.streamlit.app/?ref={cod_ref_mio}"
+            msg_compartir = f"Hola, te invito a unirte a Somos Libres de Ansiedad, un refugio seguro para la calma emocional. Regístrate aquí: {enlace_invitacion}"
+            msg_encoded = urllib.parse.quote(msg_compartir)
+
+            st.info(f"Tu enlace personal: **{enlace_invitacion}**")
+            
+            st.markdown(f"""
+                <div style="margin-top:10px;">
+                    <a href="https://api.whatsapp.com/send?text={msg_encoded}" target="_blank" class="social-btn" style="background:#25D366;">🟢 WhatsApp</a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={enlace_invitacion}" target="_blank" class="social-btn" style="background:#1877F2;">🔵 Facebook</a>
+                    <a href="https://t.me/share/url?url={enlace_invitacion}&text={msg_encoded}" target="_blank" class="social-btn" style="background:#0088CC;">✈️ Telegram</a>
+                    <a href="sms:?body={msg_encoded}" class="social-btn" style="background:#5C7A6F;">💬 SMS</a>
+                </div>
+            """, unsafe_allow_html=True)
+
+        with tab_pago_guiado:
+            st.markdown("### 🔒 Coordinación de Pago Privado con el Administrador")
+            st.caption("Tus solicitudes y los datos bancarios se gestionan de forma confidencial dentro del canal privado.")
+
+            opcion_tramite = st.selectbox("1. ¿Qué operación deseas realizar?:", [
                 "Comprar Plan Comunicador ($5 USD / 30 días)",
                 "Comprar Plan Amigo de Todos ($10 USD / 40 días)",
                 "Solicitar Cupón Verde al Administrador",
@@ -528,50 +625,52 @@ else:
                 "Solicitar Cupón Rojo al Administrador"
             ])
 
-            metodo_sel = st.selectbox("Canal de Recepción de Fondos:", [
-                "Pago Móvil BDV (Banco de Venezuela - 0102)",
-                "Binance Pay (USDT)",
-                "PayPal"
+            accion_pago = st.selectbox("2. Canal o acción requerida:", [
+                "Solicitar datos de Pago Móvil BDV (Banco de Venezuela)",
+                "Solicitar coordenadas de Binance Pay (USDT)",
+                "Solicitar cuenta PayPal",
+                "Ya realicé mi pago y deseo enviar el reporte con comprobante"
             ])
 
-            if "Pago Móvil" in metodo_sel:
-                st.info("""
-                🏦 **Datos de Recepción (BDV):**
-                * **Banco:** Banco de Venezuela (0102)
-                * **Teléfono:** 04128014962
-                * **Cédula de Identidad:** V-84608666
-                * **Tasa referencial:** Tasa oficial BCV del día según el plan elegido.
-                """)
-            elif "Binance" in metodo_sel:
-                st.info("🟡 **Binance Pay:** Solicita el Pay ID o QR por el chat de abajo indicando tu usuario.")
+            if accion_pago == "Ya realicé mi pago y deseo enviar el reporte con comprobante":
+                monto_ref = st.text_input("Monto cancelado en Bs / USD y Banco Emisor:")
+                num_comprobante = st.text_input("Número de Referencia del Comprobante:")
+                nota_adicional = st.text_area("Mensaje adicional o duda para el Administrador:")
+                
+                if st.button("Enviar Reporte de Pago"):
+                    if not num_comprobante.strip():
+                        st.warning("Por favor ingresa el número de referencia.")
+                    else:
+                        mensaje_formateado = f"Plan: {opcion_tramite} | Monto: {monto_ref} | Ref: {num_comprobante} | Nota: {nota_adicional}"
+                        r_pay = requests.post(f"{API_URL}/pagos/enviar-mensaje", headers=headers_auth, json={
+                            "mensaje": mensaje_formateado,
+                            "plan_solicitado": opcion_tramite,
+                            "metodo_pago": "Reporte de Pago",
+                            "monto_referencia": num_comprobante
+                        })
+                        if r_pay.status_code == 200:
+                            st.success("Reporte enviado al Administrador. Te responderá por este canal.")
+                            st.rerun()
             else:
-                st.info("🔵 **PayPal:** Cuenta oficial `somos.libredeansiedad@gmail.com`.")
-
-            st.markdown("---")
-            monto_ref = st.text_input("Monto cancelado en Bs / USD y Banco Emisor:")
-            num_comprobante = st.text_input("Número de Referencia del Comprobante:")
-            nota_adicional = st.text_area("Mensaje adicional o duda para el Administrador:")
-
-            if st.button("Enviar Reporte de Pago"):
-                if not num_comprobante.strip():
-                    st.warning("Por favor ingresa el número de referencia del comprobante.")
-                else:
-                    mensaje_formateado = f"Plan: {opcion_tramite} | Método: {metodo_sel} | Monto: {monto_ref} | Ref: {num_comprobante} | Nota: {nota_adicional}"
-                    r_pay = requests.post(f"{API_URL}/pagos/enviar-mensaje", headers=headers_auth, json={
-                        "mensaje": mensaje_formateado,
+                if st.button("Solicitar Datos Privados al Administrador"):
+                    mensaje_pedido = f"Hola, solicito los datos para realizar la siguiente operación: {opcion_tramite} mediante {accion_pago}."
+                    r_ped = requests.post(f"{API_URL}/pagos/enviar-mensaje", headers=headers_auth, json={
+                        "mensaje": mensaje_pedido,
                         "plan_solicitado": opcion_tramite,
-                        "metodo_pago": metodo_sel,
-                        "monto_referencia": num_comprobante
+                        "metodo_pago": accion_pago
                     })
-                    if r_pay.status_code == 200:
-                        st.success("Reporte enviado al Administrador. Recibirás tu confirmación y cupón por este medio.")
+                    if r_ped.status_code == 200:
+                        st.success("Solicitud enviada. El Administrador te suministrará los datos por este chat.")
                         st.rerun()
 
-            st.markdown("#### Historial de Conciliaciones y Cupones Recibidos")
+            st.markdown("#### Conversación Privada y Cupones Entregados")
             try:
                 r_my_p = requests.get(f"{API_URL}/pagos/mis-mensajes", headers=headers_auth)
                 if r_my_p.status_code == 200:
-                    for mp in r_my_p.json().get("mensajes", []):
+                    mensajes_pago = r_my_p.json().get("mensajes", [])
+                    if not mensajes_pago:
+                        st.caption("No tienes mensajes en tu historial de pago.")
+                    for mp in mensajes_pago:
                         emisor = "Tú" if mp.get("emisor_rol") == "user" else "🌟 Administrador (Juan Carlos)"
                         st.markdown(f"**{emisor}:** {mp.get('mensaje')}")
             except Exception as e:
@@ -608,6 +707,13 @@ else:
                                 for h in r_hist.json().get("mensajes", []):
                                     st.caption(f"{'Usuario' if h.get('emisor_rol') == 'user' else 'Admin'}: {h.get('mensaje')}")
                             
+                            st.caption("💡 *Plantilla rápida para enviar datos Pago Móvil BDV:*")
+                            if st.button("📋 Pegar Coordenadas BDV", key=f"bdv_{u.get('id')}"):
+                                texto_bdv = "Datos BDV: Banco de Venezuela (0102) | Tel: 04128014962 | CI: 84608666 | Monto al cambio BCV del día según plan."
+                                requests.post(f"{API_URL}/admin/pagos/responder", headers=headers_auth, json={"para_usuario_id": u.get("id"), "mensaje": texto_bdv})
+                                st.success("Coordenadas enviadas.")
+                                st.rerun()
+
                             resp_admin = st.text_area(f"Responder o entregar cupón a {u.get('apodo')}:", key=f"adm_resp_{u.get('id')}")
                             if st.button("Enviar Respuesta", key=f"btn_adm_resp_{u.get('id')}"):
                                 requests.post(f"{API_URL}/admin/pagos/responder", headers=headers_auth, json={"para_usuario_id": u.get("id"), "mensaje": resp_admin})
@@ -618,43 +724,36 @@ else:
 
         with tab_afiliados_adm:
             st.markdown("### 👥 Auditoría de Referidos y Programa de Recompensas")
-            st.caption("Monitorea el progreso de cada usuario hacia las metas de afiliados y adjudica los beneficios directamente.")
             try:
                 r_af = requests.get(f"{API_URL}/admin/afiliados", headers=headers_auth)
                 if r_af.status_code == 200:
                     afiliados = r_af.json().get("afiliados", [])
                     afiliados_activos = [a for a in afiliados if a.get("total_referidos", 0) > 0]
                     if not afiliados_activos:
-                        st.info("Aún no hay usuarios con referidos registrados en el sistema.")
-                    
+                        st.info("Aún no hay usuarios con referidos registrados.")
                     for a in afiliados_activos:
                         with st.expander(f"👤 {a.get('apodo')} (`{a.get('codigo_referido')}`) | Total: {a.get('total_referidos')} | Pagos: {a.get('referidos_pagos')}"):
                             st.write(f"**Correo:** {a.get('correo')} | **Plan Actual:** {a.get('plan_actual').upper()}")
-                            if a.get('suscripcion_expira'):
-                                st.caption(f"Suscripción expira: {a.get('suscripcion_expira')}")
-                            
                             col_b1, col_b2 = st.columns(2)
                             with col_b1:
                                 if a.get("aplica_bono_conversion"):
-                                    st.success("✅ ¡Aplica a Bono de Conversión! (10 referidos con ≥5 pagos)")
+                                    st.success("✅ ¡Aplica a Bono de Conversión!")
                                     if st.button("🏆 Adjudicar Bono Conversión (7 días)", key=f"btn_bono_{a.get('usuario_id')}"):
                                         r_rew = requests.post(f"{API_URL}/admin/afiliados/premiar", headers=headers_auth, json={
-                                            "usuario_id": a.get("usuario_id"),
-                                            "tipo_premio": "bono_conversion"
+                                            "usuario_id": a.get("usuario_id"), "tipo_premio": "bono_conversion"
                                         })
                                         if r_rew.status_code == 200:
                                             st.success(r_rew.json().get("message"))
                                             st.rerun()
                                 else:
-                                    st.info(f"Progreso Conversión: {a.get('total_referidos')}/10 referidos ({a.get('referidos_pagos')}/5 de pago)")
+                                    st.info(f"Progreso Conversión: {a.get('total_referidos')}/10 ({a.get('referidos_pagos')}/5 pagos)")
 
                             with col_b2:
                                 if a.get("aplica_gran_meta"):
-                                    st.success("👑 ¡Cumplió la Gran Meta! (≥100 referidos)")
+                                    st.success("👑 ¡Cumplió la Gran Meta!")
                                     if st.button("👑 Adjudicar Gran Meta (1 año)", key=f"btn_meta_{a.get('usuario_id')}"):
                                         r_rew = requests.post(f"{API_URL}/admin/afiliados/premiar", headers=headers_auth, json={
-                                            "usuario_id": a.get("usuario_id"),
-                                            "tipo_premio": "gran_meta"
+                                            "usuario_id": a.get("usuario_id"), "tipo_premio": "gran_meta"
                                         })
                                         if r_rew.status_code == 200:
                                             st.success(r_rew.json().get("message"))
@@ -662,7 +761,7 @@ else:
                                 else:
                                     st.caption(f"Progreso Gran Meta: {a.get('total_referidos')}/100 referidos")
             except Exception as e:
-                st.error(f"Error cargando métricas de afiliados: {e}")
+                st.error(f"Error: {e}")
 
         with tab_metricas_adm:
             try:
@@ -676,7 +775,6 @@ else:
 
         with tab_mantenimiento_adm:
             st.markdown("### 💾 Respaldo Integral de la Base de Datos")
-            st.caption("Descarga una copia completa en JSON de todos los usuarios, historiales y registros para garantizar la persistencia de datos.")
             if st.button("Generar Respaldo JSON"):
                 try:
                     r_bk = requests.get(f"{API_URL}/admin/backup", headers=headers_auth)
@@ -692,7 +790,6 @@ else:
 
             st.markdown("---")
             st.markdown("### ⚙️ Disparador Manual de Mantenimiento Semanal")
-            st.caption("Ejecuta la purga de mensajes directos antiguos (>7 días), resetea contadores semanales y revierte suscripciones vencidas.")
             if st.button("🚀 Ejecutar Mantenimiento Ahora"):
                 try:
                     r_cron = requests.post(f"{API_URL}/cron/mantenimiento", headers={"X-Cron-Key": CRON_SECRET_KEY})

@@ -1219,6 +1219,12 @@
         "edad": 37,
         "especialidad": "Economista Comunitaria, Directora de Fundación, Orfebre Ética"
       },
+      "historia_personal": {
+        "ciudad_natal": "Jaipur (Rayastán)",
+        "entorno_infancia": "Creció en los callejones del barrio de artesanos de Johari Bazaar, entre el tintineo de martillos sobre plata y el aroma a cúrcuma y té chai hervido a fuego lento.",
+        "padres": "Hija de Devraj Sharma, orfebre tradicional de filigrana, y Gayatri Iyer, maestra de sánscrito y cantos devocionales. De su padre aprendió la paciencia geométrica; de su madre, el silencio interior que aquieta la mente.",
+        "recuerdo_clave": "A los 13 años, el terremoto de Bhuj agrietó su hogar. Mientras todos corrían despavoridos, su abuela la sentó en el patio, le tomó las manos y le enseñó a sentir el suelo firme debajo de sus pies: 'La tierra tiembla, Ananya, pero tu centro permanece'."
+      },
       "archivos": {
         "texto": "ananya.txt",
         "imagen": "ananya.jpg"
@@ -1253,6 +1259,12 @@
         "bandera": "🇷🇺",
         "edad": 28,
         "especialidad": "Neuropsicóloga Clínica, Terapeuta del Lenguaje, Investigadora"
+      },
+      "historia_personal": {
+        "ciudad_natal": "San Petersburgo",
+        "entorno_infancia": "Se crió en un antiguo apartamento de techos altos cerca del canal Griboyédov, con estanterías colmadas de partituras de Chaikovski y tratados de fisiología soviética.",
+        "padres": "Hija de Yuri Volkov, ingeniero naval en los astilleros del Báltico, y Elena Vólkova, concertista de violonchelo en el Mariinski. Su padre le enseñó la precisión matemática; su madre, la disciplina de escuchar los matices del dolor.",
+        "recuerdo_clave": "El día que cayó a las aguas heladas del Nevá a los 10 años. Recuerda que al salir tiritando, su padre no le gritó ni dramatizó: la envolvió con su pesado abrigo militar de lana, le puso té caliente en las manos y le dijo: 'El frío solo te congela si te detienes; mantén el paso'."
       },
       "archivos": {
         "texto": "anastasia.txt",
@@ -1289,6 +1301,12 @@
         "edad": 33,
         "especialidad": "Médico General Integral, Fisioterapeuta, Líder Comunitario"
       },
+      "historia_personal": {
+        "ciudad_natal": "Santiago de Cuba (criado en Centro Habana)",
+        "entorno_infancia": "Creció en el barrio de Los Sitios, en un solar donde los tambores batá sonaban en cada esquina y el café colado bien fuerte unía a los vecinos frente a cualquier apagón.",
+        "padres": "Hijo de Ernesto Valdés, albañil y veterano de obras públicas, y Caridad Portuondo, enfermera pediátrica en el hospital materno. Su padre le enseñó la rectitud de la palabra; su madre, la vocación de escuchar el llanto de quien sufre sin juzgarlo jamás.",
+        "recuerdo_clave": "A los 9 años, cuando un ciclón voló parte del techo de su casa, su padre lo sentó en una caja de madera, le puso su mano callosa sobre el hombro y le cantó una rumba bajito: 'Camilo, el viento hace ruido, pero nosotros tenemos raíces. Si nos caemos, nos levantamos cantando'."
+      },
       "archivos": {
         "texto": "camilo.txt",
         "imagen": "camilo.jpg"
@@ -1323,6 +1341,12 @@
         "bandera": "🇹🇼 / 🇨🇳",
         "edad": 30,
         "especialidad": "Científico de Datos, Consultor en Salud Digital, Autor"
+      },
+      "historia_personal": {
+        "ciudad_natal": "Tainan (con raíces familiares en Chengdu)",
+        "entorno_infancia": "Creció en una casa tradicional con patio interior de baldosas rojas, entre el rumor de teteras de arcilla de Yixing y las campanas de viento del templo local de Confucio.",
+        "padres": "Hijo de Chen Long-Wei, relojero y restaurador de mecanismos antiguos, y Lin Mei-Ling, botánica y herborista tradicional. Su padre le transmitió la fascinación por los sistemas que no se apresuran; su madre, el respeto por los ciclos lentos de la naturaleza.",
+        "recuerdo_clave": "Durante el terremoto de Sichuan, atrapado 18 horas entre vigas de hormigón, se concentró en el tic-tac rítmico del reloj de bolsillo de cuerda que su padre le había regalado: aprendió que cuando el mundo exterior colapsa, la supervivencia depende de acompasar la respiración a un ritmo regular."
       },
       "archivos": {
         "texto": "chen.txt",
@@ -1359,6 +1383,12 @@
         "edad": 36,
         "especialidad": "Consultora en Ética Corporativa, Mediadora, Ensayista"
       },
+      "historia_personal": {
+        "ciudad_natal": "Lyon (barrio histórico de Saint-Jean)",
+        "entorno_infancia": "Se crió en las colinas de Fourvière, en una casa llena de libros de filosofía existencialista, olor a papel envejecido y debates sobre justicia social durante las cenas dominicales.",
+        "padres": "Hija de Henri Dubois, magistrado de derecho laboral, y Solange Laurent, restauradora de manuscritos medievales. De su padre absorbió la noción inquebrantable de la dignidad de las personas; de su madre, el tacto delicado para reparar lo que parecía roto.",
+        "recuerdo_clave": "Durante su adolescencia, batallando con una anorexia feroz, su madre la llevó a un convento silencioso en Borgoña. Allí la miró y le dijo: 'Éléonore, no necesitas castigar a tu cuerpo para merecer existir. Ya eres suficiente'."
+      },
       "archivos": {
         "texto": "eleonore.txt",
         "imagen": "eleonore.jpg"
@@ -1393,6 +1423,12 @@
         "bandera": "🇧🇷",
         "edad": 29,
         "especialidad": "Psicóloga Clínica, Arteterapeuta Corporal, Educadora Comunitaria"
+      },
+      "historia_personal": {
+        "ciudad_natal": "Salvador de Bahía (Ladeira do Pelourinho)",
+        "entorno_infancia": "Creció corriendo descalza sobre adoquines centenarios, con el aroma a aceite de dendê de las vendedoras de acarajé y el pulso continuo de los tambores de Olodum haciendo vibrar las paredes de madera.",
+        "padres": "Hija de Tiago Fonseca, pescador de Itapuã y artesano de berimbaus, y Nilza de Oliveira, bordadora de fuxico y líder vecinal comunitaria. De su padre aprendió a leer la marea emocional; de su madre, que no hay dolor que no se alivie bailando o cantando juntos.",
+        "recuerdo_clave": "A los 8 años, tras fracturarse el fémur en una caída y estar meses inmovilizada, su abuela la sentó en la ventana frente a la bahía y le enseñó capoeira con las manos: 'Larissa, si tus piernas descansan, tu espíritu se mueve. Nada te encierra a menos que tú lo decidas'."
       },
       "archivos": {
         "texto": "larissa.txt",
@@ -1429,6 +1465,12 @@
         "edad": 34,
         "especialidad": "Kinesiólogo Clínico, Especialista en Trauma Somático, Autor"
       },
+      "historia_personal": {
+        "ciudad_natal": "San Diego, California (con infancia previa en Bristol)",
+        "entorno_infancia": "Creció en una cabaña costera cerca de Encinitas, entre tableros de surf encerados, olor a salitre del Pacífico y las herramientas de carpintería de su abuelo galés.",
+        "padres": "Hijo de Sean Miller, paramédico y bombero forestal, y Margaret Hughes, enfermera de cuidados paliativos. De su padre aprendió a mantener la calma en medio del caos; de su madre, a sostener la mirada de quien enfrenta el dolor más crudo.",
+        "recuerdo_clave": "A los 12 años, durante el gran incendio forestal de Cedar Fire, vio quemarse su casa por completo. Su padre, cubierto de hollín, le entregó una pequeña brújula de latón intacta: 'Lucas, las cosas materiales arden; lo que sabes hacer y tu integridad viajan siempre contigo'."
+      },
       "archivos": {
         "texto": "lucas.txt",
         "imagen": "lucas.jpg"
@@ -1463,6 +1505,12 @@
         "bandera": "🇦🇴",
         "edad": 32,
         "especialidad": "Sociólogo Comunitario, Mediador Tradicional, Defensor Cívico"
+      },
+      "historia_personal": {
+        "ciudad_natal": "Benguela (barrio de Navegantes)",
+        "entorno_infancia": "Se crió bajo la sombra inmensa de los baobabs milenarios del litoral atlántico angoleño, escuchando por las noches las historias de los ancianos contadas en idioma umbundu alrededor de una fogata comunitaria.",
+        "padres": "Hijo de Mateus Nzita, maestro de escuela rural y agricultor de mandioca, y Teresa dos Santos, partera tradicional y tejedora de cestos. Su padre le enseñó que la palabra empeñada es sagrada; su madre, que una comunidad se mide por cómo cuida a sus niños y ancianos.",
+        "recuerdo_clave": "A los 9 años, cuando una mina antipersona estalló en los campos de su aldea quitándole la vida a su compañero de juegos, su abuelo lo llevó al río Catumbela, le lavó la cara con agua fría y le dijo: 'Manuel, el odio destruye a quien lo guarda. Tu labor será sembrar paz donde otros dejaron pólvora'."
       },
       "archivos": {
         "texto": "manuel.txt",
@@ -1499,6 +1547,12 @@
         "edad": 36,
         "especialidad": "Relacionista Industrial, Consultora de RRHH, Autora y Mentora"
       },
+      "historia_personal": {
+        "ciudad_natal": "Barquisimeto (criada entre el valle del Turbio y Caracas)",
+        "entorno_infancia": "Creció bajo los crepúsculos morados de los atardeceres larenses, con olor a café recién colado en manga, arepas tostadas en budare de barro y música de cuatro sonando en el patio.",
+        "padres": "Hija de Gonzalo Rivas, técnico electromecánico en centrales azucareras, y Carmen Delgado, profesora de literatura hispanoamericana en liceos públicos. De su padre aprendió la resolución ingeniosa ante la falta de repuestos; de su madre, el poder sanador de las palabras.",
+        "recuerdo_clave": "Durante el deslave de 1999 que sepultó parte de su comunidad costera en Vargas, vio a su madre organizar a los vecinos con una linterna y una libreta para repartir agua sin desesperación: 'Mariana, en las crisis la queja no alimenta a nadie; el amor organizado salva vidas'."
+      },
       "archivos": {
         "texto": "mariana.txt",
         "imagen": "mariana.jpg"
@@ -1533,6 +1587,12 @@
         "bandera": "🇪🇸",
         "edad": 39,
         "especialidad": "Abogado Penalista, Mediador Penitenciario, Director de Fundación"
+      },
+      "historia_personal": {
+        "ciudad_natal": "Toledo (con despacho en Madrid)",
+        "entorno_infancia": "Se crió en el casco histórico de Toledo, entre murallas de piedra visigodas, patios de naranjos y tertulias jurídicas en mesas de madera maciza colmadas de legajos.",
+        "padres": "Hijo de Javier Navas, notario y archivero municipal, y María Dolores Serrano, enfermera jefa en hospitales de campaña y urgencias. De su padre heredó la búsqueda de la justicia documental; de su madre, la firmeza serena ante el dolor de las heridas abiertas.",
+        "recuerdo_clave": "El día de los atentados del 11 de marzo en la estación de Atocha, donde perdió a un querido compañero de facultad. Su padre lo llevó esa noche a caminar por el puente de San Martín sobre el Tajo y le dijo: 'Rodrigo, el rencor es una celda que te encierra a ti mismo; la justicia real se construye devolviendo humanidad a donde la rompieron'."
       },
       "archivos": {
         "texto": "rodrigo.txt",

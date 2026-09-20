@@ -14,6 +14,13 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, select, o
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, selectinload
 
+# Delegación al motor cognitivo de Rafael
+from cerebro_avatares import (
+    obtener_catalogo_formateado,
+    existe_avatar,
+    procesar_respuesta_avatar
+)
+
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./somos_libres.db")
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
@@ -30,7 +37,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
 
 security = HTTPBearer()
 
-app = FastAPI(title="Somos Libres de Ansiedad Core API", version="4.5.0")
+app = FastAPI(title="Somos Libres de Ansiedad Core API", version="4.6.1")
 
 app.add_middleware(
     CORSMiddleware,
@@ -55,8 +62,8 @@ class UserModel(Base):
     profesion: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
     situacion_sentimental: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     cantidad_hijos: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    biografia: Mapped[Optional[str]] = mapped_column(String(250), default="En camino hacia la serenidad.")
-    foto_perfil: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    biografia: Mapped[Optional[str]] = mapped_column(String(2000), default="En camino hacia la serenidad.")
+    foto_perfil: Mapped[Optional[str]] = mapped_column(String(100000), nullable=True) # Soporte para DataURI comprimido a 50kb
     
     plan_nivel: Mapped[str] = mapped_column(String(30), default="gratis")
     role: Mapped[str] = mapped_column(String(20), default="user")
@@ -133,19 +140,6 @@ class BuzonModel(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     autor = relationship("UserModel")
 
-# Carga de catálogo RAG
-CATALOGO_CACHE = {}
-LIBROS_CACHE = []
-if os.path.exists("catalogo_rag_avatares.json"):
-    try:
-        with open("catalogo_rag_avatares.json", "r", encoding="utf-8") as f:
-            datos_json = json.load(f)
-            LIBROS_CACHE = datos_json.get("biblioteca_rag", [])
-            for av in datos_json.get("avatares_oficiales", []):
-                CATALOGO_CACHE[av["id_avatar"]] = av
-    except Exception as e:
-        print(f"Error cargando catalogo RAG: {e}")
-
 class UserRegister(BaseModel):
     nombre_completo: str
     apodo: str
@@ -169,7 +163,7 @@ class ProfileUpdate(BaseModel):
     profesion: Optional[str] = None
     situacion_sentimental: Optional[str] = None
     cantidad_hijos: Optional[int] = None
-    biografia: Optional[str] = Field(None, max_length=250)
+    biografia: Optional[str] = Field(None, max_length=2000)
     foto_perfil: Optional[str] = None
 
 class TokenResponse(BaseModel):
@@ -291,12 +285,7 @@ PENSAMIENTOS_BIENVENIDA = [
     "No tienes que resolver todo hoy; un solo paso a la vez es suficiente.",
     "Tus emociones son válidas. Lo que sientes hoy no define quién serás mañana.",
     "La calma no es la ausencia de caos, sino la paz que construyes en tu interior.",
-    "Está bien hacer una pausa. El descanso también es parte del camino.",
-    "No estás solo en esta batalla; reconocer lo que sientes ya es un acto de valentía.",
-    "Permítete soltar lo que no puedes controlar y enfócate en el presente.",
-    "Inhala calma, exhala la prisa del día. Aquí no hay juicios ni expectativas.",
-    "Cada día difícil superado es una prueba de tu fortaleza interior.",
-    "Hoy solo necesitas ser amable contigo mismo. Bienvenida/o a tu refugio."
+    "Está bien hacer una pausa. El descanso también es parte del camino."
 ]
 
 @app.post("/api/auth/register", status_code=status.HTTP_201_CREATED)
@@ -379,7 +368,6 @@ async def acceder_usuario(data: UserLogin, db: AsyncSession = Depends(get_db)):
         pensamiento_dia=random.choice(PENSAMIENTOS_BIENVENIDA)
     )
 
-# --- PERFILES Y AMISTADES ---
 @app.get("/api/usuario/mi-perfil")
 async def obtener_mi_perfil(current_user: UserModel = Depends(get_current_user)):
     return {
@@ -416,9 +404,15 @@ async def actualizar_mi_perfil(data: ProfileUpdate, current_user: UserModel = De
     await db.commit()
     return {"status": "success", "message": "Perfil actualizado correctamente."}
 
+# COMUNIDAD PROTEGIDA: ADMIN OCULTO E INCÓGNITOS PARA PLAN GRATIS
 @app.get("/api/comunidad/perfiles")
 async def listar_perfiles_comunidad(current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    res = await db.execute(select(UserModel).where(UserModel.id != current_user.id).limit(40))
+    # FILTRO ESTRICTO: JAMÁS mostrar al administrador ni al propio usuario
+    res = await db.execute(
+        select(UserModel).where(
+            and_(UserModel.id != current_user.id, UserModel.role != "admin")
+        ).limit(40)
+    )
     usuarios = res.scalars().all()
 
     amistades_res = await db.execute(
@@ -438,18 +432,32 @@ async def listar_perfiles_comunidad(current_user: UserModel = Depends(get_curren
     lista = []
     for u in usuarios:
         info_amistad = estado_amigos.get(u.id, (None, "ninguna", False))
+        
+        # Enmascarar identidades de planes superiores si quien consulta es Plan Gratis
+        if current_user.plan_nivel == "gratis" and u.plan_nivel != "gratis":
+            apodo_vis = "Miembro en Serenidad (Incógnito)"
+            prof_vis = "Miembro Privado"
+            bio_vis = "Perfil reservado para miembros de planes superiores."
+            foto_vis = None
+        else:
+            apodo_vis = u.apodo
+            prof_vis = u.profesion or "Miembro"
+            bio_vis = u.biografia
+            foto_vis = u.foto_perfil
+
         lista.append({
             "id": u.id,
-            "apodo": u.apodo,
-            "edad": u.edad,
+            "apodo": apodo_vis,
+            "edad": u.edad if current_user.plan_nivel != "gratis" or u.plan_nivel == "gratis" else "--",
             "sexo": u.sexo or "No especificado",
-            "profesion": u.profesion or "Miembro",
+            "profesion": prof_vis,
             "situacion_sentimental": u.situacion_sentimental or "No especificado",
-            "biografia": u.biografia,
-            "foto_perfil": u.foto_perfil,
+            "biografia": bio_vis,
+            "foto_perfil": foto_vis,
             "amistad_id": info_amistad[0],
             "amistad_estatus": info_amistad[1],
-            "soy_solicitante": info_amistad[2]
+            "soy_solicitante": info_amistad[2],
+            "es_incognito": current_user.plan_nivel == "gratis" and u.plan_nivel != "gratis"
         })
     return {"status": "success", "perfiles": lista}
 
@@ -591,23 +599,12 @@ async def responder_pago_admin(data: PaymentMessageCreate, admin: UserModel = De
     await db.commit()
     return {"status": "success", "message": "Respuesta de pago enviada."}
 
-# --- CATÁLOGO Y CHAT HUMANIZADO (CON FILTRO ROJO / SOS) ---
+# --- CATÁLOGO Y CHAT DELEGADO AL CEREBRO MODULAR DE RAFAEL ---
 @app.get("/api/avatares/catalogo")
 async def obtener_avatares(current_user: UserModel = Depends(get_current_user)):
     activos = json.loads(current_user.avatares_activos)
     limite_texto = {"gratis": 25, "comunicador": 100, "amigo_todos": 999999}.get(current_user.plan_nivel, 25)
-    catalogo = []
-    for k, v in CATALOGO_CACHE.items():
-        catalogo.append({
-            "id": k,
-            "nombre": v["identidad"]["nombre_completo"],
-            "pais": v["identidad"]["pais"],
-            "bandera": v["identidad"]["bandera"],
-            "tono": v["tono_linguistico"],
-            "imagen": v["archivos"]["imagen"],
-            "is_activo": k in activos,
-            "disparador_inicial": random.choice(v.get("frases_bienvenida", ["Hola, aquí estoy para ti."]))
-        })
+    catalogo = obtener_catalogo_formateado(activos)
     return {
         "status": "success", 
         "avatares": catalogo,
@@ -617,7 +614,7 @@ async def obtener_avatares(current_user: UserModel = Depends(get_current_user)):
 
 @app.post("/api/avatares/seleccionar")
 async def seleccionar_avatar(data: AvatarSelectRequest, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    if data.avatar_id not in CATALOGO_CACHE:
+    if not existe_avatar(data.avatar_id):
         raise HTTPException(status_code=404, detail="Avatar no encontrado.")
 
     activos = json.loads(current_user.avatares_activos)
@@ -632,16 +629,11 @@ async def seleccionar_avatar(data: AvatarSelectRequest, current_user: UserModel 
     activos.append(data.avatar_id)
     current_user.avatares_activos = json.dumps(activos)
     await db.commit()
-    return {"status": "success", "message": f"Avatar {CATALOGO_CACHE[data.avatar_id]['identidad']['nombre_completo']} seleccionado.", "activos": activos}
-
-PATRONES_CRISIS_SOS = [
-    "suicid", "matarme", "quitarme la vida", "no quiero vivir", "hacerme dano", 
-    "cortarme", "morirme", "desaparecer para siempre", "acabar con todo", "no vale la pena vivir"
-]
+    return {"status": "success", "message": "Avatar seleccionado con éxito.", "activos": activos}
 
 @app.post("/api/chat")
 async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    if data.avatar_id not in CATALOGO_CACHE:
+    if not existe_avatar(data.avatar_id):
         raise HTTPException(status_code=404, detail="Avatar no encontrado.")
 
     limite_texto = {"gratis": 25, "comunicador": 100, "amigo_todos": 999999}.get(current_user.plan_nivel, 25)
@@ -652,86 +644,26 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
     current_user.chats_usados_semana += 1
     await db.commit()
 
-    avatar_info = CATALOGO_CACHE[data.avatar_id]
-    nombre_avatar = avatar_info["identidad"]["nombre_completo"]
-    pais_avatar = avatar_info["identidad"]["pais"]
-    texto = data.message.lower().strip()
-    apodo = current_user.apodo
+    perfil_dict = {
+        "apodo": current_user.apodo,
+        "nombre_completo": current_user.nombre_completo,
+        "cantidad_hijos": current_user.cantidad_hijos,
+        "profesion": current_user.profesion,
+        "situacion_sentimental": current_user.situacion_sentimental,
+        "biografia": current_user.biografia
+    }
 
-    # FILTRO ROJO / PROTOCOLO SOS DE CONTENCIÓN
-    if any(p in texto for p in PATRONES_CRISIS_SOS):
-        respuesta_sos = (
-            f"🚨 **{apodo}, por favor deténte un momento. Tu vida y tu bienestar son inmensamente valiosos.**\n\n"
-            "Siento profundamente el dolor tan intenso que estás experimentando, pero este programa es un espacio educativo reflexivo y no puede sustituir la atención médica o psicológica de urgencia que necesitas ahora mismo.\n\n"
-            "**Por favor, contacta de inmediato a estos recursos gratuitos y confidenciales:**\n"
-            "• **Venezuela - FPV (Federación de Psicólogos):** 0212-4163116 / 0212-4163118\n"
-            "• **Cruz Roja / Emergencias Locales:** Llama al 911 o 171 de tu localidad, o acude al centro de salud más cercano.\n"
-            "• **Línea Internacional de Ayuda (Befrienders Worldwide):** https://www.befrienders.org\n\n"
-            "No estás solo/a en esto. Permite que un profesional o un ser querido te sostenga en este momento difícil."
-        )
-        return {
-            "status": "success",
-            "avatar_nombre": nombre_avatar,
-            "respuesta": respuesta_sos,
-            "is_crisis": True,
-            "chats_restantes": max(0, limite_texto - current_user.chats_usados_semana)
-        }
-
-    consejos = []
-    for libro in LIBROS_CACHE:
-        if libro.get("id_libro") in avatar_info.get("libros_rag_afines", []):
-            consejos.append(libro.get("consejo_aplicable"))
-    consejo_base = random.choice(consejos) if consejos else "Toma una respiración pausada y regresa a tu cuerpo."
-
-    nombre_real = current_user.nombre_completo
-    hijos = current_user.cantidad_hijos if current_user.cantidad_hijos is not None else 0
-    profesion = current_user.profesion or "tu labor diaria"
-
-    if any(q in texto for q in ["nombre completo", "como me llamo completo", "mi nombre real"]):
-        respuesta = f"Tu nombre completo registrado es {nombre_real}, aunque en este refugio te reconozco con cariño como {apodo}."
-    elif any(q in texto for q in ["sabes mi nombre", "quien soy", "mi apodo"]):
-        respuesta = f"Por supuesto. Eres {apodo}. Estoy aquí para acompañarte."
-    elif any(q in texto for q in ["cuantos hijos", "mis hijos", "tengo hijos"]):
-        if hijos > 0:
-            respuesta = f"Sé que tienes {hijos} {'hijo' if hijos == 1 else 'hijos'}. Ser padre/madre implica mucho amor y también sobrecargas. Respira hondo: lo estás haciendo lo mejor que puedes hoy."
-        else:
-            respuesta = "En tu perfil no tienes hijos registrados. Cada etapa y circunstancia de vida tiene sus propios retos y aprendizajes, y estoy aquí para escucharte."
-    elif any(q in texto for q in ["a que me dedico", "mi profesion", "mi trabajo", "en que trabajo"]):
-        respuesta = f"Sé que te dedicas a {profesion}. Las exigencias del trabajo pueden acumular mucha tensión; recuerda que tu valor humano va mucho más allá de tu productividad."
-    elif any(q in texto for q in ["quien eres", "de donde eres", "tu pais"]):
-        respuesta = f"Soy {nombre_avatar}, acompaño tu proceso desde {pais_avatar}. Mi intención es brindarte serenidad, escucha y perspectiva."
-    elif any(q in texto for q in ["hola", "buenas", "buen dia", "saludos"]):
-        aperturas = [
-            f"Hola {apodo}. Tómate este instante para soltar la prisa. ¿Cómo te sientes en este preciso momento?",
-            f"Bienvenido/a {apodo}. Qué alegría coincidir hoy. Respira profundo y cuéntame qué pasa por tu mente.",
-            f"Hola {apodo}, aquí estoy para ti. Deja que los hombros caigan y conversemos con calma."
-        ]
-        respuesta = random.choice(aperturas)
-    elif any(q in texto for q in ["mal", "triste", "miedo", "ansiedad", "panico", "angustia", "cansado"]):
-        apoyos = [
-            f"Te siento abrumado/a, {apodo}. Es completamente natural sentirse vulnerable. {consejo_base}",
-            f"No estás solo/a en este momento, {apodo}. No tienes que arreglarlo todo de golpe. {consejo_base}",
-            f"Permítete sentir sin juzgarte, {apodo}. Tu cuerpo está procesando una carga alta. {consejo_base}"
-        ]
-        respuesta = random.choice(apoyos)
-    elif any(q in texto for q in ["gracias", "agradezco", "me sirvio"]):
-        respuesta = f"Es un honor acompañarte en tu calma, {apodo}. El mérito es tuyo por darte este espacio."
-    else:
-        reflexiones = [
-            f"Te escucho atentamente, {apodo}. Desde mi mirada reflexiva: {consejo_base} ¿Qué es lo que más te inquieta de esto?",
-            f"Entiendo lo que planteas, {apodo}. Recuerda esta perspectiva: {consejo_base} ¿Cómo resuena en tu cuerpo ahora mismo?",
-            f"A veces la mente sobreanaliza buscando certezas que no existen, {apodo}. {consejo_base}"
-        ]
-        respuesta = random.choice(reflexiones)
+    nombre_av, resp, es_crisis = procesar_respuesta_avatar(data.avatar_id, data.message, perfil_dict)
 
     return {
         "status": "success",
-        "avatar_nombre": nombre_avatar,
-        "respuesta": respuesta,
+        "avatar_nombre": nombre_av,
+        "respuesta": resp,
+        "is_crisis": es_crisis,
         "chats_restantes": max(0, limite_texto - current_user.chats_usados_semana)
     }
 
-# --- MURO, BUZÓN Y CUPONES ---
+# --- MURO, BUZÓN Y MANTENIMIENTO ---
 @app.get("/api/muro")
 async def obtener_muro(categoria: Optional[str] = None, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     query = select(MuroPostModel).options(selectinload(MuroPostModel.autor)).order_by(MuroPostModel.created_at.desc()).limit(50)
@@ -816,7 +748,6 @@ async def canjear_cupon(data: CouponRedeem, current_user: UserModel = Depends(ge
     await db.commit()
     return {"status": "success", "message": f"Cupón activado con éxito. Ahora disfrutas del Plan {cupon.tipo_plan.title()}."}
 
-# --- CONTROL Y PREMIOS DEL PROGRAMA DE AFILIADOS ---
 @app.get("/api/admin/afiliados")
 async def auditar_afiliados(admin: UserModel = Depends(get_current_admin), db: AsyncSession = Depends(get_db)):
     res_users = await db.execute(select(UserModel))
@@ -833,9 +764,6 @@ async def auditar_afiliados(admin: UserModel = Depends(get_current_admin), db: A
         total_ref = len(hijos)
         ref_pagos = sum(1 for h in hijos if h.plan_nivel in ["comunicador", "amigo_todos"])
         
-        meta_bono_conversion = (total_ref >= 10 and ref_pagos >= 5)
-        meta_gran_meta = (total_ref >= 100)
-
         resultado.append({
             "usuario_id": u.id,
             "apodo": u.apodo,
@@ -845,8 +773,8 @@ async def auditar_afiliados(admin: UserModel = Depends(get_current_admin), db: A
             "suscripcion_expira": u.suscripcion_expira.isoformat() if u.suscripcion_expira else None,
             "total_referidos": total_ref,
             "referidos_pagos": ref_pagos,
-            "aplica_bono_conversion": meta_bono_conversion,
-            "aplica_gran_meta": meta_gran_meta
+            "aplica_bono_conversion": (total_ref >= 10 and ref_pagos >= 5),
+            "aplica_gran_meta": (total_ref >= 100)
         })
 
     return {"status": "success", "afiliados": resultado}
@@ -874,17 +802,14 @@ async def premiar_afiliado(data: RewardAffiliateCreate, admin: UserModel = Depen
         "nueva_expiracion": user.suscripcion_expira.isoformat()
     }
 
-# --- AUTOMATIZACIÓN DE MANTENIMIENTO PROGRAMADO (CRON $0) ---
 @app.post("/api/cron/mantenimiento")
 async def ejecutar_mantenimiento_programado(x_cron_key: Optional[str] = Header(None), db: AsyncSession = Depends(get_db)):
-    """Rutina programada para reset de chats, depuración efímera y control de expiraciones."""
     if x_cron_key != CRON_SECRET_KEY:
         raise HTTPException(status_code=401, detail="Clave de cron no autorizada.")
 
     ahora = datetime.now(timezone.utc)
     hace_7_dias = ahora - timedelta(days=7)
 
-    # 1. Resetear chats usados de la semana
     res_users = await db.execute(select(UserModel))
     usuarios = res_users.scalars().all()
     chats_reseteados = 0
@@ -895,7 +820,6 @@ async def ejecutar_mantenimiento_programado(x_cron_key: Optional[str] = Header(N
             u.chats_usados_semana = 0
             chats_reseteados += 1
         
-        # Revertir planes vencidos
         if u.suscripcion_expira and u.role != "admin":
             exp = u.suscripcion_expira if u.suscripcion_expira.tzinfo else u.suscripcion_expira.replace(tzinfo=timezone.utc)
             if ahora > exp:
@@ -903,34 +827,26 @@ async def ejecutar_mantenimiento_programado(x_cron_key: Optional[str] = Header(N
                 u.suscripcion_expira = None
                 planes_revertidos += 1
 
-    # 2. Depuración de mensajes directos antiguos (>7 días)
     dms_del = await db.execute(delete(DirectMessageModel).where(DirectMessageModel.created_at < hace_7_dias))
-    
     await db.commit()
 
     return {
         "status": "success",
-        "mensaje": "Mantenimiento automatizado ejecutado.",
         "chats_semanales_reseteados": chats_reseteados,
         "planes_vencidos_revertidos": planes_revertidos,
         "mensajes_directos_purgados": dms_del.rowcount
     }
 
-# --- RESPALDO Y AUDITORÍA ADMIN ---
 @app.get("/api/admin/backup")
 async def descargar_backup_completo(admin: UserModel = Depends(get_current_admin), db: AsyncSession = Depends(get_db)):
     u_res = await db.execute(select(UserModel))
     usuarios = u_res.scalars().all()
-    
     p_res = await db.execute(select(MuroPostModel))
     posts = p_res.scalars().all()
-    
     d_res = await db.execute(select(DirectMessageModel))
     dms = d_res.scalars().all()
-    
     c_res = await db.execute(select(CouponModel))
     cupones = c_res.scalars().all()
-
     pay_res = await db.execute(select(PaymentChatMessageModel))
     pagos = pay_res.scalars().all()
 
