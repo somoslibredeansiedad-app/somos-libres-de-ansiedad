@@ -37,7 +37,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
 
 security = HTTPBearer()
 
-app = FastAPI(title="Somos Libres de Ansiedad Core API", version="4.6.1")
+app = FastAPI(title="Somos Libres de Ansiedad Core API", version="4.6.2")
 
 app.add_middleware(
     CORSMiddleware,
@@ -63,7 +63,7 @@ class UserModel(Base):
     situacion_sentimental: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     cantidad_hijos: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     biografia: Mapped[Optional[str]] = mapped_column(String(2000), default="En camino hacia la serenidad.")
-    foto_perfil: Mapped[Optional[str]] = mapped_column(String(100000), nullable=True) # Soporte para DataURI comprimido a 50kb
+    foto_perfil: Mapped[Optional[str]] = mapped_column(String(100000), nullable=True)
     
     plan_nivel: Mapped[str] = mapped_column(String(30), default="gratis")
     role: Mapped[str] = mapped_column(String(20), default="user")
@@ -179,9 +179,11 @@ class TokenResponse(BaseModel):
 class AvatarSelectRequest(BaseModel):
     avatar_id: str
 
+# Entrada de mensaje enriquecida con historial previo
 class UserMessage(BaseModel):
     avatar_id: str
     message: str
+    historial_previo: Optional[List[str]] = None
 
 class DirectMessageCreate(BaseModel):
     destinatario_id: int
@@ -404,10 +406,8 @@ async def actualizar_mi_perfil(data: ProfileUpdate, current_user: UserModel = De
     await db.commit()
     return {"status": "success", "message": "Perfil actualizado correctamente."}
 
-# COMUNIDAD PROTEGIDA: ADMIN OCULTO E INCÓGNITOS PARA PLAN GRATIS
 @app.get("/api/comunidad/perfiles")
 async def listar_perfiles_comunidad(current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    # FILTRO ESTRICTO: JAMÁS mostrar al administrador ni al propio usuario
     res = await db.execute(
         select(UserModel).where(
             and_(UserModel.id != current_user.id, UserModel.role != "admin")
@@ -433,7 +433,6 @@ async def listar_perfiles_comunidad(current_user: UserModel = Depends(get_curren
     for u in usuarios:
         info_amistad = estado_amigos.get(u.id, (None, "ninguna", False))
         
-        # Enmascarar identidades de planes superiores si quien consulta es Plan Gratis
         if current_user.plan_nivel == "gratis" and u.plan_nivel != "gratis":
             apodo_vis = "Miembro en Serenidad (Incógnito)"
             prof_vis = "Miembro Privado"
@@ -653,7 +652,13 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
         "biografia": current_user.biografia
     }
 
-    nombre_av, resp, es_crisis = procesar_respuesta_avatar(data.avatar_id, data.message, perfil_dict)
+    # SE INTEGRA EL HISTORIAL PREVIO HACIA RAFAEL
+    nombre_av, resp, es_crisis = procesar_respuesta_avatar(
+        avatar_id=data.avatar_id, 
+        mensaje_usuario=data.message, 
+        perfil_usuario=perfil_dict, 
+        historial_reciente=data.historial_previo or []
+    )
 
     return {
         "status": "success",

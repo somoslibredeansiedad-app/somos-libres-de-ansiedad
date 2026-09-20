@@ -17,7 +17,6 @@ THEME_COLORS = {
     "border": "#C2EAD9"
 }
 
-# APROVECHAR EL 100% DEL ANCHO DE PANTALLA
 st.set_page_config(page_title="Somos Libres de Ansiedad", page_icon="🌿", layout="wide")
 
 st.markdown(f"""
@@ -44,6 +43,50 @@ st.markdown(f"""
         box-shadow: 0 4px 6px rgba(0,0,0,0.08);
         margin-bottom: 20px;
     }}
+    
+    /* MEJORA CRÍTICA DE ACCESIBILIDAD Y CONTRASTE EN CHAT */
+    [data-testid="stChatMessage"] {{
+        padding: 14px 18px !important;
+        border-radius: 10px !important;
+        margin-bottom: 12px !important;
+    }}
+    
+    /* Mensajes del usuario: Fondo oscuro de alto contraste y letras blancas */
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {{
+        background-color: #2D4036 !important;
+        border-left: 4px solid #4E8A72 !important;
+    }}
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) p,
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) span {{
+        color: #FFFFFF !important;
+        font-size: 16px !important;
+        font-weight: 500 !important;
+    }}
+
+    /* Mensajes del asistente: Fondo blanco nítido con texto verde bosque profundo */
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {{
+        background-color: #FFFFFF !important;
+        border-left: 4px solid #2ECC71 !important;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
+    }}
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) p,
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) span {{
+        color: #15382A !important;
+        font-size: 16px !important;
+        line-height: 1.6 !important;
+    }}
+
+    /* Entrada de chat con texto y placeholder de alto contraste */
+    [data-testid="stChatInput"] textarea {{
+        background-color: #FFFFFF !important;
+        color: #1E4D3B !important;
+        font-size: 15px !important;
+    }}
+    [data-testid="stChatInput"] textarea::placeholder {{
+        color: #6A8277 !important;
+        font-weight: bold !important;
+    }}
+
     .stTextInput input, .stNumberInput input, .stTextArea textarea, .stSelectbox select {{
         background-color: #FFFFFF !important;
         color: #1E4D3B !important;
@@ -78,6 +121,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 API_URL = os.getenv("API_URL", "https://somos-libres-de-ansiedad-1.onrender.com/api")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://somoslibredeansiedad-app.streamlit.app")
 CRON_SECRET_KEY = os.getenv("CRON_SECRET_KEY", "somos-libres-cron-mantenimiento-2026")
 
 if "authenticated" not in st.session_state:
@@ -598,7 +642,7 @@ else:
             except Exception:
                 cod_ref_mio = ""
 
-            enlace_invitacion = f"https://somoslibresdeansiedad.streamlit.app/?ref={cod_ref_mio}"
+            enlace_invitacion = f"{FRONTEND_URL}/?ref={cod_ref_mio}"
             msg_compartir = f"Hola, te invito a unirte a Somos Libres de Ansiedad, un refugio seguro para la calma emocional. Regístrate aquí: {enlace_invitacion}"
             msg_encoded = urllib.parse.quote(msg_compartir)
 
