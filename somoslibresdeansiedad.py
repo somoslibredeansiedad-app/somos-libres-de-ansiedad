@@ -37,7 +37,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
 
 security = HTTPBearer()
 
-app = FastAPI(title="Somos Libres de Ansiedad Core API", version="4.6.2")
+app = FastAPI(title="Somos Libres de Ansiedad Core API", version="4.6.3")
 
 app.add_middleware(
     CORSMiddleware,
@@ -179,7 +179,6 @@ class TokenResponse(BaseModel):
 class AvatarSelectRequest(BaseModel):
     avatar_id: str
 
-# Entrada de mensaje enriquecida con historial previo
 class UserMessage(BaseModel):
     avatar_id: str
     message: str
@@ -404,6 +403,7 @@ async def actualizar_mi_perfil(data: ProfileUpdate, current_user: UserModel = De
     if data.foto_perfil is not None:
         current_user.foto_perfil = data.foto_perfil
     await db.commit()
+    await db.refresh(current_user)
     return {"status": "success", "message": "Perfil actualizado correctamente."}
 
 @app.get("/api/comunidad/perfiles")
@@ -642,6 +642,8 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
 
     current_user.chats_usados_semana += 1
     await db.commit()
+    # RECARGA VITAL: Garantiza datos reales y actualizados del perfil
+    await db.refresh(current_user)
 
     perfil_dict = {
         "apodo": current_user.apodo,
