@@ -22,7 +22,7 @@ st.set_page_config(page_title="Somos Libres de Ansiedad", page_icon="🌿", layo
 st.markdown(f"""
     <style>
     .stApp {{ background-color: {THEME_COLORS['background']}; color: {THEME_COLORS['text_primary']}; }}
-    h1, h2, h3, h4, h5, h6, p, label, span {{ color: {THEME_COLORS['text_primary']} !important; }}
+    h1, h2, h3, h4, h5, h6, p, label, span {{ color: {THEME_COLORS['text_primary']}; }}
     
     [data-testid="stSidebar"] {{
         background-color: {THEME_COLORS['background']} !important;
@@ -51,26 +51,35 @@ st.markdown(f"""
         margin-bottom: 12px !important;
     }}
     
-    /* Mensajes del usuario: Fondo oscuro de alto contraste y letras blancas */
+    /* Mensajes del usuario: Fondo oscuro de alto contraste y texto blanco puro */
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {{
         background-color: #2D4036 !important;
-        border-left: 4px solid #4E8A72 !important;
+        border-left: 5px solid #4E8A72 !important;
     }}
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) p,
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) span {{
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) span,
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) div,
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) li {{
         color: #FFFFFF !important;
         font-size: 16px !important;
         font-weight: 500 !important;
     }}
 
-    /* Mensajes del asistente: Fondo blanco nítido con texto verde bosque profundo */
+    /* Mensajes del asistente: Fondo blanco nítido con texto y listas en verde bosque profundo */
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {{
         background-color: #FFFFFF !important;
-        border-left: 4px solid #2ECC71 !important;
+        border-left: 5px solid #2ECC71 !important;
         box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
     }}
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) p,
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) span {{
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) span,
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) div,
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) strong,
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) b,
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) em,
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) ul,
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) ol,
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) li {{
         color: #15382A !important;
         font-size: 16px !important;
         line-height: 1.6 !important;
@@ -358,7 +367,7 @@ else:
                     except Exception as e:
                         st.error(f"Error: {e}")
 
-    # 2. CHAT CON AVATAR (CON PROTOCOLO SOS EN VIVO)
+    # 2. CHAT CON AVATAR (CON PROTOCOLO SOS Y MEMORIA EN VIVO)
     elif menu == "Chat con Avatar":
         if not st.session_state.avatar_activo:
             st.warning("Selecciona un guía primero en la pestaña 'Seleccionar Avatar'.")
@@ -388,8 +397,15 @@ else:
                 with st.chat_message("user", avatar="👤"):
                     st.markdown(user_text)
 
+                # Extraer los últimos cuatro mensajes previos a esta entrada
+                historial_reciente = [m["content"] for m in st.session_state[chat_key][-5:-1]]
+
                 try:
-                    payload = {"avatar_id": av.get("id"), "message": user_text}
+                    payload = {
+                        "avatar_id": av.get("id"),
+                        "message": user_text,
+                        "historial_previo": historial_reciente
+                    }
                     r = requests.post(f"{API_URL}/chat", headers=headers_auth, json=payload)
                     if r.status_code == 200:
                         d_resp = r.json()
