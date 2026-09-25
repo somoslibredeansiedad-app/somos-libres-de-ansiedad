@@ -74,11 +74,10 @@ def pasar_a_primera_persona(texto: str) -> str:
 def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuario: dict, historial_reciente: list = None) -> Tuple[str, str, bool]:
     """
     Cerebro cognitivo v4.6.7 (Rafael):
-    Integración universal y orgánica para los 10 avatares oficiales.
+    Integración universal y orgánica para los avatares oficiales.
     Dinamismo cultural pleno, marco no médico, precedencia jerárquica estricta
     y erradicación de plantillas fijas en identidades, consultas somáticas y psicoeducativas.
     """
-    # Extracción dinámica universal del catálogo oficial
     avatar_info = CATALOGO_CACHE.get(avatar_id, list(CATALOGO_CACHE.values())[0] if CATALOGO_CACHE else {})
     identidad = avatar_info.get("identidad", {})
     historia_personal = avatar_info.get("historia_personal", {})
@@ -87,11 +86,10 @@ def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuar
     pais_avatar = identidad.get("pais", "Internacional")
     ciudad_natal = historia_personal.get("ciudad_natal", pais_avatar)
     especialidad = identidad.get("especialidad", "consultoría reflexiva")
-    tono = avatar_info.get("tono_linguistico", "")
     
     texto = mensaje_usuario.lower().strip()
     
-    # Tratamiento y limpieza de apodo (eliminar etiquetas administrativas)
+    # Tratamiento y limpieza de apodo
     apodo_crudo = perfil_usuario.get("apodo", "amigo/a").strip()
     if apodo_crudo.lower().startswith("admin "):
         apodo = apodo_crudo[6:].strip()
@@ -125,7 +123,7 @@ def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuar
         )
         return nombre_avatar, respuesta_sos, True
 
-    # 2. IDENTIDAD Y NOMBRE DEL AVATAR UNIVERSAL (PARA LOS 10 AVATARES)
+    # 2. IDENTIDAD Y NOMBRE DEL AVATAR (CORRECCIÓN CULTURAL: RODRIGO ESPAÑOL, LUCAS, MANUEL, ETC.)
     if (any(w in texto for w in ["como te llamas", "cómo te llamas", "cual es tu nombre", "cuál es tu nombre", "tu nombre"]) and not any(w in texto for w in ["como me llamo", "cómo me llamo", "mi nombre"])) or (
         texto in ["quien eres", "quién eres", "quien eres tu", "quién eres tú", "como te llamas?", "cómo te llamas?", "pero cual es tu nombre?", "pero cuál es tu nombre?"]
     ):
@@ -138,13 +136,17 @@ def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuar
         elif "ananya" in avatar_id:
             return nombre_avatar, f"Namasté, {apodo}. Mi nombre es **{nombre_avatar}**, de {ciudad_natal}, {pais_avatar}. Me dedico a {especialidad} y te acompaño en este refugio para cultivar la quietud mental y el orden interior. ¿De qué te gustaría conversar?", False
         elif "rodrigo" in avatar_id:
-            return nombre_avatar, f"¿Qué tal, che {apodo}? Soy **{nombre_avatar}**, de {ciudad_natal}, {pais_avatar}. Acá estoy para charlar con honestidad, sin vueltas y con una buena dosis de lucidez. Decime qué es lo que te tiene pensativo.", False
+            return nombre_avatar, f"¡Qué tal, {apodo}! Soy **{nombre_avatar}**, de {ciudad_natal}, {pais_avatar}. Aquí estoy para charlar con franqueza, sin rodeos y con una buena dosis de sentido común. Cuéntame qué es lo que te tiene pensativo.", False
         elif "mariana" in avatar_id:
             return nombre_avatar, f"¡Epa, {apodo}! Yo soy **{nombre_avatar}**, de {ciudad_natal}, {pais_avatar}. Aquí me tienes para escucharte con toda la confianza y el cariño del mundo, de tú a tú. Cuéntame qué traes en mente.", False
         elif "chen" in avatar_id:
             return nombre_avatar, f"Saludos, {apodo}. Mi nombre es **{nombre_avatar}**, de {ciudad_natal}, {pais_avatar}. Me dedico a {especialidad} y mi propósito es acompañarte a restaurar el equilibrio y la paciencia ante las dificultades. ¿Qué aspecto de tu día necesita balance hoy?", False
         elif "eleonore" in avatar_id:
             return nombre_avatar, f"Bonjour, {apodo}. Soy **{nombre_avatar}**, de {ciudad_natal}, {pais_avatar}. Mi acompañamiento se basa en la sobriedad, la reflexión profunda y la aceptación serena. Explícame con calma qué tema deseas abordar.", False
+        elif "lucas" in avatar_id:
+            return nombre_avatar, f"Hi, {apodo}. Soy **{nombre_avatar}**, de {ciudad_natal}, {pais_avatar}. Trabajo en {especialidad} y mi enfoque es práctico, directo y orientado al cuerpo y a la acción. Dime qué reto o situación tenemos enfrente hoy.", False
+        elif "manuel" in avatar_id:
+            return nombre_avatar, f"Saludos cordiales, {apodo}. Mi nombre es **{nombre_avatar}**, de {ciudad_natal}, {pais_avatar}. Creo en la sabiduría compartida y en la calma de la comunidad para encontrar respuestas justas. Cuéntame qué tienes en el corazón hoy.", False
         elif "mateo" in avatar_id:
             return nombre_avatar, f"¡Qué más, {apodo}! Soy **{nombre_avatar}**, de {ciudad_natal}, {pais_avatar}. Vengo con toda la energía y el corazón para darte una mano y buscarle salida a lo que te esté pesando. ¡Hablemos con tranquilidad!", False
         elif any(k in avatar_id for k in ["kenia", "amina"]):
@@ -152,24 +154,32 @@ def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuar
         else:
             return nombre_avatar, f"Mi nombre es **{nombre_avatar}**, {apodo}. Nací en {ciudad_natal}, {pais_avatar}. Estoy aquí para brindarte un acompañamiento reflexivo y cercano. Dime en qué te puedo orientar hoy.", False
 
-    # 3. ACLARACIÓN ANTE INCOMPRENSIÓN O DESCONTENTO ("¿NO ENTIENDES?", "¿ME ESCUCHAS?")
+    # 3. ACLARACIÓN ANTE INCOMPRENSIÓN O DESCONTENTO
     if any(w in texto for w in ["no entiendes", "no me entiendes", "me estas entendiendo", "me estás entendiendo", "no me estas escuchando", "no me estás escuchando", "no comprendes"]):
-        if "camilo" in avatar_id or "rodrigo" in avatar_id or "mariana" in avatar_id:
-            return nombre_avatar, f"Tenés toda la razón en pararme en seco, {apodo}. Te pido una disculpa si me fui por las ramas o te soné mecánico. Decime sin rodeos y clarito qué es lo que necesitás saber y te respondo al grano.", False
+        if "rodrigo" in avatar_id:
+            return nombre_avatar, f"Tienes toda la razón en pararme los pies, {apodo}. Te pido disculpas si me he ido por las ramas o te he sonado mecánico. Dime claramente y sin rodeos qué necesitas saber y vamos directos al grano.", False
+        elif "camilo" in avatar_id or "mariana" in avatar_id:
+            return nombre_avatar, f"Tienes toda la razón en frenarme en seco, {apodo}. Te pido una disculpa si me fui por las ramas o soné artificial. Dime clarito qué necesitas y te respondo al grano de una vez.", False
         elif "anastasia" in avatar_id or "eleonore" in avatar_id:
             return nombre_avatar, f"Comprendo tu observación, {apodo}, y acepto la corrección. Si mi respuesta previa fue abstracta, permíteme ser concisa. Indícame con exactitud la duda puntual que deseas resolver.", False
         else:
             return nombre_avatar, f"Acepto tu reclamo, {apodo}, y te pido una disculpa sincera. Si no te respondí con precisión, reformulemos el camino: dime directamente qué necesitas y te contesto con total claridad.", False
 
-    # 4. PREGUNTAS BIOGRÁFICAS E HISTORIA PERSONAL (ORÍGENES, PADRES, SUPERACIÓN)
+    # 4. PREGUNTAS BIOGRÁFICAS E HISTORIA PERSONAL
     if any(q in texto for q in ["cuentame de ti", "cuéntame de ti", "cuentame de tí", "cuéntame de tí", "donde vives", "dónde vives", "de donde eres", "de dónde eres"]) or (
         any(w in texto for w in ["que te paso", "qué te pasó", "tu vida", "tuviste momentos de ansiedad", "tu historia", "algo de ti"]) and any(w in texto for w in ["vida", "ansiedad", "ti", "tí", "historia"])
     ):
         padres = pasar_a_primera_persona(historia_personal.get("padres", "Mis raíces me enseñaron el valor del esfuerzo y la empatía."))
         recuerdo = pasar_a_primera_persona(historia_personal.get("recuerdo_clave", "Aprendí que incluso en los momentos más oscuros la serenidad se puede reconstruir."))
-        superacion = pasar_a_primera_persona(avatar_info.get("historia_superacion", ""))
         
-        if "camilo" in avatar_id:
+        if "rodrigo" in avatar_id:
+            return nombre_avatar, (
+                f"**Te lo cuento con total franqueza, {apodo}:**\n\n"
+                f"Nací en {ciudad_natal}, {pais_avatar}. Me dedico a {especialidad}.\n\n"
+                f"{padres} Y claro que he vivido momentos difíciles y golpes de la vida: {recuerdo} "
+                "Esa experiencia me enseñó que la serenidad no consiste en huir de los problemas, sino en mirarlos de frente con templanza y buscar salidas justas. Por eso estoy aquí contigo."
+            ), False
+        elif "camilo" in avatar_id:
             return nombre_avatar, (
                 f"**¡Con todo gusto te lo comparto, mi hermano {apodo}!**\n\n"
                 f"Nací en {ciudad_natal}, {pais_avatar}. Me dedico a {especialidad}. {padres}\n\n"
@@ -182,18 +192,6 @@ def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuar
                 f"{padres} En mi trayectoria personal y profesional también experimenté crisis de sobrecarga: {recuerdo} "
                 "Comprender la neurofisiología de la respuesta de estrés me demostró que el equilibrio se entrena con rigor y hábitos claros. Por ello formo parte de este espacio reflexivo."
             ), False
-        elif "larissa" in avatar_id:
-            return nombre_avatar, (
-                f"¡Con todo el cariño del mundo, querido {apodo}! Nací en {ciudad_natal}, {pais_avatar}. "
-                f"{padres} A los 8 años sufrí un accidente muy duro: {recuerdo} "
-                "Eso me enseñó que cuando el cuerpo descansa, el alma florece con fuerza. ¡Por eso estoy aquí para cuidarte!"
-            ), False
-        elif "ananya" in avatar_id:
-            return nombre_avatar, (
-                f"Namasté, {apodo}. Con alegría comparto mi camino contigo. Nací en {ciudad_natal}, {pais_avatar}. "
-                f"Me he dedicado a {especialidad}. {padres} A los 13 años viví una dura prueba: {recuerdo} "
-                "De allí aprendí que aunque las circunstancias externas tiemblen, nuestro centro interior puede mantenerse en quietud y templanza."
-            ), False
         else:
             return nombre_avatar, (
                 f"Nací en {ciudad_natal}, {pais_avatar}, {apodo}. Me desempeño en {especialidad}.\n\n"
@@ -203,7 +201,13 @@ def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuar
 
     # 5. CUESTIONAMIENTO DE SER ROBOT / RECLAMO DE CERCANÍA HUMANA
     if any(w in texto for w in ["eres un robot", "eres robot", "solo respondes un par de preguntas", "te vas, eres un robot"]):
-        if "camilo" in avatar_id or "mariana" in avatar_id or "rodrigo" in avatar_id:
+        if "rodrigo" in avatar_id:
+            return nombre_avatar, (
+                f"¡Para nada me voy a ningún lado, {apodo}! Aquí me tienes al pie del cañón. "
+                "Entiendo perfectamente que las pantallas puedan sentirse impersonales, pero mi compromiso contigo es escucharte y darte una mano sensata para que no lleves esto a solas. "
+                "Cuéntame lo que tengas que decir, sin filtros, que te escucho con atención."
+            ), False
+        elif "camilo" in avatar_id or "mariana" in avatar_id:
             return nombre_avatar, (
                 f"¡Oye, {apodo}, para nada me voy a ningún lado! Aquí estoy bien plantado contigo. "
                 "Sé que la pantalla a veces se siente fría, pero detrás de mis palabras hay un compromiso sincero de estar a tu lado para que no cargues tus problemas a solas. "
@@ -287,7 +291,7 @@ def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuar
             "En espacios profesionales y reflexivos adecuados se trabaja con rigor y empatía, libres de juicio. Si alguien en tu entorno minimiza lo que experimentas, recuerda que su reacción refleja su propia falta de herramientas, no la validez de tu vivencia."
         ), False
 
-    # 14. CONFIDENCIALIDAD CLÍNICA: ¿SE LO DIRÁN A MIS PADRES O JEFES?
+    # 14. CONFIDENCIALIDAD CLÍNICA
     if any(w in texto for w in ["completamente confidencial", "se lo diran a mis padres", "se lo dirán a mis padres", "se lo diran a mis jefes", "se lo dirán a mis jefes", "secreto profesional"]):
         return nombre_avatar, (
             f"**Es completamente confidencial, {apodo}. El secreto profesional es una norma ética y legal estricta a nivel mundial.**\n\n"
@@ -329,7 +333,7 @@ def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuar
             "Esa complicidad pasiva refleja la falta de coraje del grupo, no una justificación del maltrato hacia tu persona."
         ), False
 
-    # 20. ACOSO ESCOLAR EN 1RA PERSONA: ¿HAY ALGO MALO EN MÍ? / MIEDO A PEDIR AYUDA
+    # 20. ACOSO ESCOLAR EN 1RA PERSONA: ¿HAY ALGO MALO EN MÍ? / REPRESALIAS
     if any(w in texto for w in ["hay algo malo en mi", "hay algo malo en mí", "merezca el rechazo", "me merezca el rechazo", "por que mis companeros me tratan asi", "por qué mis compañeros me tratan así"]):
         return nombre_avatar, (
             f"**No hay absolutamente nada defectuoso en ti ni mereces el rechazo de nadie, {apodo}.**\n\n"
@@ -493,9 +497,11 @@ def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuar
             "El administrador te atenderá con gusto para activar tu acceso."
         ), False
 
-    # 39. SALUDOS Y CORTESÍA UNIVERSALES
+    # 39. SALUDOS Y CORTESÍA (RODRIGO CON TONO NATURAL ESPAÑOL)
     if any(q in texto for q in ["hola", "buenas", "saludos", "brother", "que tal", "qué tal", "ola", "olá", "namaste", "namasté"]):
-        if "camilo" in avatar_id:
+        if "rodrigo" in avatar_id:
+            return nombre_avatar, f"¡Buenas, {apodo}! Qué alegría encontrarte por aquí. Venga, tómate un momento y cuéntame con calma de qué va el asunto.", False
+        elif "camilo" in avatar_id:
             return nombre_avatar, f"¡Qué tal, mi hermano {apodo}! Un gustazo enorme saludarte. Suelta los hombros y cuéntame con confianza: ¿qué traes en mente hoy?", False
         elif "anastasia" in avatar_id:
             return nombre_avatar, f"Hola, {apodo}. Me alegra saludarte. Tómate un respiro sereno y explícame con total franqueza qué situación deseas que analicemos hoy.", False
@@ -503,8 +509,12 @@ def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuar
             return nombre_avatar, f"Namasté, {apodo}. Qué alegría coincidir en este espacio de calma. Respira hondo y cuéntame con tranquilidad: ¿qué inquietud traes hoy en tu mente?", False
         elif "larissa" in avatar_id:
             return nombre_avatar, f"¡Olá, {apodo}! ¡Qué hermosa energía tenerte por aquí! Respira hondo, suelta los hombros y cuéntame con confianza: ¿de qué te gustaría conversar hoy?", False
-        elif "rodrigo" in avatar_id:
-            return nombre_avatar, f"¿Cómo andás, {apodo}? Me alegra encontrarte. Hablemos con calma y contame qué te anda dando vueltas en la cabeza.", False
+        elif "mariana" in avatar_id:
+            return nombre_avatar, f"¡Epa, {apodo}! ¡Qué gusto verte por acá! Respira profundo y cuéntame con calma: ¿qué traes en mente hoy?", False
+        elif "lucas" in avatar_id:
+            return nombre_avatar, f"Hi, {apodo}! Qué bueno saludarte. Dime directamente cuál es el reto o asunto que quieres abordar hoy.", False
+        elif "manuel" in avatar_id:
+            return nombre_avatar, f"Saludos cordiales, {apodo}. Es un gusto recibirte. Cuéntame con tranquilidad qué inquietud traes en tu camino hoy.", False
         else:
             return nombre_avatar, f"¡Hola, {apodo}! Te doy una cálida bienvenida. Tómate un respiro y cuéntame de qué te gustaría conversar hoy.", False
 
@@ -520,7 +530,13 @@ def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuar
     consejos_filtrados = [c for c in consejos if not any(c[:30] in h for h in historial)]
     consejo_seleccionado = random.choice(consejos_filtrados if consejos_filtrados else consejos) if consejos else "Lleva tu atención al momento presente y da un paso pequeño a la vez."
 
-    if "camilo" in avatar_id:
+    if "rodrigo" in avatar_id:
+        aperturas = [
+            f"Te entiendo bien, {apodo}. Mira, aplicándole un poco de sentido común al asunto: {consejo_seleccionado}",
+            f"Viendo las cosas con perspectiva y sin rodeos, {apodo}, ten en cuenta esto: {consejo_seleccionado}"
+        ]
+        return nombre_avatar, f"{random.choice(aperturas)} Dime, ¿por dónde empezamos a meterle mano al tema?", False
+    elif "camilo" in avatar_id:
         aperturas = [
             f"Te entiendo perfectamente, mi hermano {apodo}. Mira, algo que siempre ayuda a ver las cosas claras es esto: {consejo_seleccionado}",
             f"Hermano {apodo}, cuando las aguas se ponen turbulentas, ten presente esta perspectiva: {consejo_seleccionado}"

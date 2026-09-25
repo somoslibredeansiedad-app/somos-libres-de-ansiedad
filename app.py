@@ -21,115 +21,166 @@ st.set_page_config(page_title="Somos Libres de Ansiedad", page_icon="🌿", layo
 
 st.markdown(f"""
     <style>
-    .stApp {{ background-color: {THEME_COLORS['background']}; color: {THEME_COLORS['text_primary']}; }}
-    h1, h2, h3, h4, h5, h6, p, label, span {{ color: {THEME_COLORS['text_primary']}; }}
+    /* ESCALA TIPOGRÁFICA GLOBAL Y ACCESIBILIDAD UNIVERSAL */
+    html, body, [class*="css"], .stMarkdown, p, span, label, div {{
+        font-size: 18px !important;
+        color: {THEME_COLORS['text_primary']};
+    }}
+    .stApp {{ background-color: {THEME_COLORS['background']}; }}
     
+    h1 {{ font-size: 2.3rem !important; font-weight: 800 !important; color: {THEME_COLORS['text_primary']} !important; }}
+    h2 {{ font-size: 1.85rem !important; font-weight: 700 !important; color: {THEME_COLORS['text_primary']} !important; }}
+    h3 {{ font-size: 1.5rem !important; font-weight: 700 !important; color: {THEME_COLORS['text_primary']} !important; }}
+    h4, h5, h6 {{ font-size: 1.3rem !important; font-weight: 600 !important; color: {THEME_COLORS['text_primary']} !important; }}
+    
+    /* ENTRADAS Y FORMULARIOS */
+    .stTextInput label, .stNumberInput label, .stSelectbox label, .stTextArea label {{
+        font-size: 18px !important;
+        font-weight: 600 !important;
+        margin-bottom: 6px !important;
+        color: {THEME_COLORS['text_primary']} !important;
+    }}
+    
+    .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"], .stTextArea textarea {{
+        background-color: #FFFFFF !important;
+        color: #1E4D3B !important;
+        font-size: 18px !important;
+        min-height: 48px !important;
+        border: 1.5px solid {THEME_COLORS['secondary']} !important;
+        border-radius: 8px !important;
+    }}
+    
+    .stTextArea textarea {{
+        min-height: 120px !important;
+    }}
+
+    .stButton button {{
+        background-color: {THEME_COLORS['secondary']} !important;
+        color: #FFFFFF !important;
+        border-radius: 10px !important;
+        font-weight: bold !important;
+        font-size: 18px !important;
+        min-height: 50px !important;
+        padding: 10px 24px !important;
+        width: 100% !important;
+        border: none !important;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.12) !important;
+    }}
+    .stButton button:hover {{
+        background-color: #3B6B58 !important;
+        color: #FFFFFF !important;
+    }}
+
+    /* PESTAÑAS Y TABS */
+    button[data-baseweb="tab"] {{
+        padding: 14px 24px !important;
+    }}
+    button[data-baseweb="tab"] div {{
+        font-size: 19px !important;
+        font-weight: 700 !important;
+    }}
+
+    /* BARRA LATERAL */
     [data-testid="stSidebar"] {{
         background-color: {THEME_COLORS['background']} !important;
         border-right: 1px solid {THEME_COLORS['border']} !important;
     }}
-    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] p, 
-    [data-testid="stSidebar"] label, [data-testid="stSidebar"] span {{
-        color: {THEME_COLORS['text_primary']} !important;
+    [data-testid="stSidebar"] * {{
+        font-size: 17px !important;
     }}
     
     .welcome-banner {{
         background: linear-gradient(135deg, #4E8A72 0%, #A8E6CF 100%);
-        padding: 20px;
-        border-radius: 12px;
+        padding: 24px 20px;
+        border-radius: 14px;
         color: #1E4D3B;
         text-align: center;
-        font-weight: bold;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.08);
-        margin-bottom: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        margin-bottom: 24px;
     }}
-    
-    /* MEJORA CRÍTICA DE ACCESIBILIDAD Y CONTRASTE EN CHAT */
-    [data-testid="stChatMessage"] {{
-        padding: 14px 18px !important;
-        border-radius: 10px !important;
-        margin-bottom: 12px !important;
+    .welcome-banner h2 {{
+        margin: 0 0 10px 0 !important;
+        font-size: 1.9rem !important;
     }}
-    
-    /* Mensajes del usuario: Fondo oscuro de alto contraste y texto blanco puro */
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {{
-        background-color: #2D4036 !important;
-        border-left: 5px solid #4E8A72 !important;
-    }}
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) p,
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) span,
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) div,
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) li {{
-        color: #FFFFFF !important;
-        font-size: 16px !important;
+    .welcome-banner p {{
+        margin: 0 !important;
+        font-size: 1.2rem !important;
         font-weight: 500 !important;
     }}
-
-    /* Mensajes del asistente: Fondo blanco nítido con texto y listas en verde bosque profundo */
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {{
-        background-color: #FFFFFF !important;
-        border-left: 5px solid #2ECC71 !important;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
+    
+    /* GLOBOS DE CHAT CON CONTRASTE REFORZADO */
+    [data-testid="stChatMessage"] {{
+        padding: 16px 20px !important;
+        border-radius: 12px !important;
+        margin-bottom: 14px !important;
     }}
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) p,
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) span,
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) div,
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) strong,
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) b,
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) em,
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) ul,
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) ol,
-    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) li {{
-        color: #15382A !important;
-        font-size: 16px !important;
+    
+    /* MENSAJE DEL USUARIO: FONDO OSCURO Y TEXTO BLANCO NÍTIDO OBLIGATORIO */
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {{
+        background-color: #2D4036 !important;
+        border-left: 6px solid #4E8A72 !important;
+    }}
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) * {{
+        color: #FFFFFF !important;
+        font-size: 18px !important;
+        font-weight: 500 !important;
         line-height: 1.6 !important;
     }}
 
-    /* Entrada de chat con texto y placeholder de alto contraste */
+    /* MENSAJE DEL ASISTENTE: FONDO BLANCO Y VERDE BOSQUE PROFUNDO */
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {{
+        background-color: #FFFFFF !important;
+        border-left: 6px solid #2ECC71 !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06) !important;
+    }}
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) * {{
+        color: #15382A !important;
+        font-size: 18px !important;
+        line-height: 1.65 !important;
+    }}
+
+    /* SUBTÍTULOS Y CAPTIONS VISIBLES */
+    .avatar-subtitle {{
+        color: #1E4D3B !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        margin-top: -8px !important;
+        margin-bottom: 12px !important;
+    }}
+
     [data-testid="stChatInput"] textarea {{
         background-color: #FFFFFF !important;
         color: #1E4D3B !important;
-        font-size: 15px !important;
+        font-size: 18px !important;
     }}
     [data-testid="stChatInput"] textarea::placeholder {{
         color: #6A8277 !important;
-        font-weight: bold !important;
+        font-weight: 600 !important;
     }}
 
-    .stTextInput input, .stNumberInput input, .stTextArea textarea, .stSelectbox select {{
-        background-color: #FFFFFF !important;
-        color: #1E4D3B !important;
-        border-color: {THEME_COLORS['secondary']} !important;
-    }}
-    .stButton button {{
-        background-color: {THEME_COLORS['secondary']} !important;
-        color: #FFFFFF !important;
-        border-radius: 8px;
-        font-weight: bold;
-    }}
     .social-btn {{
         display: inline-block;
-        padding: 8px 14px;
-        margin: 4px;
-        border-radius: 6px;
+        padding: 10px 16px;
+        margin: 6px 4px;
+        border-radius: 8px;
         text-decoration: none;
         color: white !important;
         font-weight: bold;
-        font-size: 13px;
+        font-size: 15px;
     }}
     .post-card {{
         background: #FFFFFF;
-        padding: 14px 18px;
-        border-radius: 8px;
-        margin-bottom: 12px;
-        border-left: 5px solid #4E8A72;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        padding: 16px 20px;
+        border-radius: 10px;
+        margin-bottom: 14px;
+        border-left: 6px solid #4E8A72;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }}
     #MainMenu, header, footer {{ visibility: hidden; }}
     </style>
 """, unsafe_allow_html=True)
 
-API_URL = os.getenv("API_URL", "https://somos-libres-de-ansiedad-1.onrender.com/api")
+API_URL = os.getenv("API_URL", "https://somos-libres-de-ansiedad-1.onrender.com/api").rstrip("/")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://somoslibredeansiedad-app.streamlit.app")
 CRON_SECRET_KEY = os.getenv("CRON_SECRET_KEY", "somos-libres-cron-mantenimiento-2026")
 
@@ -180,7 +231,7 @@ def mostrar_imagen(avatar_data: dict, ancho: int = 120):
     try:
         st.image(src, width=ancho)
     except Exception:
-        st.markdown(f"<div style='width:{ancho}px; height:{ancho}px; background:#C2EAD9; display:flex; align-items:center; justify-content:center; border-radius:8px;'>🌿</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='width:{ancho}px; height:{ancho}px; background:#C2EAD9; display:flex; align-items:center; justify-content:center; border-radius:8px; font-size:36px;'>🌿</div>", unsafe_allow_html=True)
 
 if os.path.exists("Logo.png"):
     st.image("Logo.png", width=120)
@@ -192,11 +243,11 @@ if not st.session_state.authenticated:
     st.markdown("""
         <div class="welcome-banner">
             <h2>✨ Tu Refugio Seguro y Sin Fármacos ✨</h2>
-            <p>Un espacio confidencial para recuperar tu calma interior.</p>
+            <p>Un espacio confidencial para recuperar tu calma interior y ordenar tus emociones.</p>
         </div>
     """, unsafe_allow_html=True)
 
-    tab_login, tab_register = st.tabs(["Iniciar Sesión", "Registrarse"])
+    tab_login, tab_register = st.tabs(["🔑 Iniciar Sesión", "📝 Registrarse"])
 
     with tab_login:
         correo_log = st.text_input("Correo Electrónico", key="log_correo")
@@ -205,74 +256,97 @@ if not st.session_state.authenticated:
         preg_secreta = None
         if correo_log.strip().lower() == "somos.libredeansiedad@gmail.com":
             st.info("🔒 Cuenta Maestra: Se requiere confirmación de seguridad.")
-            preg_secreta = st.text_input("Pregunta de resguardo: ¿Cuál es la palabra clave?", type="password", key="log_admin_sec")
+            preg_secreta = st.text_input("Palabra clave de seguridad:", type="password", key="log_admin_sec")
 
-        if st.button("Ingresar a mi espacio"):
-            try:
-                payload_log = {"correo": correo_log.strip(), "password": pass_log}
-                if preg_secreta:
-                    payload_log["pregunta_secreta"] = preg_secreta.strip()
+        if st.button("Ingresar a mi espacio", key="btn_ingresar_login"):
+            if not correo_log.strip() or not pass_log.strip():
+                st.warning("Por favor introduce tu correo electrónico y tu contraseña.")
+            else:
+                with st.spinner("Verificando tus credenciales... Por favor espera un instante."):
+                    try:
+                        payload_log = {"correo": correo_log.strip(), "password": pass_log}
+                        if preg_secreta:
+                            payload_log["pregunta_secreta"] = preg_secreta.strip()
 
-                res = requests.post(f"{API_URL}/auth/login", json=payload_log)
-                if res.status_code == 200:
-                    d = res.json()
-                    st.session_state.authenticated = True
-                    st.session_state.user_id = d.get("user_id")
-                    st.session_state.user_role = d.get("role", "user")
-                    st.session_state.user_plan = d.get("plan_actual", "gratis")
-                    st.session_state.user_apodo = d.get("apodo", "")
-                    st.session_state.token = d.get("access_token")
-                    st.success(f"¡Bienvenido/a {st.session_state.user_apodo}!")
-                    st.info(f"💡 {d.get('pensamiento_dia', '')}")
-                    st.rerun()
-                else:
-                    st.error(res.json().get("detail", "Credenciales incorrectas."))
-            except Exception as e:
-                st.error(f"Error de conexión: {e}")
+                        res = requests.post(f"{API_URL}/auth/login", json=payload_log, timeout=40)
+                        if res.status_code == 200:
+                            d = res.json()
+                            st.session_state.authenticated = True
+                            st.session_state.user_id = d.get("user_id")
+                            st.session_state.user_role = d.get("role", "user")
+                            st.session_state.user_plan = d.get("plan_actual", "gratis")
+                            st.session_state.user_apodo = d.get("apodo", "")
+                            st.session_state.token = d.get("access_token")
+                            st.success(f"¡Bienvenido/a {st.session_state.user_apodo}!")
+                            if d.get("pensamiento_dia"):
+                                st.info(f"💡 {d.get('pensamiento_dia')}")
+                            st.rerun()
+                        else:
+                            try:
+                                err_msg = res.json().get("detail", "Credenciales incorrectas o usuario no encontrado.")
+                            except Exception:
+                                err_msg = f"Error del servidor ({res.status_code}). Intenta de nuevo en unos segundos."
+                            st.error(err_msg)
+                    except requests.exceptions.Timeout:
+                        st.error("El servidor demoró en responder. Si estaba en reposo, espera 30 segundos y vuelve a presionar el botón.")
+                    except Exception as e:
+                        st.error(f"Falla de conexión con el servidor: {e}")
 
     with tab_register:
-        nombre = st.text_input("Nombre Completo (*)")
-        apodo = st.text_input("Apodo (*)")
+        nombre = st.text_input("Nombre Completo (*)", key="reg_nombre")
+        apodo = st.text_input("Apodo o Nombre de Preferencia (*)", key="reg_apodo")
         correo_reg = st.text_input("Correo Electrónico (*)", key="reg_correo")
         pass_reg = st.text_input("Contraseña (*)", type="password", key="reg_pass")
-        edad = st.number_input("Edad (*)", min_value=12, max_value=100, value=25)
+        edad = st.number_input("Edad (*)", min_value=12, max_value=100, value=25, key="reg_edad")
         
         with st.expander("➕ Datos del Perfil (Opcionales para personalizar tu experiencia)"):
-            sexo = st.selectbox("Sexo", ["Prefiero no decir", "Femenino", "Masculino", "Otro"])
-            profesion = st.text_input("Profesión u Ocupación")
-            situacion = st.selectbox("Situación Sentimental", ["Prefiero no decir", "Soltero/a", "En pareja / Casado/a", "Divorciado/a", "Viudo/a"])
-            hijos = st.number_input("Cantidad de Hijos", min_value=0, max_value=10, value=0)
+            sexo = st.selectbox("Sexo", ["Prefiero no decir", "Femenino", "Masculino", "Otro"], key="reg_sexo")
+            profesion = st.text_input("Profesión u Ocupación", key="reg_profesion")
+            situacion = st.selectbox("Situación Sentimental", ["Prefiero no decir", "Soltero/a", "En pareja / Casado/a", "Divorciado/a", "Viudo/a"], key="reg_situacion")
+            hijos = st.number_input("Cantidad de Hijos", min_value=0, max_value=10, value=0, key="reg_hijos")
 
-        codigo_ref = st.text_input("Código de Referido (opcional)", value=ref_url)
+        codigo_ref = st.text_input("Código de Referido (opcional)", value=ref_url, key="reg_codigo_ref")
         
-        col_t1, col_btn_pol = st.columns([3, 1])
-        with col_t1:
-            t1 = st.checkbox("He leído y acepto los Términos de Servicio y la Política de Privacidad. (*)")
-        with col_btn_pol:
-            ver_politicas = st.button("📄 Leer Políticas", use_container_width=True)
+        with st.expander("📜 Términos de Servicio, Descargo Legal y Política de Privacidad Oficial", expanded=False):
+            st.markdown("""
+            ### Marco Legal, Ético y Sanitario
+            
+            **1. Naturaleza No Médica y Deslinde Sanitario Absoluto:**
+            * «Somos Libres de Ansiedad» es una plataforma digital de carácter estrictamente educativo, reflexivo y de acompañamiento emocional asistido por Inteligencia Artificial.
+            * **NO constituye un servicio médico, psiquiátrico, psicológico clínico ni psicoterapéutico.**
+            * El software, sus creadores, colaboradores y avatares virtuales **NO son médicos colegiados ni terapeutas facultativos**, y bajo ninguna circunstancia emiten diagnósticos clínicos, altas, dictámenes patológicos ni prescripción, retiro o modificación de medicamentos o psicofármacos.
+            * La utilización de esta herramienta es voluntaria y complementaria a tu desarrollo personal, y jamás debe reemplazar la valoración, consulta, supervisión o tratamiento de un profesional de la salud debidamente certificado.
+            
+            **2. Protocolo de Crisis y Exención en Emergencias:**
+            * Esta aplicación **NO es un servicio de urgencias médicas ni monitoriza crisis en tiempo real.**
+            * Si estás atravesando una emergencia médica, angustia invalidante, crisis aguda de pánico o pensamientos relacionados con autolesión o ideación suicida, debes suspender el uso de esta app de inmediato y acudir a un centro asistencial o comunicarte con las líneas gratuitas de auxilio de tu país:
+              - **Global:** Befrienders Worldwide (https://www.befrienders.org)
+              - **Venezuela:** Línea FPV 0212-4163116 / 0212-4163118 / Emergencias 911
+              - **España:** Línea 024 / Teléfono de la Esperanza 717 003 717 / Emergencias 112
+              - **EE.UU. / Canadá:** Línea 988 / Emergencias 911
+              - **Otros países:** Acudir de inmediato al servicio de urgencias hospitalarias local.
+            
+            **3. Transparencia Algorítmica y Cero Engaño (Fraude Cero):**
+            * Cada «Guía» o «Avatar» disponible en esta aplicación es una representación algorítmica de software diseñada para ofrecer reflexiones basadas en literatura pública de crecimiento y bienestar. Ningún avatar pretende hacerse pasar por una persona humana física ni por un profesional médico.
+            * Los planes de suscripción o colaboración económica financian exclusivamente la infraestructura técnica del software y el acceso a funciones digitales, no honorarios facultativos.
+            
+            **4. Privacidad, Confidencialidad y Seguridad de Datos:**
+            * Las contraseñas de acceso son protegidas y cifradas de forma irreversible mediante el algoritmo estándar de la industria `bcrypt`.
+            * Toda la información biográfica y emocional que compartas se utiliza única y exclusivamente para contextualizar tus conversaciones dentro de tu propia sesión.
+            * **Política de Cero Venta:** Tus datos e interacciones jamás serán vendidos, cedidos, transferidos ni comercializados con terceros ni anunciantes.
+            * Tienes el derecho irrevocable de solicitar en cualquier momento la eliminación completa o rectificación de tu cuenta y datos a través de los canales de soporte.
+            """)
 
-        if ver_politicas:
-            with st.expander("📜 Términos de Servicio y Política de Privacidad Oficial", expanded=True):
-                st.markdown("""
-                **1. Términos de Servicio y Descargo Médico:**
-                * **Naturaleza del Servicio:** «Somos Libres de Ansiedad» es una plataforma digital de bienestar emocional y acompañamiento reflexivo asistido por IA. **No constituye servicio médico, psiquiátrico ni psicoterapéutico clínico**, ni prescribe fármacos.
-                * **Emergencias:** En caso de crisis severa, ideación suicida o emergencia médica, acude de inmediato a un centro de urgencias de tu localidad.
-                * **Convivencia:** Queda prohibido el acoso, spam o conductas indebidas en la comunidad.
-
-                **2. Política de Privacidad y Tratamiento de Datos:**
-                * **Seguridad:** Las contraseñas se almacenan encriptadas con algoritmo `bcrypt`.
-                * **Uso Exclusivo:** Los datos de tu perfil solo se usan para enriquecer y contextualizar tu experiencia con tu guía.
-                * **Confidencialidad:** Tus datos personales e interacciones nunca se venden, alquilan ni comparten con terceros.
-                * **Control:** Puedes solicitar la rectificación o eliminación total de tus registros a través del Buzón de Soporte.
-                """)
-
-        t2 = st.checkbox("Acepto que este programa es una herramienta educativa no médica. (*)")
+        t1 = st.checkbox("He leído, comprendo y acepto los Términos de Servicio y la Política de Privacidad. (*)", key="chk_terms")
+        t2 = st.checkbox("Reconozco que este programa es una herramienta psicoeducativa de IA y no un servicio médico ni farmacológico. (*)", key="chk_disclaimer")
         
-        if st.button("Registrarme"):
-            if not t1 or not t2 or not nombre or not apodo or not correo_reg or not pass_reg:
-                st.warning("Completa los campos obligatorios marcados con (*).")
+        if st.button("Completar mi Registro", key="btn_completar_registro"):
+            if not t1 or not t2:
+                st.warning("Debes marcar ambas casillas de aceptación de términos y descargo sanitario para registrarte.")
+            elif not nombre.strip() or not apodo.strip() or not correo_reg.strip() or not pass_reg.strip():
+                st.warning("Por favor completa los campos obligatorios marcados con (*).")
             else:
-                try:
+                with st.spinner("Registrando tu cuenta de forma segura..."):
                     payload = {
                         "nombre_completo": nombre.strip(),
                         "apodo": apodo.strip(),
@@ -287,15 +361,26 @@ if not st.session_state.authenticated:
                         "terms_accepted": t1,
                         "disclaimer_accepted": t2
                     }
-                    res = requests.post(f"{API_URL}/auth/register", json=payload)
-                    if res.status_code == 201:
-                        st.success(res.json().get("message", "¡Registro completado! Ya puedes Iniciar Sesión."))
-                    else:
-                        st.error(res.json().get("detail", "Error al registrarse."))
-                except Exception as e:
-                    st.error(f"Error de conexión: {e}")
+                    try:
+                        res = requests.post(f"{API_URL}/auth/register", json=payload, timeout=40)
+                        if res.status_code == 404:
+                            res = requests.post(f"{API_URL}/auth/registro", json=payload, timeout=40)
 
-# --- PANTALLA PRINCIPAL ---
+                        if res.status_code in [200, 201]:
+                            msg = res.json().get("message", "¡Registro completado con éxito! Ve a la pestaña 'Iniciar Sesión' para acceder.")
+                            st.success(f"✅ {msg}")
+                        else:
+                            try:
+                                detalle_error = res.json().get("detail", "No fue posible procesar el registro.")
+                            except Exception:
+                                detalle_error = f"Error en el servidor ({res.status_code}). Verifica los datos."
+                            st.error(f"⚠️ {detalle_error}")
+                    except requests.exceptions.Timeout:
+                        st.error("El servidor tardó en responder durante el registro. Si estaba en reposo, espera 30 segundos e inténtalo de nuevo.")
+                    except Exception as e:
+                        st.error(f"No se pudo conectar con el servidor: {e}")
+
+# --- PANTALLA PRINCIPAL CON SESIÓN INICIADA ---
 else:
     headers_auth = {"Authorization": f"Bearer {st.session_state.token}"}
     
@@ -311,7 +396,6 @@ else:
             del st.session_state[key]
         st.rerun()
 
-    # BANNERS ESPECÍFICOS SEGÚN CADA SECCIÓN
     if menu == "Red Social y Comunidad":
         banner_msg = "Bienvenido a tu red de apoyo emocional y crecimiento mutuo."
     elif menu == "Planes y Suscripción":
@@ -335,7 +419,7 @@ else:
         st.subheader("🛠️ Catálogo Oficial de Guías")
         
         try:
-            res = requests.get(f"{API_URL}/avatares/catalogo", headers=headers_auth)
+            res = requests.get(f"{API_URL}/avatares/catalogo", headers=headers_auth, timeout=30)
             d_cat = res.json() if res.status_code == 200 else {}
             avatares = d_cat.get("avatares", [])
             chats_disp = d_cat.get("chats_restantes", 25)
@@ -355,10 +439,10 @@ else:
             with cols[idx % 2]:
                 mostrar_imagen(av, ancho=130)
                 st.markdown(f"**{av.get('bandera')} {av.get('nombre')}**")
-                st.caption(f"Origen: {av.get('pais')} | {av.get('tono')}")
+                st.markdown(f"<p class='avatar-subtitle'>Origen: {av.get('pais')} | {av.get('tono')}</p>", unsafe_allow_html=True)
                 if st.button("Seleccionar este Guía", key=f"sel_{av.get('id')}"):
                     try:
-                        r = requests.post(f"{API_URL}/avatares/seleccionar", headers=headers_auth, json={"avatar_id": av.get("id")})
+                        r = requests.post(f"{API_URL}/avatares/seleccionar", headers=headers_auth, json={"avatar_id": av.get("id")}, timeout=30)
                         if r.status_code == 200:
                             st.session_state.avatar_activo = av
                             st.rerun()
@@ -367,7 +451,7 @@ else:
                     except Exception as e:
                         st.error(f"Error: {e}")
 
-    # 2. CHAT CON AVATAR (CON PROTOCOLO SOS Y MEMORIA EN VIVO)
+    # 2. CHAT CON AVATAR
     elif menu == "Chat con Avatar":
         if not st.session_state.avatar_activo:
             st.warning("Selecciona un guía primero en la pestaña 'Seleccionar Avatar'.")
@@ -375,10 +459,10 @@ else:
             av = st.session_state.avatar_activo
             col_f, col_t = st.columns([1, 6])
             with col_f:
-                mostrar_imagen(av, ancho=85)
+                mostrar_imagen(av, ancho=95)
             with col_t:
                 st.subheader(f"Conversando con {av.get('nombre')}")
-                st.caption(f"{av.get('bandera')} {av.get('tono')}")
+                st.markdown(f"<p class='avatar-subtitle'>{av.get('bandera')} {av.get('tono')}</p>", unsafe_allow_html=True)
 
             chat_key = f"messages_{st.session_state.user_id}"
             if chat_key not in st.session_state:
@@ -397,7 +481,6 @@ else:
                 with st.chat_message("user", avatar="👤"):
                     st.markdown(user_text)
 
-                # Extraer los últimos cuatro mensajes previos a esta entrada
                 historial_reciente = [m["content"] for m in st.session_state[chat_key][-5:-1]]
 
                 try:
@@ -406,7 +489,7 @@ else:
                         "message": user_text,
                         "historial_previo": historial_reciente
                     }
-                    r = requests.post(f"{API_URL}/chat", headers=headers_auth, json=payload)
+                    r = requests.post(f"{API_URL}/chat", headers=headers_auth, json=payload, timeout=45)
                     if r.status_code == 200:
                         d_resp = r.json()
                         ans = d_resp.get("respuesta")
@@ -435,7 +518,7 @@ else:
         with tab_mi_perfil:
             st.markdown("### 👤 Tu Perfil Personal")
             try:
-                res_me = requests.get(f"{API_URL}/usuario/mi-perfil", headers=headers_auth)
+                res_me = requests.get(f"{API_URL}/usuario/mi-perfil", headers=headers_auth, timeout=30)
                 if res_me.status_code == 200:
                     mi_p = res_me.json().get("perfil", {})
                     col_p1, col_p2 = st.columns([1, 4])
@@ -473,7 +556,7 @@ else:
                             "cantidad_hijos": int(nuevos_hijos),
                             "biografia": nueva_bio,
                             "foto_perfil": foto_b64
-                        })
+                        }, timeout=30)
                         if r_up.status_code == 200:
                             st.success("Perfil actualizado con éxito.")
                             st.rerun()
@@ -486,7 +569,7 @@ else:
                 st.info("ℹ️ Estás explorando la comunidad en Plan Gratis. Los miembros de planes superiores aparecen en modo incógnito. Para enviar solicitudes de amistad, asciende a Plan Comunicador.")
 
             try:
-                res_perf = requests.get(f"{API_URL}/comunidad/perfiles", headers=headers_auth)
+                res_perf = requests.get(f"{API_URL}/comunidad/perfiles", headers=headers_auth, timeout=30)
                 if res_perf.status_code == 200:
                     for p in res_perf.json().get("perfiles", []):
                         es_incog = p.get("es_incognito", False)
@@ -508,7 +591,7 @@ else:
                                         st.caption("⚠️ Para enviar solicitud de amistad a este usuario debes ascender a Plan Comunicador.")
                                     else:
                                         if st.button("Enviar Solicitud de Amistad", key=f"sol_{p.get('id')}"):
-                                            requests.post(f"{API_URL}/comunidad/amistad/solicitar", headers=headers_auth, json={"usuario_id": p.get("id")})
+                                            requests.post(f"{API_URL}/comunidad/amistad/solicitar", headers=headers_auth, json={"usuario_id": p.get("id")}, timeout=30)
                                             st.success("Solicitud enviada.")
                                             st.rerun()
                                 elif estatus_a == "pendiente":
@@ -518,24 +601,24 @@ else:
                                         st.warning("📩 Te ha enviado una solicitud de amistad:")
                                         col_si, col_no = st.columns(2)
                                         if col_si.button("Aceptar", key=f"ac_{p.get('amistad_id')}"):
-                                            requests.post(f"{API_URL}/comunidad/amistad/{p.get('amistad_id')}/responder?aceptar=true", headers=headers_auth)
+                                            requests.post(f"{API_URL}/comunidad/amistad/{p.get('amistad_id')}/responder?aceptar=true", headers=headers_auth, timeout=30)
                                             st.rerun()
                                         if col_no.button("Rechazar", key=f"rc_{p.get('amistad_id')}"):
-                                            requests.post(f"{API_URL}/comunidad/amistad/{p.get('amistad_id')}/responder?aceptar=false", headers=headers_auth)
+                                            requests.post(f"{API_URL}/comunidad/amistad/{p.get('amistad_id')}/responder?aceptar=false", headers=headers_auth, timeout=30)
                                             st.rerun()
                                 elif estatus_a == "aceptada":
                                     st.success("🤝 ¡Son Amigos! (Chat directo ilimitado habilitado)")
 
                                 msg_dm = st.text_input("Mensaje privado:", key=f"dm_in_{p.get('id')}")
                                 if st.button("Enviar Mensaje", key=f"btn_dm_{p.get('id')}"):
-                                    r_dm = requests.post(f"{API_URL}/comunidad/dm", headers=headers_auth, json={"destinatario_id": p.get("id"), "contenido": msg_dm})
+                                    r_dm = requests.post(f"{API_URL}/comunidad/dm", headers=headers_auth, json={"destinatario_id": p.get("id"), "contenido": msg_dm}, timeout=30)
                                     if r_dm.status_code == 200:
                                         st.success("Mensaje enviado.")
                                     else:
                                         st.error(r_dm.json().get("detail", "Límite alcanzado."))
 
                                 if st.checkbox("Ver conversación previa", key=f"chk_conv_{p.get('id')}"):
-                                    r_c = requests.get(f"{API_URL}/comunidad/conversacion/{p.get('id')}", headers=headers_auth)
+                                    r_c = requests.get(f"{API_URL}/comunidad/conversacion/{p.get('id')}", headers=headers_auth, timeout=30)
                                     if r_c.status_code == 200:
                                         for cm in r_c.json().get("mensajes", []):
                                             rem = "Tú" if cm.get("remitente_id") != p.get("id") else p.get("apodo")
@@ -566,7 +649,7 @@ else:
                                 "contenido": post_txt.strip(),
                                 "categoria_emocional": map_cat[cat_emocional],
                                 "is_anonimo": anon
-                            })
+                            }, timeout=30)
                             st.success("Publicación realizada.")
                             st.rerun()
             else:
@@ -588,7 +671,7 @@ else:
             cat_query = map_filtro[filtro_cat]
             url_muro = f"{API_URL}/muro" if cat_query == "todas" else f"{API_URL}/muro?categoria={cat_query}"
             
-            res_muro = requests.get(url_muro, headers=headers_auth)
+            res_muro = requests.get(url_muro, headers=headers_auth, timeout=30)
             if res_muro.status_code == 200:
                 posts = res_muro.json().get("posts", [])
                 if not posts:
@@ -607,9 +690,9 @@ else:
                     }.get(post.get("categoria_emocional"), "🌿 Reflexión")
                     
                     st.markdown(f"""
-                        <div class="post-card" style="border-left: 5px solid {borde_color};">
-                            <span style="font-size:12px; font-weight:bold; color:{THEME_COLORS['text_secondary']};">[{tag_nombre}] {post.get('autor')}</span>
-                            <p style="margin-top:6px; font-size:15px; color:{THEME_COLORS['text_primary']};">{post.get('contenido')}</p>
+                        <div class="post-card" style="border-left: 6px solid {borde_color};">
+                            <span style="font-size:15px; font-weight:bold; color:{THEME_COLORS['text_secondary']};">[{tag_nombre}] {post.get('autor')}</span>
+                            <p style="margin-top:8px; font-size:18px; color:{THEME_COLORS['text_primary']};">{post.get('contenido')}</p>
                         </div>
                     """, unsafe_allow_html=True)
 
@@ -626,7 +709,7 @@ else:
             asu = st.text_input("Asunto:")
             det = st.text_area("Mensaje detallado:")
             if st.button("Enviar al Administrador"):
-                requests.post(f"{API_URL}/buzon/ticket", headers=headers_auth, json={"categoria": cat, "asunto": asu, "mensaje": det})
+                requests.post(f"{API_URL}/buzon/ticket", headers=headers_auth, json={"categoria": cat, "asunto": asu, "mensaje": det}, timeout=30)
                 st.success("Ticket registrado correctamente.")
 
     # 4. PLANES Y CONCILIACIÓN DE PAGOS PROTEGIDA
@@ -635,7 +718,7 @@ else:
 
         with tab_p:
             c1, c2, c3 = st.columns(3)
-            c1.markdown("### 🌿 Gratis\n- $0\n- 1 Avatar activo\n- 25 chats semanales\n- Comunidad en modo lectura")
+            c1.markdown("### 🌿 Gratis\n- $0 USD\n- 1 Avatar activo\n- 25 chats semanales\n- Comunidad en modo lectura")
             c2.markdown("### ⭐ Comunicador\n- $5 USD / 30 días\n- 3 Avatares activos\n- 100 chats semanales\n- Muro y salas activas\n- Envío de solicitudes de amistad")
             c3.markdown("### 👑 Amigo de Todos\n- $10 USD / 40 días\n- 10 Avatares activos\n- Chats ilimitados\n- Acceso total sin restricciones")
 
@@ -643,7 +726,7 @@ else:
             st.markdown("### 🎟️ Canjear Cupón Promocional")
             cod = st.text_input("Introduce tu Código de Cupón (Ej: SL-VERDE-4821):")
             if st.button("Canjear Cupón"):
-                r = requests.post(f"{API_URL}/cupones/canjear", headers=headers_auth, json={"codigo": cod.strip()})
+                r = requests.post(f"{API_URL}/cupones/canjear", headers=headers_auth, json={"codigo": cod.strip()}, timeout=30)
                 if r.status_code == 200:
                     st.success(r.json().get("message"))
                     st.rerun()
@@ -653,7 +736,7 @@ else:
             st.markdown("---")
             st.markdown("### 📢 Comparte tu Enlace y Gana Recompensas")
             try:
-                res_me = requests.get(f"{API_URL}/usuario/mi-perfil", headers=headers_auth)
+                res_me = requests.get(f"{API_URL}/usuario/mi-perfil", headers=headers_auth, timeout=30)
                 cod_ref_mio = res_me.json().get("perfil", {}).get("codigo_referido", "") if res_me.status_code == 200 else ""
             except Exception:
                 cod_ref_mio = ""
@@ -707,7 +790,7 @@ else:
                             "plan_solicitado": opcion_tramite,
                             "metodo_pago": "Reporte de Pago",
                             "monto_referencia": num_comprobante
-                        })
+                        }, timeout=30)
                         if r_pay.status_code == 200:
                             st.success("Reporte enviado al Administrador. Te responderá por este canal.")
                             st.rerun()
@@ -718,14 +801,14 @@ else:
                         "mensaje": mensaje_pedido,
                         "plan_solicitado": opcion_tramite,
                         "metodo_pago": accion_pago
-                    })
+                    }, timeout=30)
                     if r_ped.status_code == 200:
                         st.success("Solicitud enviada. El Administrador te suministrará los datos por este chat.")
                         st.rerun()
 
             st.markdown("#### Conversación Privada y Cupones Entregados")
             try:
-                r_my_p = requests.get(f"{API_URL}/pagos/mis-mensajes", headers=headers_auth)
+                r_my_p = requests.get(f"{API_URL}/pagos/mis-mensajes", headers=headers_auth, timeout=30)
                 if r_my_p.status_code == 200:
                     mensajes_pago = r_my_p.json().get("mensajes", [])
                     if not mensajes_pago:
@@ -747,7 +830,7 @@ else:
             st.markdown("### Emisión de Cupones de Activación (Válidos por 30 minutos)")
             color = st.selectbox("Color del Cupón:", ["verde", "azul", "rojo", "morado"])
             if st.button("Generar Código"):
-                r = requests.post(f"{API_URL}/admin/cupones", headers=headers_auth, json={"tipo": color})
+                r = requests.post(f"{API_URL}/admin/cupones", headers=headers_auth, json={"tipo": color}, timeout=30)
                 if r.status_code == 200:
                     d = r.json()
                     st.success(f"Código: `{d.get('codigo')}` | Plan: {d.get('tipo_plan')} | Días: {d.get('duracion_dias')}")
@@ -755,14 +838,14 @@ else:
         with tab_pagos_adm:
             st.markdown("### Bandeja de Conciliación de Pagos")
             try:
-                r_conv = requests.get(f"{API_URL}/admin/pagos/conversaciones", headers=headers_auth)
+                r_conv = requests.get(f"{API_URL}/admin/pagos/conversaciones", headers=headers_auth, timeout=30)
                 if r_conv.status_code == 200:
                     usuarios = r_conv.json().get("usuarios_con_pago", [])
                     if not usuarios:
                         st.info("No hay pagos pendientes de revisión.")
                     for u in usuarios:
                         with st.expander(f"Usuario: {u.get('apodo')} ({u.get('correo')}) - Plan: {u.get('plan')}"):
-                            r_hist = requests.get(f"{API_URL}/admin/pagos/usuario/{u.get('id')}", headers=headers_auth)
+                            r_hist = requests.get(f"{API_URL}/admin/pagos/usuario/{u.get('id')}", headers=headers_auth, timeout=30)
                             if r_hist.status_code == 200:
                                 for h in r_hist.json().get("mensajes", []):
                                     st.caption(f"{'Usuario' if h.get('emisor_rol') == 'user' else 'Admin'}: {h.get('mensaje')}")
@@ -770,13 +853,13 @@ else:
                             st.caption("💡 *Plantilla rápida para enviar datos Pago Móvil BDV:*")
                             if st.button("📋 Pegar Coordenadas BDV", key=f"bdv_{u.get('id')}"):
                                 texto_bdv = "Datos BDV: Banco de Venezuela (0102) | Tel: 04128014962 | CI: 84608666 | Monto al cambio BCV del día según plan."
-                                requests.post(f"{API_URL}/admin/pagos/responder", headers=headers_auth, json={"para_usuario_id": u.get("id"), "mensaje": texto_bdv})
+                                requests.post(f"{API_URL}/admin/pagos/responder", headers=headers_auth, json={"para_usuario_id": u.get("id"), "mensaje": texto_bdv}, timeout=30)
                                 st.success("Coordenadas enviadas.")
                                 st.rerun()
 
                             resp_admin = st.text_area(f"Responder o entregar cupón a {u.get('apodo')}:", key=f"adm_resp_{u.get('id')}")
                             if st.button("Enviar Respuesta", key=f"btn_adm_resp_{u.get('id')}"):
-                                requests.post(f"{API_URL}/admin/pagos/responder", headers=headers_auth, json={"para_usuario_id": u.get("id"), "mensaje": resp_admin})
+                                requests.post(f"{API_URL}/admin/pagos/responder", headers=headers_auth, json={"para_usuario_id": u.get("id"), "mensaje": resp_admin}, timeout=30)
                                 st.success("Respuesta enviada.")
                                 st.rerun()
             except Exception as e:
@@ -785,7 +868,7 @@ else:
         with tab_afiliados_adm:
             st.markdown("### 👥 Auditoría de Referidos y Programa de Recompensas")
             try:
-                r_af = requests.get(f"{API_URL}/admin/afiliados", headers=headers_auth)
+                r_af = requests.get(f"{API_URL}/admin/afiliados", headers=headers_auth, timeout=30)
                 if r_af.status_code == 200:
                     afiliados = r_af.json().get("afiliados", [])
                     afiliados_activos = [a for a in afiliados if a.get("total_referidos", 0) > 0]
@@ -801,7 +884,7 @@ else:
                                     if st.button("🏆 Adjudicar Bono Conversión (7 días)", key=f"btn_bono_{a.get('usuario_id')}"):
                                         r_rew = requests.post(f"{API_URL}/admin/afiliados/premiar", headers=headers_auth, json={
                                             "usuario_id": a.get("usuario_id"), "tipo_premio": "bono_conversion"
-                                        })
+                                        }, timeout=30)
                                         if r_rew.status_code == 200:
                                             st.success(r_rew.json().get("message"))
                                             st.rerun()
@@ -814,7 +897,7 @@ else:
                                     if st.button("👑 Adjudicar Gran Meta (1 año)", key=f"btn_meta_{a.get('usuario_id')}"):
                                         r_rew = requests.post(f"{API_URL}/admin/afiliados/premiar", headers=headers_auth, json={
                                             "usuario_id": a.get("usuario_id"), "tipo_premio": "gran_meta"
-                                        })
+                                        }, timeout=30)
                                         if r_rew.status_code == 200:
                                             st.success(r_rew.json().get("message"))
                                             st.rerun()
@@ -825,7 +908,7 @@ else:
 
         with tab_metricas_adm:
             try:
-                r_m = requests.get(f"{API_URL}/admin/usuarios", headers=headers_auth)
+                r_m = requests.get(f"{API_URL}/admin/usuarios", headers=headers_auth, timeout=30)
                 if r_m.status_code == 200:
                     met = r_m.json().get("metricas", {})
                     st.metric("Total Usuarios Registrados", met.get("total_registrados", 0))
@@ -837,7 +920,7 @@ else:
             st.markdown("### 💾 Respaldo Integral de la Base de Datos")
             if st.button("Generar Respaldo JSON"):
                 try:
-                    r_bk = requests.get(f"{API_URL}/admin/backup", headers=headers_auth)
+                    r_bk = requests.get(f"{API_URL}/admin/backup", headers=headers_auth, timeout=40)
                     if r_bk.status_code == 200:
                         st.download_button(
                             label="📥 Descargar Archivo de Respaldo",
@@ -852,7 +935,7 @@ else:
             st.markdown("### ⚙️ Disparador Manual de Mantenimiento Semanal")
             if st.button("🚀 Ejecutar Mantenimiento Ahora"):
                 try:
-                    r_cron = requests.post(f"{API_URL}/cron/mantenimiento", headers={"X-Cron-Key": CRON_SECRET_KEY})
+                    r_cron = requests.post(f"{API_URL}/cron/mantenimiento", headers={"X-Cron-Key": CRON_SECRET_KEY}, timeout=40)
                     if r_cron.status_code == 200:
                         d_res = r_cron.json()
                         st.success(f"Mantenimiento ejecutado: {d_res.get('chats_semanales_reseteados')} chats reseteados, {d_res.get('planes_vencidos_revertidos')} planes expirados y {d_res.get('mensajes_directos_purgados')} DMs purgados.")

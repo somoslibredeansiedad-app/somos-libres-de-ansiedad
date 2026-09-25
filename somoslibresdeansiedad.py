@@ -2,30 +2,35 @@ import json
 import os
 import random
 from datetime import datetime, timedelta, timezone
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from fastapi import Depends, FastAPI, HTTPException, status, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
 import bcrypt
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, select, or_, and_, delete
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, selectinload
 
-# Delegación al motor cognitivo de Rafael
+# Delegación estricta al motor cognitivo de Rafael
 from cerebro_avatares import (
     obtener_catalogo_formateado,
     existe_avatar,
     procesar_respuesta_avatar
 )
 
+# Configuración y saneamiento determinista de conexión a Base de Datos
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./somos_libres.db")
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
 elif DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+# Saneamiento de parámetros incompatibles con el driver asyncpg (sslmode, channel_binding)
+if "postgresql+asyncpg://" in DATABASE_URL and "?" in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.split("?")[0]
 
 engine = create_async_engine(DATABASE_URL, echo=False, future=True)
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
@@ -37,7 +42,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
 
 security = HTTPBearer()
 
-app = FastAPI(title="Somos Libres de Ansiedad Core API", version="4.6.3")
+app = FastAPI(title="Somos Libres de Ansiedad Core API", version="4.6.7")
 
 app.add_middleware(
     CORSMiddleware,
@@ -61,7 +66,7 @@ class UserModel(Base):
     sexo: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
     profesion: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
     situacion_sentimental: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    cantidad_hijos: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    cantidad_hijos: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
     biografia: Mapped[Optional[str]] = mapped_column(String(2000), default="En camino hacia la serenidad.")
     foto_perfil: Mapped[Optional[str]] = mapped_column(String(100000), nullable=True)
     
@@ -144,15 +149,34 @@ class UserRegister(BaseModel):
     nombre_completo: str
     apodo: str
     correo: EmailStr
-    password: str = Field(..., min_length=5)
-    edad: int
+    password: str = Field(..., min_length=4)
+    edad: Union[int, str]
     sexo: Optional[str] = None
     profesion: Optional[str] = None
     situacion_sentimental: Optional[str] = None
-    cantidad_hijos: Optional[int] = None
+    cantidad_hijos: Optional[Union[int, str]] = 0
     codigo_referido: Optional[str] = None
     terms_accepted: bool
     disclaimer_accepted: bool
+
+    @field_validator("edad")
+    @classmethod
+    def validar_edad(cls, v):
+        try:
+            val = int(v)
+            if val < 10 or val > 120:
+                return 25
+            return val
+        except Exception:
+            return 25
+
+    @field_validator("cantidad_hijos")
+    @classmethod
+    def validar_hijos(cls, v):
+        try:
+            return int(v) if v is not None else 0
+        except Exception:
+            return 0
 
 class UserLogin(BaseModel):
     correo: EmailStr
@@ -228,7 +252,10 @@ def hash_password(password: str) -> str:
     return bcrypt.hashpw(pwd_bytes, bcrypt.gensalt()).decode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return bcrypt.checkpw(plain_password.encode('utf-8')[:72], hashed_password.encode('utf-8'))
+    try:
+        return bcrypt.checkpw(plain_password.encode('utf-8')[:72], hashed_password.encode('utf-8'))
+    except Exception:
+        return False
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
@@ -241,9 +268,9 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
         correo: str = payload.get("sub")
         if correo is None:
-            raise HTTPException(status_code=401, detail="Token inválido.")
+            raise HTTPException(status_code=401, detail="Token de acceso inválido.")
     except jwt.PyJWTError:
-        raise HTTPException(status_code=401, detail="Credenciales inválidas.")
+        raise HTTPException(status_code=401, detail="Credenciales inválidas o expiradas.")
 
     result = await db.execute(select(UserModel).where(UserModel.correo == correo))
     user = result.scalar_one_or_none()
@@ -255,7 +282,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 async def get_current_admin(current_user: UserModel = Depends(get_current_user)) -> UserModel:
     if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Acceso exclusivo de administrador.")
+        raise HTTPException(status_code=403, detail="Acceso exclusivo del Administrador Maestro.")
     return current_user
 
 @app.on_event("startup")
@@ -286,18 +313,19 @@ PENSAMIENTOS_BIENVENIDA = [
     "No tienes que resolver todo hoy; un solo paso a la vez es suficiente.",
     "Tus emociones son válidas. Lo que sientes hoy no define quién serás mañana.",
     "La calma no es la ausencia de caos, sino la paz que construyes en tu interior.",
-    "Está bien hacer una pausa. El descanso también es parte del camino."
+    "Está bien hacer una pausa. El descanso consciente también es parte del camino."
 ]
 
-@app.post("/api/auth/register", status_code=status.HTTP_201_CREATED)
-async def registrar_usuario(data: UserRegister, db: AsyncSession = Depends(get_db)):
+# CONTROLADOR COMPARTIDO DE REGISTRO
+async def _procesar_registro_interno(data: UserRegister, db: AsyncSession):
     if not data.terms_accepted or not data.disclaimer_accepted:
-        raise HTTPException(status_code=400, detail="Acepta los términos y el descargo de responsabilidad médica.")
+        raise HTTPException(status_code=400, detail="Debes aceptar los términos y el descargo legal y sanitario.")
 
-    if data.correo.strip().lower() == "somos.libredeansiedad@gmail.com":
+    correo_normalizado = data.correo.strip().lower()
+    if correo_normalizado == "somos.libredeansiedad@gmail.com":
         raise HTTPException(status_code=400, detail="Esta cuenta maestra ya existe en el sistema.")
 
-    res = await db.execute(select(UserModel).where(UserModel.correo == data.correo))
+    res = await db.execute(select(UserModel).where(UserModel.correo == correo_normalizado))
     if res.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado.")
 
@@ -318,15 +346,15 @@ async def registrar_usuario(data: UserRegister, db: AsyncSession = Depends(get_d
             expira_inicial = datetime.now(timezone.utc) + timedelta(days=1)
 
     nuevo = UserModel(
-        nombre_completo=data.nombre_completo,
-        apodo=data.apodo,
-        correo=data.correo,
+        nombre_completo=data.nombre_completo.strip(),
+        apodo=data.apodo.strip(),
+        correo=correo_normalizado,
         password_hash=hash_password(data.password),
-        edad=data.edad,
+        edad=int(data.edad),
         sexo=data.sexo,
-        profesion=data.profesion,
+        profesion=data.profesion.strip() if data.profesion else None,
         situacion_sentimental=data.situacion_sentimental,
-        cantidad_hijos=data.cantidad_hijos,
+        cantidad_hijos=int(data.cantidad_hijos) if data.cantidad_hijos else 0,
         plan_nivel=plan_inicial,
         suscripcion_expira=expira_inicial,
         role="user",
@@ -335,8 +363,16 @@ async def registrar_usuario(data: UserRegister, db: AsyncSession = Depends(get_d
     )
     db.add(nuevo)
     await db.commit()
-    msg = f"¡Bienvenido/a {data.apodo}! Has recibido 1 día de cortesía en el Plan Amigo de Todos." if plan_inicial == "amigo_todos" else f"¡Bienvenido/a {data.apodo}!"
+    msg = f"¡Bienvenido/a {nuevo.apodo}! Has recibido 1 día de cortesía en el Plan Amigo de Todos." if plan_inicial == "amigo_todos" else f"¡Bienvenido/a {nuevo.apodo}! Tu cuenta ha sido creada exitosamente."
     return {"status": "success", "message": msg, "codigo_referido": cod}
+
+@app.post("/api/auth/register", status_code=status.HTTP_201_CREATED)
+async def registrar_usuario_en(data: UserRegister, db: AsyncSession = Depends(get_db)):
+    return await _procesar_registro_interno(data, db)
+
+@app.post("/api/auth/registro", status_code=status.HTTP_201_CREATED)
+async def registrar_usuario_es(data: UserRegister, db: AsyncSession = Depends(get_db)):
+    return await _procesar_registro_interno(data, db)
 
 @app.post("/api/auth/login", response_model=TokenResponse)
 async def acceder_usuario(data: UserLogin, db: AsyncSession = Depends(get_db)):
@@ -654,7 +690,7 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
         "biografia": current_user.biografia
     }
 
-    # SE INTEGRA EL HISTORIAL PREVIO HACIA RAFAEL
+    # Integración del historial hacia Rafael
     nombre_av, resp, es_crisis = procesar_respuesta_avatar(
         avatar_id=data.avatar_id, 
         mensaje_usuario=data.message, 
