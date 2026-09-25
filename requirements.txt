@@ -5,20 +5,21 @@ pydantic[email]
 email-validator
 python-multipart
 
-# Base de Datos y Persistencia Asíncrona
+# Base de Datos y Persistencia Asíncrona (Neon PostgreSQL y SQLite local)
 sqlalchemy
-aiosqlite
 asyncpg
+aiosqlite
 greenlet
 
-# Seguridad y Criptografía
-bcrypt==4.0.1
+# Seguridad, Criptografía y Tokens
+bcrypt
 pyjwt
 
-# Interfaz de Usuario y Clientes
+# Interfaz de Usuario y Cliente Web
 streamlit
 requests
-Pillow
+pillow
 
-# Conectividad e Inteligencia Artificial
+# Motor de Inteligencia Artificial (Google Gemini SDK)
 google-genai
+httpx
