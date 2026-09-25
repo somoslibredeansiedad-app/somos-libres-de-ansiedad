@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import ssl
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Union
 
@@ -23,16 +24,21 @@ from cerebro_avatares import (
 
 # Configuración y saneamiento determinista de conexión a Base de Datos
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./somos_libres.db")
+connect_args = {}
+
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
 elif DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-# Saneamiento de parámetros incompatibles con el driver asyncpg (sslmode, channel_binding)
-if "postgresql+asyncpg://" in DATABASE_URL and "?" in DATABASE_URL:
-    DATABASE_URL = DATABASE_URL.split("?")[0]
+# Saneamiento de parámetros incompatibles y activación segura de SSL para asyncpg en Neon
+if "postgresql+asyncpg://" in DATABASE_URL:
+    if "?" in DATABASE_URL:
+        DATABASE_URL = DATABASE_URL.split("?")[0]
+    ssl_context = ssl.create_default_context()
+    connect_args = {"ssl": ssl_context}
 
-engine = create_async_engine(DATABASE_URL, echo=False, future=True)
+engine = create_async_engine(DATABASE_URL, connect_args=connect_args, echo=False, future=True)
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 SECRET_KEY = os.getenv("SECRET_KEY", "somos-libres-seguridad-produccion-2026-clave-jwt")
@@ -42,7 +48,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
 
 security = HTTPBearer()
 
-app = FastAPI(title="Somos Libres de Ansiedad Core API", version="4.6.7")
+app = FastAPI(title="Somos Libres de Ansiedad Core API", version="4.6.8")
 
 app.add_middleware(
     CORSMiddleware,
