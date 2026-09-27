@@ -451,7 +451,7 @@ else:
                     except Exception as e:
                         st.error(f"Error: {e}")
 
-    # 2. CHAT CON AVATAR
+    # 2. CHAT CON AVATAR (MANEJO DEFENSIVO ANTE ERRORES HTTP)
     elif menu == "Chat con Avatar":
         if not st.session_state.avatar_activo:
             st.warning("Selecciona un guía primero en la pestaña 'Seleccionar Avatar'.")
@@ -489,25 +489,35 @@ else:
                         "message": user_text,
                         "historial_previo": historial_reciente
                     }
-                    r = requests.post(f"{API_URL}/chat", headers=headers_auth, json=payload, timeout=45)
+                    r = requests.post(f"{API_URL}/chat", headers=headers_auth, json=payload, timeout=60)
+                    
                     if r.status_code == 200:
-                        d_resp = r.json()
-                        ans = d_resp.get("respuesta")
-                        es_crisis = d_resp.get("is_crisis", False)
-                        chats_rest = d_resp.get("chats_restantes")
-                        
-                        st.session_state[chat_key].append({"role": "assistant", "content": ans, "is_crisis": es_crisis})
-                        
-                        if es_crisis:
-                            st.error(ans)
-                        else:
-                            with st.chat_message("assistant", avatar="🌿"):
-                                st.markdown(ans)
-                                st.caption(f"Mensajes restantes de tu plan: {chats_rest}")
+                        try:
+                            d_resp = r.json()
+                            ans = d_resp.get("respuesta")
+                            es_crisis = d_resp.get("is_crisis", False)
+                            chats_rest = d_resp.get("chats_restantes")
+                            
+                            st.session_state[chat_key].append({"role": "assistant", "content": ans, "is_crisis": es_crisis})
+                            
+                            if es_crisis:
+                                st.error(ans)
+                            else:
+                                with st.chat_message("assistant", avatar="🌿"):
+                                    st.markdown(ans)
+                                    st.caption(f"Mensajes restantes de tu plan: {chats_rest}")
+                        except Exception as e_json:
+                            st.error(f"Error interpretando la respuesta del servidor: {e_json}")
                     else:
-                        st.error(r.json().get("detail", "Error al procesar el mensaje."))
+                        try:
+                            detalle = r.json().get("detail", r.text[:250])
+                        except Exception:
+                            detalle = r.text[:250] if r.text else f"Error HTTP {r.status_code}"
+                        st.error(f"Aviso del servidor ({r.status_code}): {detalle}")
+                except requests.exceptions.Timeout:
+                    st.error("El servidor tardó más de 60 segundos en responder. Si el backend estaba en reposo, espera un momento y vuelve a enviar el mensaje.")
                 except Exception as e:
-                    st.error(f"Error de conexión: {e}")
+                    st.error(f"Falla de conexión con el backend: {e}")
 
     # 3. RED SOCIAL Y COMUNIDAD
     elif menu == "Red Social y Comunidad":
