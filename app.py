@@ -108,6 +108,19 @@ st.markdown(f"""
         font-weight: 500 !important;
     }}
     
+    /* CABECERA FIJA DE CHAT (STICKY) */
+    .sticky-chat-header {{
+        position: sticky;
+        top: 0;
+        z-index: 99;
+        background-color: #EBF7F2;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1.5px solid #C2EAD9;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        margin-bottom: 20px;
+    }}
+
     /* GLOBOS DE CHAT CON CONTRASTE REFORZADO */
     [data-testid="stChatMessage"] {{
         padding: 16px 20px !important;
@@ -127,7 +140,7 @@ st.markdown(f"""
         line-height: 1.6 !important;
     }}
 
-    /* MENSAJE DEL ASISTENTE: FONDO BLANCO Y VERDE BOSQUE PROFUNDO */
+    /* MENSAJE DEL ASISTENTE / OTRO USUARIO */
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {{
         background-color: #FFFFFF !important;
         border-left: 6px solid #2ECC71 !important;
@@ -138,14 +151,23 @@ st.markdown(f"""
         font-size: 18px !important;
         line-height: 1.65 !important;
     }}
+    
+    /* CONTROL DE LISTAS Y VIÑETAS DENTRO DEL ASISTENTE */
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) ul,
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) ol,
+    [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) li {{
+        color: #15382A !important;
+        font-size: 18px !important;
+        font-weight: 500 !important;
+        line-height: 1.6 !important;
+    }}
 
-    /* SUBTÍTULOS Y CAPTIONS VISIBLES */
     .avatar-subtitle {{
         color: #1E4D3B !important;
         font-size: 16px !important;
         font-weight: 600 !important;
-        margin-top: -8px !important;
-        margin-bottom: 12px !important;
+        margin-top: -6px !important;
+        margin-bottom: 6px !important;
     }}
 
     [data-testid="stChatInput"] textarea {{
@@ -176,11 +198,37 @@ st.markdown(f"""
         border-left: 6px solid #4E8A72;
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }}
+    
+    .comment-card {{
+        background: #F7FCF9;
+        padding: 10px 14px;
+        border-radius: 8px;
+        margin-top: 8px;
+        margin-left: 20px;
+        border-left: 3px solid #A8E6CF;
+        font-size: 16px !important;
+    }}
+    
+    .timer-badge {{
+        background-color: #FFFFFF;
+        border: 1px solid #C2EAD9;
+        border-left: 4px solid #4E8A72;
+        padding: 8px 12px;
+        border-radius: 8px;
+        margin-top: 6px;
+        margin-bottom: 14px;
+        font-size: 14px !important;
+        color: #1E4D3B;
+        font-weight: 600;
+    }}
+    
     #MainMenu, header, footer {{ visibility: hidden; }}
     </style>
 """, unsafe_allow_html=True)
 
-API_URL = os.getenv("API_URL", "https://somos-libres-de-ansiedad-1.onrender.com/api").rstrip("/")
+# Normalización determinista de API_URL para asegurar sufijo /api
+raw_api_url = os.getenv("API_URL", "https://somos-libres-de-ansiedad-1.onrender.com").rstrip("/")
+API_URL = raw_api_url if raw_api_url.endswith("/api") else f"{raw_api_url}/api"
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://somoslibredeansiedad-app.streamlit.app")
 CRON_SECRET_KEY = os.getenv("CRON_SECRET_KEY", "somos-libres-cron-mantenimiento-2026")
 
@@ -196,8 +244,14 @@ if "user_apodo" not in st.session_state:
     st.session_state.user_apodo = ""
 if "avatar_activo" not in st.session_state:
     st.session_state.avatar_activo = None
+if "avatares_vinculados" not in st.session_state:
+    st.session_state.avatares_vinculados = []
 if "token" not in st.session_state:
     st.session_state.token = None
+if "horas_restantes_plan" not in st.session_state:
+    st.session_state.horas_restantes_plan = None
+if "dm_activo_contacto" not in st.session_state:
+    st.session_state.dm_activo_contacto = None
 
 ref_url = st.query_params.get("ref", "")
 
@@ -277,6 +331,7 @@ if not st.session_state.authenticated:
                             st.session_state.user_plan = d.get("plan_actual", "gratis")
                             st.session_state.user_apodo = d.get("apodo", "")
                             st.session_state.token = d.get("access_token")
+                            st.session_state.horas_restantes_plan = d.get("horas_restantes")
                             st.success(f"¡Bienvenido/a {st.session_state.user_apodo}!")
                             if d.get("pensamiento_dia"):
                                 st.info(f"💡 {d.get('pensamiento_dia')}")
@@ -384,6 +439,46 @@ if not st.session_state.authenticated:
 else:
     headers_auth = {"Authorization": f"Bearer {st.session_state.token}"}
     
+    # Sincronización proactiva de plan y contador en tiempo real desde el perfil
+    try:
+        r_sync = requests.get(f"{API_URL}/usuario/mi-perfil", headers=headers_auth, timeout=15)
+        if r_sync.status_code == 200:
+            d_perfil = r_sync.json().get("perfil", {})
+            st.session_state.user_plan = d_perfil.get("plan_nivel", "gratis")
+            st.session_state.horas_restantes_plan = d_perfil.get("horas_restantes")
+    except Exception:
+        pass
+
+    # Sincronización de catálogo y avatares vinculados
+    catalogo_completo = []
+    chats_disp_semana = 25
+    try:
+        r_cat = requests.get(f"{API_URL}/avatares/catalogo", headers=headers_auth, timeout=15)
+        if r_cat.status_code == 200:
+            d_c = r_cat.json()
+            catalogo_completo = d_c.get("avatares", [])
+            chats_disp_semana = d_c.get("chats_restantes", 25)
+            vinculados = [av for av in catalogo_completo if av.get("is_activo")]
+            st.session_state.avatares_vinculados = vinculados
+            
+            if not st.session_state.avatar_activo and vinculados:
+                st.session_state.avatar_activo = vinculados[0]
+            elif st.session_state.avatar_activo and vinculados:
+                matching = [v for v in vinculados if v.get("id") == st.session_state.avatar_activo.get("id")]
+                if matching:
+                    st.session_state.avatar_activo = matching[0]
+    except Exception:
+        pass
+
+    # Sincronización de contactos de DMs comunitarios
+    mis_contactos_dm = []
+    try:
+        r_dm_contacts = requests.get(f"{API_URL}/comunidad/mis-chats", headers=headers_auth, timeout=15)
+        if r_dm_contacts.status_code == 200:
+            mis_contactos_dm = r_dm_contacts.json().get("contactos", [])
+    except Exception:
+        pass
+
     opciones = ["Seleccionar Avatar", "Chat con Avatar", "Red Social y Comunidad", "Planes y Suscripción"]
     if st.session_state.user_role == "admin":
         opciones.append("Panel de Administración")
@@ -391,10 +486,60 @@ else:
     menu = st.sidebar.selectbox("Navegación", opciones)
     st.sidebar.markdown(f"**Plan:** <span style='color:#4E8A72; font-weight:bold;'>{st.session_state.user_plan.upper()}</span>", unsafe_allow_html=True)
 
+    # Despliegue del contador de horas de vigencia de plan
+    if st.session_state.user_role != "admin" and st.session_state.horas_restantes_plan is not None:
+        horas = st.session_state.horas_restantes_plan
+        if horas > 0:
+            dias_calc = round(horas / 24, 1)
+            st.sidebar.markdown(f"""
+                <div class="timer-badge">
+                    ⏱️ <strong>Vence en:</strong> {horas}h ({dias_calc} días)
+                </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.sidebar.markdown("""
+                <div class="timer-badge" style="border-left-color: #E74C3C; color: #C0392B;">
+                    ⚠️ Plan vencido. Revertido a Gratis.
+                </div>
+            """, unsafe_allow_html=True)
+            st.session_state.user_plan = "gratis"
+            st.session_state.horas_restantes_plan = None
+            st.rerun()
+
     if st.sidebar.button("Cerrar Sesión"):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
+
+    # --- PANEL DE GUÍAS ACTIVOS EN LA BARRA LATERAL ---
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 🌿 Tus Guías Activos")
+    
+    if not st.session_state.avatares_vinculados:
+        st.sidebar.caption("Aún no tienes ningún avatar vinculado. Ve a 'Seleccionar Avatar'.")
+    else:
+        for av_vinc in st.session_state.avatares_vinculados:
+            es_actual = (st.session_state.avatar_activo and st.session_state.avatar_activo.get("id") == av_vinc.get("id"))
+            label_boton = f"👉 {av_vinc.get('bandera')} {av_vinc.get('nombre')}" if es_actual else f"{av_vinc.get('bandera')} {av_vinc.get('nombre')}"
+            
+            if st.sidebar.button(label_boton, key=f"side_av_{av_vinc.get('id')}"):
+                st.session_state.avatar_activo = av_vinc
+                st.rerun()
+                
+        st.sidebar.caption(f"Mensajes semanales disponibles: **{chats_disp_semana}**")
+
+    # --- PANEL DE CHATS CON MIEMBROS EN LA BARRA LATERAL ---
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 💬 Chats con Miembros")
+    if not mis_contactos_dm:
+        st.sidebar.caption("Sin chats activos. Puedes conectar en 'Comunidad y Amigos'.")
+    else:
+        for c_dm in mis_contactos_dm:
+            es_dm_sel = (st.session_state.dm_activo_contacto and st.session_state.dm_activo_contacto.get("id") == c_dm.get("id"))
+            label_dm = f"💬 👉 {c_dm.get('apodo')}" if es_dm_sel else f"💬 {c_dm.get('apodo')}"
+            if st.sidebar.button(label_dm, key=f"side_dm_{c_dm.get('id')}"):
+                st.session_state.dm_activo_contacto = c_dm
+                st.rerun()
 
     if menu == "Red Social y Comunidad":
         banner_msg = "Bienvenido a tu red de apoyo emocional y crecimiento mutuo."
@@ -418,20 +563,16 @@ else:
     if menu == "Seleccionar Avatar":
         st.subheader("🛠️ Catálogo Oficial de Guías")
         
-        try:
-            res = requests.get(f"{API_URL}/avatares/catalogo", headers=headers_auth, timeout=30)
-            d_cat = res.json() if res.status_code == 200 else {}
-            avatares = d_cat.get("avatares", [])
-            chats_disp = d_cat.get("chats_restantes", 25)
-        except Exception:
-            avatares = []
-            chats_disp = 25
+        avatares = catalogo_completo
+        chats_disp = chats_disp_semana
 
         if st.session_state.avatar_activo:
-            st.success(f"✅ Ya seleccionaste a **{st.session_state.avatar_activo.get('nombre')}** como tu acompañante. Te quedan **{chats_disp} mensajes semanales** disponibles.")
+            st.success(f"✅ Tu guía activo es **{st.session_state.avatar_activo.get('nombre')}**. Te quedan **{chats_disp} mensajes semanales** disponibles.")
         else:
             if st.session_state.user_plan == "gratis":
                 st.info("ℹ️ Tu **Plan Gratis** te permite vincular **1 Avatar activo** y disfrutar de **25 chats reflexivos semanales**.")
+            elif st.session_state.user_plan == "comunicador":
+                st.info("ℹ️ Tu **Plan Comunicador** te permite alternar entre **hasta 3 Avatares activos** con **100 chats semanales**.")
 
         c1, c2 = st.columns(2)
         cols = [c1, c2]
@@ -440,31 +581,46 @@ else:
                 mostrar_imagen(av, ancho=130)
                 st.markdown(f"**{av.get('bandera')} {av.get('nombre')}**")
                 st.markdown(f"<p class='avatar-subtitle'>Origen: {av.get('pais')} | {av.get('tono')}</p>", unsafe_allow_html=True)
-                if st.button("Seleccionar este Guía", key=f"sel_{av.get('id')}"):
-                    try:
-                        r = requests.post(f"{API_URL}/avatares/seleccionar", headers=headers_auth, json={"avatar_id": av.get("id")}, timeout=30)
-                        if r.status_code == 200:
-                            st.session_state.avatar_activo = av
-                            st.rerun()
-                        else:
-                            st.error(r.json().get("detail", "Límite de avatares alcanzado."))
-                    except Exception as e:
-                        st.error(f"Error: {e}")
+                
+                esta_seleccionado = av.get("is_activo", False)
+                if esta_seleccionado:
+                    st.caption("✅ Ya forma parte de tus guías activos")
+                    if st.button("Conversar con este Guía", key=f"sel_act_{av.get('id')}"):
+                        st.session_state.avatar_activo = av
+                        st.rerun()
+                else:
+                    if st.button("Seleccionar este Guía", key=f"sel_{av.get('id')}"):
+                        try:
+                            r = requests.post(f"{API_URL}/avatares/seleccionar", headers=headers_auth, json={"avatar_id": av.get("id")}, timeout=30)
+                            if r.status_code == 200:
+                                st.session_state.avatar_activo = av
+                                st.rerun()
+                            else:
+                                st.error(r.json().get("detail", "Límite de avatares alcanzado en tu plan."))
+                        except Exception as e:
+                            st.error(f"Error: {e}")
 
-    # 2. CHAT CON AVATAR (MANEJO DEFENSIVO ANTE ERRORES HTTP)
+    # 2. CHAT CON AVATAR (CABECERA STICKY)
     elif menu == "Chat con Avatar":
         if not st.session_state.avatar_activo:
             st.warning("Selecciona un guía primero en la pestaña 'Seleccionar Avatar'.")
         else:
             av = st.session_state.avatar_activo
+
             col_f, col_t = st.columns([1, 6])
             with col_f:
-                mostrar_imagen(av, ancho=95)
+                mostrar_imagen(av, ancho=85)
             with col_t:
-                st.subheader(f"Conversando con {av.get('nombre')}")
-                st.markdown(f"<p class='avatar-subtitle'>{av.get('bandera')} {av.get('tono')}</p>", unsafe_allow_html=True)
+                st.markdown(f"""
+                    <div style="margin-top: 4px;">
+                        <h3 style="margin: 0; font-size: 1.4rem !important;">Conversando con {av.get('nombre')}</h3>
+                        <p class="avatar-subtitle" style="margin: 2px 0 0 0;">{av.get('bandera')} {av.get('pais')} | {av.get('tono')}</p>
+                    </div>
+                """, unsafe_allow_html=True)
 
-            chat_key = f"messages_{st.session_state.user_id}"
+            st.markdown("---")
+
+            chat_key = f"messages_{st.session_state.user_id}_{av.get('id')}"
             if chat_key not in st.session_state:
                 st.session_state[chat_key] = [{"role": "assistant", "content": av.get("disparador_inicial", "Hola, estoy aquí para acompañarte."), "is_crisis": False}]
 
@@ -477,11 +633,15 @@ else:
                         st.markdown(m["content"])
 
             if user_text := st.chat_input("Escribe tu pensamiento o inquietud..."):
+                historial_reciente = [
+                    f"{'Usuario' if m['role'] == 'user' else 'Guía'}: {m['content']}"
+                    for m in st.session_state[chat_key][-4:]
+                    if not m.get("is_crisis")
+                ]
+
                 st.session_state[chat_key].append({"role": "user", "content": user_text, "is_crisis": False})
                 with st.chat_message("user", avatar="👤"):
                     st.markdown(user_text)
-
-                historial_reciente = [m["content"] for m in st.session_state[chat_key][-5:-1]]
 
                 try:
                     payload = {
@@ -542,6 +702,8 @@ else:
                         st.write(f"**Edad:** {mi_p.get('edad')} años | **Sexo:** {mi_p.get('sexo') or 'No especificado'}")
                         st.write(f"**Hijos:** {mi_p.get('cantidad_hijos', 0)} | **Profesión:** {mi_p.get('profesion') or 'No especificada'}")
                         st.write(f"**Código de Referido:** `{mi_p.get('codigo_referido')}`")
+                        if mi_p.get("horas_restantes") is not None:
+                            st.write(f"**Vigencia del Plan:** {mi_p.get('horas_restantes')} horas restantes")
                     
                     st.markdown("---")
                     st.markdown("#### Actualizar Datos")
@@ -577,6 +739,47 @@ else:
             st.markdown("### 👥 Miembros de la Comunidad")
             if st.session_state.user_plan == "gratis":
                 st.info("ℹ️ Estás explorando la comunidad en Plan Gratis. Los miembros de planes superiores aparecen en modo incógnito. Para enviar solicitudes de amistad, asciende a Plan Comunicador.")
+
+            # CHAT ACTIVO CON MIEMBRO SELECCIONADO (ESTILO NATIVO)
+            if st.session_state.dm_activo_contacto:
+                c_sel = st.session_state.dm_activo_contacto
+                st.markdown(f"#### 💬 Conversación Directa con {c_sel.get('apodo')}")
+                st.caption(f"Profesión: {c_sel.get('profesion') or 'Miembro'} | *Los mensajes de más de 7 días se purgan automáticamente por privacidad.*")
+                
+                try:
+                    r_chat_m = requests.get(f"{API_URL}/comunidad/conversacion/{c_sel.get('id')}", headers=headers_auth, timeout=30)
+                    if r_chat_m.status_code == 200:
+                        mensajes_dm = r_chat_m.json().get("mensajes", [])
+                        if not mensajes_dm:
+                            st.info("Aún no tienes mensajes con este usuario. Escribe el primer mensaje a continuación.")
+                        for m_dm in mensajes_dm:
+                            es_propio = (m_dm.get("remitente_id") == st.session_state.user_id)
+                            rol_msg = "user" if es_propio else "assistant"
+                            ico = "👤" if es_propio else "🌿"
+                            with st.chat_message(rol_msg, avatar=ico):
+                                st.markdown(m_dm.get("contenido"))
+                                
+                    nuevo_dm_texto = st.text_input("Escribe tu mensaje privado:", key=f"dm_input_box_{c_sel.get('id')}")
+                    col_dm1, col_dm2 = st.columns([1, 4])
+                    with col_dm1:
+                        if st.button("Enviar Mensaje", key=f"btn_send_dm_{c_sel.get('id')}"):
+                            if nuevo_dm_texto.strip():
+                                r_post_dm = requests.post(f"{API_URL}/comunidad/dm", headers=headers_auth, json={
+                                    "destinatario_id": c_sel.get("id"),
+                                    "contenido": nuevo_dm_texto.strip()
+                                }, timeout=30)
+                                if r_post_dm.status_code == 200:
+                                    st.success("Mensaje enviado.")
+                                    st.rerun()
+                                else:
+                                    st.error(r_post_dm.json().get("detail", "Límite de mensajes alcanzado."))
+                    with col_dm2:
+                        if st.button("Cerrar Chat con Miembro", key="btn_close_dm_chat"):
+                            st.session_state.dm_activo_contacto = None
+                            st.rerun()
+                except Exception as e_dm_chat:
+                    st.error(f"Error cargando conversación: {e_dm_chat}")
+                st.markdown("---")
 
             try:
                 res_perf = requests.get(f"{API_URL}/comunidad/perfiles", headers=headers_auth, timeout=30)
@@ -619,25 +822,15 @@ else:
                                 elif estatus_a == "aceptada":
                                     st.success("🤝 ¡Son Amigos! (Chat directo ilimitado habilitado)")
 
-                                msg_dm = st.text_input("Mensaje privado:", key=f"dm_in_{p.get('id')}")
-                                if st.button("Enviar Mensaje", key=f"btn_dm_{p.get('id')}"):
-                                    r_dm = requests.post(f"{API_URL}/comunidad/dm", headers=headers_auth, json={"destinatario_id": p.get("id"), "contenido": msg_dm}, timeout=30)
-                                    if r_dm.status_code == 200:
-                                        st.success("Mensaje enviado.")
-                                    else:
-                                        st.error(r_dm.json().get("detail", "Límite alcanzado."))
-
-                                if st.checkbox("Ver conversación previa", key=f"chk_conv_{p.get('id')}"):
-                                    r_c = requests.get(f"{API_URL}/comunidad/conversacion/{p.get('id')}", headers=headers_auth, timeout=30)
-                                    if r_c.status_code == 200:
-                                        for cm in r_c.json().get("mensajes", []):
-                                            rem = "Tú" if cm.get("remitente_id") != p.get("id") else p.get("apodo")
-                                            st.write(f"**{rem}:** {cm.get('contenido')}")
+                                if st.button(f"Abrir Chat con {p.get('apodo')}", key=f"open_dm_{p.get('id')}"):
+                                    st.session_state.dm_activo_contacto = p
+                                    st.rerun()
             except Exception as e:
                 st.error(f"Error: {e}")
 
         with tab_muro:
             st.markdown("### 💬 Muro de Desahogo y Esperanza")
+            st.caption("🌿 *Las reflexiones de la comunidad son visibles para todos y se renuevan cada 72 horas.*")
             
             if st.session_state.user_plan != "gratis":
                 with st.expander("✍️ Compartir una reflexión en el Muro", expanded=False):
@@ -663,7 +856,7 @@ else:
                             st.success("Publicación realizada.")
                             st.rerun()
             else:
-                st.caption("ℹ️ El Plan Gratis permite leer testimonios. Para publicar tus propias reflexiones, activa el Plan Comunicador.")
+                st.caption("ℹ️ El Plan Gratis permite leer testimonios. Para publicar tus propias reflexiones o comentar, activa el Plan Comunicador.")
 
             st.markdown("---")
             filtro_cat = st.selectbox("Filtrar testimonios por categoría:", [
@@ -706,12 +899,83 @@ else:
                         </div>
                     """, unsafe_allow_html=True)
 
+                    # HILO DE COMENTARIOS
+                    comentarios = post.get("comentarios", [])
+                    with st.expander(f"💬 Comentarios ({len(comentarios)})", expanded=False):
+                        if not comentarios:
+                            st.caption("Aún no hay comentarios en esta reflexión.")
+                        for com in comentarios:
+                            st.markdown(f"""
+                                <div class="comment-card">
+                                    <strong>{com.get('autor')}:</strong> {com.get('contenido')}
+                                </div>
+                            """, unsafe_allow_html=True)
+                        
+                        if st.session_state.user_plan != "gratis":
+                            nuevo_com = st.text_input("Añadir un comentario de apoyo:", key=f"com_in_{post.get('id')}")
+                            anon_com = st.checkbox("Comentar como anónimo", key=f"anon_com_{post.get('id')}")
+                            if st.button("Publicar Comentario", key=f"btn_com_{post.get('id')}"):
+                                if nuevo_com.strip():
+                                    r_c = requests.post(f"{API_URL}/muro/{post.get('id')}/comentar", headers=headers_auth, json={
+                                        "contenido": nuevo_com.strip(),
+                                        "is_anonimo": anon_com
+                                    }, timeout=30)
+                                    if r_c.status_code == 201:
+                                        st.success("Comentario publicado.")
+                                        st.rerun()
+                                    else:
+                                        st.error("No se pudo publicar el comentario.")
+                        else:
+                            st.caption("🔒 Para comentar en las publicaciones, asciende al Plan Comunicador.")
+
         with tab_reuniones:
             st.markdown("### 👥 Reunidos para Compartir (Salas de Círculos)")
+            st.caption("✨ *Las salas cerradas permanecen disponibles durante 24 horas y luego se purgan automáticamente.*")
+            
             if st.session_state.user_plan == "gratis":
-                st.warning("🔒 Debes pertenecer al Plan Comunicador o Amigo de Todos para adquirir tu sala y conversar en reunión con tus amigos.")
+                st.warning("🔒 Debes pertenecer al Plan Comunicador o Amigo de Todos para solicitar y coordinar una sala de reunión con el Administrador.")
             else:
-                st.success("✨ Tienes acceso a salas sincrónicas para convocar y dialogar con tus círculos de apoyo.")
+                st.success("✨ Tienes acceso a salas sincrónicas. Puedes solicitar tu espacio al Administrador a continuación:")
+                
+                with st.expander("📅 Solicitar Sala de Reunión al Administrador", expanded=False):
+                    tema_sala = st.text_input("Tema o título del círculo:")
+                    desc_sala = st.text_area("Objetivo o temática a compartir:")
+                    fecha_sala = st.text_input("Fecha y hora propuesta (Ej: Sábado 15 de Octubre, 6:00 PM):")
+                    
+                    if st.button("Enviar Solicitud al Administrador"):
+                        if not tema_sala.strip() or not fecha_sala.strip():
+                            st.warning("Por favor completa el tema y la fecha propuesta.")
+                        else:
+                            r_sol = requests.post(f"{API_URL}/reuniones/solicitar", headers=headers_auth, json={
+                                "tema": tema_sala.strip(),
+                                "descripcion": desc_sala.strip(),
+                                "fecha_propuesta": fecha_sala.strip()
+                            }, timeout=30)
+                            if r_sol.status_code == 201:
+                                st.success("Solicitud enviada con éxito. El Administrador te asignará el enlace en este panel.")
+                                st.rerun()
+                            else:
+                                st.error("No se pudo registrar la solicitud.")
+
+                st.markdown("#### Salas Disponibles y Programadas")
+                try:
+                    r_salas = requests.get(f"{API_URL}/reuniones/salas", headers=headers_auth, timeout=30)
+                    if r_salas.status_code == 200:
+                        salas_list = r_salas.json().get("salas", [])
+                        if not salas_list:
+                            st.info("No hay reuniones programadas en este momento.")
+                        for s in salas_list:
+                            with st.expander(f"📌 {s.get('tema')} — Solicitada por {s.get('solicitante')} ({s.get('estatus').upper()})"):
+                                st.write(f"**Descripción:** {s.get('descripcion')}")
+                                st.write(f"**Fecha y Hora:** {s.get('fecha_propuesta')}")
+                                if s.get("enlace_reunion"):
+                                    st.markdown(f"🔗 **Enlace de Acceso:** [{s.get('enlace_reunion')}]({s.get('enlace_reunion')})")
+                                else:
+                                    st.info("⏳ Enlace pendiente por asignar por el Administrador.")
+                                if s.get("estatus") == "cerrada":
+                                    st.caption("⚠️ Esta reunión ha concluido y desaparecerá a las 24 horas de su cierre.")
+                except Exception as e_s:
+                    st.error(f"Error cargando salas: {e_s}")
 
         with tab_buzon:
             st.markdown("### 📬 Buzón y Tickets de Soporte")
@@ -832,8 +1096,8 @@ else:
     # 5. PANEL ADMIN (JUAN CARLOS)
     elif menu == "Panel de Administración" and st.session_state.user_role == "admin":
         st.subheader("🔒 Panel Maestro (Admin - Juan Carlos)")
-        tab_cupones_adm, tab_pagos_adm, tab_afiliados_adm, tab_metricas_adm, tab_mantenimiento_adm = st.tabs([
-            "Generar Cupones", "Bandeja de Pagos", "Afiliados y Recompensas", "Métricas Globales", "Mantenimiento y Respaldo"
+        tab_cupones_adm, tab_pagos_adm, tab_reuniones_adm, tab_afiliados_adm, tab_metricas_adm, tab_mantenimiento_adm = st.tabs([
+            "Generar Cupones", "Bandeja de Pagos", "Gestionar Salas", "Afiliados y Recompensas", "Métricas Globales", "Mantenimiento y Respaldo"
         ])
 
         with tab_cupones_adm:
@@ -874,6 +1138,35 @@ else:
                                 st.rerun()
             except Exception as e:
                 st.error(f"Error: {e}")
+
+        with tab_reuniones_adm:
+            st.markdown("### Gestión de Salas de Círculos de Apoyo")
+            try:
+                r_adm_salas = requests.get(f"{API_URL}/reuniones/salas", headers=headers_auth, timeout=30)
+                if r_adm_salas.status_code == 200:
+                    salas_adm = r_adm_salas.json().get("salas", [])
+                    if not salas_adm:
+                        st.info("No hay solicitudes de salas pendientes.")
+                    for s_a in salas_adm:
+                        with st.expander(f"Sala #{s_a.get('id')} — {s_a.get('tema')} ({s_a.get('solicitante')})"):
+                            st.write(f"**Fecha Propuesta:** {s_a.get('fecha_propuesta')}")
+                            st.write(f"**Descripción:** {s_a.get('descripcion')}")
+                            st.write(f"**Estatus:** `{s_a.get('estatus')}`")
+                            
+                            enlace_input = st.text_input("Asignar enlace Meet / Jitsi:", value=s_a.get("enlace_reunion") or "", key=f"link_adm_{s_a.get('id')}")
+                            nuevo_est = st.selectbox("Cambiar Estatus:", ["pendiente", "activa", "cerrada"], index=["pendiente", "activa", "cerrada"].index(s_a.get("estatus")), key=f"est_adm_{s_a.get('id')}")
+                            
+                            if st.button("Actualizar Sala", key=f"btn_up_sala_{s_a.get('id')}"):
+                                r_up_s = requests.post(f"{API_URL}/admin/reuniones/gestionar", headers=headers_auth, json={
+                                    "sala_id": s_a.get("id"),
+                                    "enlace_reunion": enlace_input.strip() or None,
+                                    "estatus": nuevo_est
+                                }, timeout=30)
+                                if r_up_s.status_code == 200:
+                                    st.success("Sala actualizada.")
+                                    st.rerun()
+            except Exception as e_adm_s:
+                st.error(f"Error administrando salas: {e_adm_s}")
 
         with tab_afiliados_adm:
             st.markdown("### 👥 Auditoría de Referidos y Programa de Recompensas")
@@ -948,7 +1241,7 @@ else:
                     r_cron = requests.post(f"{API_URL}/cron/mantenimiento", headers={"X-Cron-Key": CRON_SECRET_KEY}, timeout=40)
                     if r_cron.status_code == 200:
                         d_res = r_cron.json()
-                        st.success(f"Mantenimiento ejecutado: {d_res.get('chats_semanales_reseteados')} chats reseteados, {d_res.get('planes_vencidos_revertidos')} planes expirados y {d_res.get('mensajes_directos_purgados')} DMs purgados.")
+                        st.success(f"Mantenimiento ejecutado: {d_res.get('chats_semanales_reseteados')} chats reseteados, {d_res.get('planes_vencidos_revertidos')} planes expirados, {d_res.get('mensajes_directos_purgados_7d')} DMs purgados (7d), {d_res.get('posts_muro_purgados_72h')} posts del muro purgados (72h) y {d_res.get('salas_reunion_purgadas_24h')} salas cerradas purgadas (24h).")
                     else:
                         st.error("Error al disparar mantenimiento.")
                 except Exception as e:

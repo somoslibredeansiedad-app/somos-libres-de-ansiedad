@@ -58,6 +58,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- RUTAS DE HEALTH CHECK Y DISPONIBILIDAD RAÍZ ---
+@app.get("/")
+async def root():
+    return {
+        "status": "online",
+        "app": "Somos Libres de Ansiedad Core API",
+        "version": "4.6.8",
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
+
 class Base(DeclarativeBase):
     pass
 
@@ -138,6 +152,31 @@ class MuroPostModel(Base):
     is_anonimo: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     autor = relationship("UserModel")
+    comentarios = relationship("MuroComentarioModel", back_populates="post", cascade="all, delete-orphan")
+
+class MuroComentarioModel(Base):
+    __tablename__ = "muro_comentarios"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    post_id: Mapped[int] = mapped_column(Integer, ForeignKey("muro_posts.id"))
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("usuarios.id"))
+    contenido: Mapped[str] = mapped_column(String(600))
+    is_anonimo: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    autor = relationship("UserModel")
+    post = relationship("MuroPostModel", back_populates="comentarios")
+
+class MeetingRoomModel(Base):
+    __tablename__ = "reuniones_salas"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    solicitante_id: Mapped[int] = mapped_column(Integer, ForeignKey("usuarios.id"))
+    tema: Mapped[str] = mapped_column(String(150))
+    descripcion: Mapped[str] = mapped_column(String(1000))
+    fecha_propuesta: Mapped[str] = mapped_column(String(80))
+    enlace_reunion: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    estatus: Mapped[str] = mapped_column(String(30), default="pendiente") # pendiente, activa, cerrada
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    closed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    solicitante = relationship("UserModel")
 
 class BuzonModel(Base):
     __tablename__ = "buzon_mensajes"
@@ -205,6 +244,8 @@ class TokenResponse(BaseModel):
     role: str
     codigo_referido: str
     pensamiento_dia: str
+    horas_restantes: Optional[int] = None
+    suscripcion_expira: Optional[str] = None
 
 class AvatarSelectRequest(BaseModel):
     avatar_id: str
@@ -244,6 +285,20 @@ class MuroPostCreate(BaseModel):
     categoria_emocional: str = "ansiedad_cotidiana"
     is_anonimo: bool = False
 
+class MuroCommentCreate(BaseModel):
+    contenido: str = Field(..., max_length=600)
+    is_anonimo: bool = False
+
+class MeetingRoomCreate(BaseModel):
+    tema: str = Field(..., max_length=150)
+    descripcion: str = Field(..., max_length=1000)
+    fecha_propuesta: str = Field(..., max_length=80)
+
+class MeetingRoomUpdateAdmin(BaseModel):
+    sala_id: int
+    enlace_reunion: Optional[str] = None
+    estatus: str = "activa" # activa, cerrada
+
 class BuzonCreate(BaseModel):
     categoria: str = "Consulta general"
     asunto: str
@@ -282,8 +337,15 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado.")
-    user.last_active_at = datetime.now(timezone.utc)
-    await db.commit()
+
+    # Control estricto de caducidad en tiempo real
+    if user.suscripcion_expira and user.role != "admin":
+        exp = user.suscripcion_expira if user.suscripcion_expira.tzinfo else user.suscripcion_expira.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) > exp:
+            user.plan_nivel = "gratis"
+            user.suscripcion_expira = None
+            await db.commit()
+
     return user
 
 async def get_current_admin(current_user: UserModel = Depends(get_current_user)) -> UserModel:
@@ -322,7 +384,6 @@ PENSAMIENTOS_BIENVENIDA = [
     "Está bien hacer una pausa. El descanso consciente también es parte del camino."
 ]
 
-# CONTROLADOR COMPARTIDO DE REGISTRO
 async def _procesar_registro_interno(data: UserRegister, db: AsyncSession):
     if not data.terms_accepted or not data.disclaimer_accepted:
         raise HTTPException(status_code=400, detail="Debes aceptar los términos y el descargo legal y sanitario.")
@@ -393,12 +454,22 @@ async def acceder_usuario(data: UserLogin, db: AsyncSession = Depends(get_db)):
         if not data.pregunta_secreta or data.pregunta_secreta.strip().capitalize() != "Sombra":
             raise HTTPException(status_code=403, detail="Respuesta de confirmación incorrecta para la cuenta administradora.")
 
+    user.last_active_at = datetime.now(timezone.utc)
+
+    horas_disp = None
+    exp_iso = None
     if user.suscripcion_expira:
         exp = user.suscripcion_expira if user.suscripcion_expira.tzinfo else user.suscripcion_expira.replace(tzinfo=timezone.utc)
-        if datetime.now(timezone.utc) > exp and user.role != "admin":
+        ahora = datetime.now(timezone.utc)
+        if ahora > exp and user.role != "admin":
             user.plan_nivel = "gratis"
             user.suscripcion_expira = None
-            await db.commit()
+        elif user.role != "admin":
+            segundos_restantes = (exp - ahora).total_seconds()
+            horas_disp = max(0, int(segundos_restantes // 3600))
+            exp_iso = exp.isoformat()
+
+    await db.commit()
 
     token = create_access_token({"sub": user.correo, "role": user.role})
     return TokenResponse(
@@ -408,11 +479,27 @@ async def acceder_usuario(data: UserLogin, db: AsyncSession = Depends(get_db)):
         plan_actual=user.plan_nivel,
         role=user.role,
         codigo_referido=user.codigo_referido,
-        pensamiento_dia=random.choice(PENSAMIENTOS_BIENVENIDA)
+        pensamiento_dia=random.choice(PENSAMIENTOS_BIENVENIDA),
+        horas_restantes=horas_disp,
+        suscripcion_expira=exp_iso
     )
 
 @app.get("/api/usuario/mi-perfil")
-async def obtener_mi_perfil(current_user: UserModel = Depends(get_current_user)):
+async def obtener_mi_perfil(current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    horas_disp = None
+    exp_iso = None
+    if current_user.suscripcion_expira:
+        exp = current_user.suscripcion_expira if current_user.suscripcion_expira.tzinfo else current_user.suscripcion_expira.replace(tzinfo=timezone.utc)
+        ahora = datetime.now(timezone.utc)
+        if ahora > exp and current_user.role != "admin":
+            current_user.plan_nivel = "gratis"
+            current_user.suscripcion_expira = None
+            await db.commit()
+        elif current_user.role != "admin":
+            segundos_restantes = (exp - ahora).total_seconds()
+            horas_disp = max(0, int(segundos_restantes // 3600))
+            exp_iso = exp.isoformat()
+
     return {
         "status": "success",
         "perfil": {
@@ -428,7 +515,9 @@ async def obtener_mi_perfil(current_user: UserModel = Depends(get_current_user))
             "biografia": current_user.biografia,
             "foto_perfil": current_user.foto_perfil,
             "plan_nivel": current_user.plan_nivel,
-            "codigo_referido": current_user.codigo_referido
+            "codigo_referido": current_user.codigo_referido,
+            "horas_restantes": horas_disp,
+            "suscripcion_expira": exp_iso
         }
     }
 
@@ -444,6 +533,7 @@ async def actualizar_mi_perfil(data: ProfileUpdate, current_user: UserModel = De
         current_user.biografia = data.biografia
     if data.foto_perfil is not None:
         current_user.foto_perfil = data.foto_perfil
+    current_user.last_active_at = datetime.now(timezone.utc)
     await db.commit()
     await db.refresh(current_user)
     return {"status": "success", "message": "Perfil actualizado correctamente."}
@@ -565,6 +655,7 @@ async def enviar_dm(data: DirectMessageCreate, current_user: UserModel = Depends
         current_user.mensajes_directos_hoy += 1
         current_user.ultimo_dm_fecha = datetime.now(timezone.utc)
 
+    current_user.last_active_at = datetime.now(timezone.utc)
     nuevo_dm = DirectMessageModel(
         remitente_id=current_user.id,
         destinatario_id=data.destinatario_id,
@@ -586,6 +677,39 @@ async def ver_conversacion(otro_usuario_id: int, current_user: UserModel = Depen
     )
     return {"status": "success", "mensajes": res.scalars().all()}
 
+@app.get("/api/comunidad/mis-chats")
+async def listar_mis_chats(current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    # Extrae IDs únicos de usuarios con quienes se ha intercambiado DMs
+    subq = select(
+        or_(DirectMessageModel.remitente_id, DirectMessageModel.destinatario_id)
+    ).where(
+        or_(DirectMessageModel.remitente_id == current_user.id, DirectMessageModel.destinatario_id == current_user.id)
+    )
+    
+    res_dms = await db.execute(select(DirectMessageModel).where(
+        or_(DirectMessageModel.remitente_id == current_user.id, DirectMessageModel.destinatario_id == current_user.id)
+    ).order_by(DirectMessageModel.created_at.desc()))
+    
+    dms = res_dms.scalars().all()
+    user_ids = set()
+    for d in dms:
+        otro = d.destinatario_id if d.remitente_id == current_user.id else d.remitente_id
+        if otro != current_user.id:
+            user_ids.add(otro)
+            
+    if not user_ids:
+        return {"status": "success", "contactos": []}
+        
+    res_users = await db.execute(select(UserModel).where(UserModel.id.in_(list(user_ids))))
+    contactos = res_users.scalars().all()
+    return {
+        "status": "success",
+        "contactos": [
+            {"id": u.id, "apodo": u.apodo, "profesion": u.profesion, "foto_perfil": u.foto_perfil, "plan": u.plan_nivel}
+            for u in contactos
+        ]
+    }
+
 # --- CONCILIACIÓN DE PAGOS ---
 @app.get("/api/pagos/mis-mensajes")
 async def obtener_chat_pago_usuario(current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
@@ -606,6 +730,7 @@ async def enviar_mensaje_pago_usuario(data: PaymentMessageCreate, current_user: 
         comprobante_url=data.comprobante_url
     )
     db.add(nuevo)
+    current_user.last_active_at = datetime.now(timezone.utc)
     await db.commit()
     return {"status": "success", "message": "Reporte de conciliación enviado al Administrador."}
 
@@ -665,7 +790,7 @@ async def seleccionar_avatar(data: AvatarSelectRequest, current_user: UserModel 
         return {"status": "success", "message": "Avatar ya seleccionado.", "activos": activos}
 
     if len(activos) >= max_permitidos and current_user.role != "admin":
-        raise HTTPException(status_code=403, detail=f"Tu plan solo permite {max_permitidos} avatar activo.")
+        raise HTTPException(status_code=403, detail=f"Tu plan solo permite {max_permitidos} avatar(es) simultáneos.")
 
     activos.append(data.avatar_id)
     current_user.avatares_activos = json.dumps(activos)
@@ -683,6 +808,7 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
         raise HTTPException(status_code=403, detail="Has alcanzado el límite semanal de mensajes de tu plan.")
 
     current_user.chats_usados_semana += 1
+    current_user.last_active_at = datetime.now(timezone.utc)
     await db.commit()
     # RECARGA VITAL: Garantiza datos reales y actualizados del perfil
     await db.refresh(current_user)
@@ -690,6 +816,7 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
     perfil_dict = {
         "apodo": current_user.apodo,
         "nombre_completo": current_user.nombre_completo,
+        "edad": current_user.edad,
         "cantidad_hijos": current_user.cantidad_hijos,
         "profesion": current_user.profesion,
         "situacion_sentimental": current_user.situacion_sentimental,
@@ -712,15 +839,14 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
         "chats_restantes": max(0, limite_texto - current_user.chats_usados_semana)
     }
 
-# --- MURO, BUZÓN Y MANTENIMIENTO ---
+# --- MURO UNIVERSAL CON COMENTARIOS ---
 @app.get("/api/muro")
 async def obtener_muro(categoria: Optional[str] = None, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    query = select(MuroPostModel).options(selectinload(MuroPostModel.autor)).order_by(MuroPostModel.created_at.desc()).limit(50)
-    
-    if current_user.plan_nivel == "gratis":
-        query = query.where(MuroPostModel.plan_origen == "gratis")
-    elif current_user.plan_nivel == "comunicador":
-        query = query.where(MuroPostModel.plan_origen.in_(["gratis", "comunicador"]))
+    # Visibilidad universal: todos los usuarios leen todas las publicaciones activas
+    query = select(MuroPostModel).options(
+        selectinload(MuroPostModel.autor),
+        selectinload(MuroPostModel.comentarios).selectinload(MuroComentarioModel.autor)
+    ).order_by(MuroPostModel.created_at.desc()).limit(50)
     
     if categoria and categoria != "todas":
         query = query.where(MuroPostModel.categoria_emocional == categoria)
@@ -735,7 +861,16 @@ async def obtener_muro(categoria: Optional[str] = None, current_user: UserModel 
                 "categoria_emocional": p.categoria_emocional,
                 "contenido": p.contenido,
                 "autor": "Anónimo" if p.is_anonimo else p.autor.apodo,
-                "fecha": p.created_at.isoformat()
+                "fecha": p.created_at.isoformat(),
+                "comentarios": [
+                    {
+                        "id": c.id,
+                        "contenido": c.contenido,
+                        "autor": "Anónimo" if c.is_anonimo else c.autor.apodo,
+                        "fecha": c.created_at.isoformat()
+                    }
+                    for c in p.comentarios
+                ]
             }
             for p in posts
         ]
@@ -753,13 +888,99 @@ async def crear_muro_post(data: MuroPostCreate, current_user: UserModel = Depend
         is_anonimo=data.is_anonimo
     )
     db.add(nuevo)
+    current_user.last_active_at = datetime.now(timezone.utc)
     await db.commit()
     return {"status": "success", "message": "Publicado con éxito en el Muro."}
 
+@app.post("/api/muro/{post_id}/comentar", status_code=201)
+async def agregar_comentario_muro(post_id: int, data: MuroCommentCreate, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    if current_user.plan_nivel == "gratis":
+        raise HTTPException(status_code=403, detail="El Plan Gratis permite leer el muro. Para comentar, activa el Plan Comunicador.")
+
+    res_post = await db.execute(select(MuroPostModel).where(MuroPostModel.id == post_id))
+    post = res_post.scalar_one_or_none()
+    if not post:
+        raise HTTPException(status_code=404, detail="Publicación no encontrada.")
+
+    comentario = MuroComentarioModel(
+        post_id=post.id,
+        user_id=current_user.id,
+        contenido=data.contenido,
+        is_anonimo=data.is_anonimo
+    )
+    db.add(comentario)
+    current_user.last_active_at = datetime.now(timezone.utc)
+    await db.commit()
+    return {"status": "success", "message": "Comentario agregado correctamente."}
+
+# --- CÍRCULOS DE APOYO Y SALAS DE REUNIÓN ---
+@app.get("/api/reuniones/salas")
+async def listar_salas_reuniones(current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    # Muestra salas activas o cerradas hace menos de 24h
+    res = await db.execute(
+        select(MeetingRoomModel).options(selectinload(MeetingRoomModel.solicitante)).where(
+            MeetingRoomModel.estatus.in_(["pendiente", "activa", "cerrada"])
+        ).order_by(MeetingRoomModel.created_at.desc())
+    )
+    salas = res.scalars().all()
+    return {
+        "status": "success",
+        "salas": [
+            {
+                "id": s.id,
+                "tema": s.tema,
+                "descripcion": s.descripcion,
+                "fecha_propuesta": s.fecha_propuesta,
+                "enlace_reunion": s.enlace_reunion,
+                "estatus": s.estatus,
+                "solicitante": s.solicitante.apodo,
+                "es_mio": s.solicitante_id == current_user.id,
+                "creado_en": s.created_at.isoformat()
+            }
+            for s in salas
+        ]
+    }
+
+@app.post("/api/reuniones/solicitar", status_code=201)
+async def solicitar_sala_reunion(data: MeetingRoomCreate, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    if current_user.plan_nivel == "gratis":
+        raise HTTPException(status_code=403, detail="Debes pertenecer al Plan Comunicador o Amigo de Todos para solicitar una sala.")
+
+    nueva_sala = MeetingRoomModel(
+        solicitante_id=current_user.id,
+        tema=data.tema,
+        descripcion=data.descripcion,
+        fecha_propuesta=data.fecha_propuesta,
+        estatus="pendiente"
+    )
+    db.add(nueva_sala)
+    current_user.last_active_at = datetime.now(timezone.utc)
+    await db.commit()
+    return {"status": "success", "message": "Solicitud enviada al Administrador. Te notificaremos cuando asigne tu enlace de sala."}
+
+@app.post("/api/admin/reuniones/gestionar")
+async def gestionar_sala_admin(data: MeetingRoomUpdateAdmin, admin: UserModel = Depends(get_current_admin), db: AsyncSession = Depends(get_db)):
+    res = await db.execute(select(MeetingRoomModel).where(MeetingRoomModel.id == data.sala_id))
+    sala = res.scalar_one_or_none()
+    if not sala:
+        raise HTTPException(status_code=404, detail="Sala no encontrada.")
+
+    if data.enlace_reunion:
+        sala.enlace_reunion = data.enlace_reunion
+    sala.estatus = data.estatus
+
+    if data.estatus == "cerrada":
+        sala.closed_at = datetime.now(timezone.utc)
+
+    await db.commit()
+    return {"status": "success", "message": f"Sala actualizada a '{data.estatus}'."}
+
+# --- BUZÓN, CUPONES Y AFILIADOS ---
 @app.post("/api/buzon/ticket")
 async def enviar_ticket(data: BuzonCreate, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     ticket = BuzonModel(user_id=current_user.id, categoria=data.categoria, asunto=data.asunto, mensaje=data.mensaje)
     db.add(ticket)
+    current_user.last_active_at = datetime.now(timezone.utc)
     await db.commit()
     return {"status": "success", "message": "Ticket registrado en Soporte."}
 
@@ -793,6 +1014,7 @@ async def canjear_cupon(data: CouponRedeem, current_user: UserModel = Depends(ge
 
     current_user.plan_nivel = cupon.tipo_plan
     current_user.suscripcion_expira = datetime.now(timezone.utc) + timedelta(days=cupon.duracion_dias)
+    current_user.last_active_at = datetime.now(timezone.utc)
     cupon.is_used = True
     await db.commit()
     return {"status": "success", "message": f"Cupón activado con éxito. Ahora disfrutas del Plan {cupon.tipo_plan.title()}."}
@@ -851,6 +1073,7 @@ async def premiar_afiliado(data: RewardAffiliateCreate, admin: UserModel = Depen
         "nueva_expiracion": user.suscripcion_expira.isoformat()
     }
 
+# --- CRON CON PURGAS ESTRICTAS (DMs: 7 Días | Muro: 72 Horas | Salas: 24 Horas) ---
 @app.post("/api/cron/mantenimiento")
 async def ejecutar_mantenimiento_programado(x_cron_key: Optional[str] = Header(None), db: AsyncSession = Depends(get_db)):
     if x_cron_key != CRON_SECRET_KEY:
@@ -858,6 +1081,8 @@ async def ejecutar_mantenimiento_programado(x_cron_key: Optional[str] = Header(N
 
     ahora = datetime.now(timezone.utc)
     hace_7_dias = ahora - timedelta(days=7)
+    hace_72_horas = ahora - timedelta(hours=72)
+    hace_24_horas = ahora - timedelta(hours=24)
 
     res_users = await db.execute(select(UserModel))
     usuarios = res_users.scalars().all()
@@ -876,14 +1101,26 @@ async def ejecutar_mantenimiento_programado(x_cron_key: Optional[str] = Header(N
                 u.suscripcion_expira = None
                 planes_revertidos += 1
 
+    # 1. Purgar DMs de más de 7 días exactos
     dms_del = await db.execute(delete(DirectMessageModel).where(DirectMessageModel.created_at < hace_7_dias))
+
+    # 2. Purgar publicaciones del Muro de más de 72 horas (3 días) con sus comentarios en cascada
+    muro_del = await db.execute(delete(MuroPostModel).where(MuroPostModel.created_at < hace_72_horas))
+
+    # 3. Purgar salas de reunión cerradas hace más de 24 horas
+    salas_del = await db.execute(delete(MeetingRoomModel).where(
+        and_(MeetingRoomModel.estatus == "cerrada", MeetingRoomModel.closed_at < hace_24_horas)
+    ))
+
     await db.commit()
 
     return {
         "status": "success",
         "chats_semanales_reseteados": chats_reseteados,
         "planes_vencidos_revertidos": planes_revertidos,
-        "mensajes_directos_purgados": dms_del.rowcount
+        "mensajes_directos_purgados_7d": dms_del.rowcount,
+        "posts_muro_purgados_72h": muro_del.rowcount,
+        "salas_reunion_purgadas_24h": salas_del.rowcount
     }
 
 @app.get("/api/admin/backup")
@@ -898,6 +1135,8 @@ async def descargar_backup_completo(admin: UserModel = Depends(get_current_admin
     cupones = c_res.scalars().all()
     pay_res = await db.execute(select(PaymentChatMessageModel))
     pagos = pay_res.scalars().all()
+    bz_res = await db.execute(select(BuzonModel))
+    tickets = bz_res.scalars().all()
 
     return {
         "status": "success",
@@ -916,7 +1155,8 @@ async def descargar_backup_completo(admin: UserModel = Depends(get_current_admin
         "muro_posts": [{"id": p.id, "user_id": p.user_id, "categoria": p.categoria_emocional, "contenido": p.contenido, "fecha": p.created_at.isoformat()} for p in posts],
         "mensajes_directos": [{"id": d.id, "remitente_id": d.remitente_id, "destinatario_id": d.destinatario_id, "contenido": d.contenido, "fecha": d.created_at.isoformat()} for d in dms],
         "cupones": [{"codigo": c.codigo, "tipo_plan": c.tipo_plan, "duracion_dias": c.duracion_dias, "usado": c.is_used} for c in cupones],
-        "mensajes_pago": [{"user_id": py.user_id, "emisor": py.emisor_rol, "mensaje": py.mensaje, "plan": py.plan_solicitado, "metodo": py.metodo_pago, "fecha": py.created_at.isoformat()} for py in pagos]
+        "mensajes_pago": [{"user_id": py.user_id, "emisor": py.emisor_rol, "mensaje": py.mensaje, "plan": py.plan_solicitado, "metodo": py.metodo_pago, "fecha": py.created_at.isoformat()} for py in pagos],
+        "buzon_tickets": [{"id": b.id, "user_id": b.user_id, "categoria": b.categoria, "asunto": b.asunto, "estatus": b.estatus, "fecha": b.created_at.isoformat()} for b in tickets]
     }
 
 @app.get("/api/admin/usuarios")

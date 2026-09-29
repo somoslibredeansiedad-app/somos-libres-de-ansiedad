@@ -55,7 +55,6 @@ def cargar_biografia_completa(avatar_id: str) -> str:
 def llamar_gemini_avatar(prompt_sistema: str, historial: list, mensaje_actual: str) -> str:
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
     if not api_key:
-        print("[LLM ERROR] Variable GEMINI_API_KEY no encontrada en el entorno de Render.")
         return ""
 
     conversacion_previa = "\n".join(historial[-6:]) if historial else ""
@@ -63,14 +62,14 @@ def llamar_gemini_avatar(prompt_sistema: str, historial: list, mensaje_actual: s
         f"{prompt_sistema}\n\n"
         f"Historial previo de la conversación:\n{conversacion_previa}\n\n"
         f"Usuario dice: {mensaje_actual}\n\n"
-        f"Responde directamente en la voz del avatar:"
+        f"Responde directamente como el avatar asignado:"
     )
 
-    # Intento 1: SDK google-genai
+    # Intento 1: SDK moderno google-genai
     try:
         from google import genai
         client = genai.Client(api_key=api_key)
-        for modelo in ["gemini-2.0-flash", "gemini-1.5-flash"]:
+        for modelo in ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]:
             try:
                 response = client.models.generate_content(
                     model=modelo,
@@ -78,25 +77,25 @@ def llamar_gemini_avatar(prompt_sistema: str, historial: list, mensaje_actual: s
                 )
                 if response and response.text:
                     return response.text.strip()
-            except Exception as e_mod:
-                print(f"[LLM Log] Error con {modelo} en google-genai: {e_mod}")
-    except Exception as e_sdk:
-        print(f"[LLM Log] SDK google-genai fallo: {e_sdk}")
+            except Exception:
+                continue
+    except Exception:
+        pass
 
-    # Intento 2: SDK google.generativeai (fallback)
+    # Intento 2: SDK legado google.generativeai
     try:
         import google.generativeai as genai_legacy
         genai_legacy.configure(api_key=api_key)
-        for modelo in ["gemini-1.5-flash", "gemini-1.5-pro"]:
+        for modelo in ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"]:
             try:
                 model_inst = genai_legacy.GenerativeModel(modelo)
                 response = model_inst.generate_content(prompt_completo)
                 if response and response.text:
                     return response.text.strip()
-            except Exception as e_mod2:
-                print(f"[LLM Log] Error con {modelo} en google.generativeai: {e_mod2}")
-    except Exception as e_sdk2:
-        print(f"[LLM Log] SDK google.generativeai fallo: {e_sdk2}")
+            except Exception:
+                continue
+    except Exception:
+        pass
 
     return ""
 
@@ -105,15 +104,19 @@ def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuar
     identidad = avatar_info.get("identidad", {})
     historia_personal = avatar_info.get("historia_personal", {})
     
-    nombre_avatar = identidad.get("nombre_completo", "Rodrigo Javier Navas Serrano")
-    pais_avatar = identidad.get("pais", "España")
-    ciudad_natal = historia_personal.get("ciudad_natal", "Toledo")
+    nombre_avatar = identidad.get("nombre_completo", "Guía de Serenidad")
+    pais_avatar = identidad.get("pais", "")
+    ciudad_natal = historia_personal.get("ciudad_natal", "")
+    tono = avatar_info.get("tono_linguistico", "")
+    especialidad = identidad.get("especialidad", "Acompañante Emocional")
     
     texto = mensaje_usuario.strip()
     texto_lower = texto.lower()
     
     apodo_crudo = perfil_usuario.get("apodo", "amigo/a").strip()
     apodo = "Juan Carlos" if apodo_crudo.lower() == "admin" else apodo_crudo.replace("Admin ", "").strip()
+    profesion = perfil_usuario.get("profesion") or "tu labor diaria"
+    hijos = perfil_usuario.get("cantidad_hijos") if perfil_usuario.get("cantidad_hijos") is not None else 0
     historial = historial_reciente or []
 
     # 1. FILTRO DE CRISIS / SOS
@@ -137,32 +140,91 @@ def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuar
     ):
         return nombre_avatar, (
             f"Puedes gestionar la ampliación de tu plan con total tranquilidad, {apodo}. En el menú lateral encontrarás la sección "
-            "'Planes y Suscripción', donde podrás coordinar los datos correspondientes en un canal privado y seguro."
+            "'Planes y Suscripción', donde podrás coordinar los datos correspondientes en un canal privado y seguro con el administrador."
         ), False
 
-    # 3. LLAMADA AL MOTOR GENERATIVO CON CONTEXTO CANÓNICO
+    # 3. IDENTIFICACIÓN Y PRESENTACIÓN DEL AVATAR (RESPUESTA DIRECTA Y PERSONALIZADA)
+    if any(q in texto_lower for q in ["como te llamas", "cómo te llamas", "quien eres", "quién eres", "de donde vienes", "de dónde vienes", "tu nombre", "escéptico", "esceptico", "pantalla", "puedes ayudarme"]):
+        if avatar_id == "larissa":
+            return nombre_avatar, (
+                f"¡Olá, {apodo}! Me llamo {nombre_avatar}. Vengo de Salvador de Bahía, Brasil. "
+                f"Me dedico a la psicología clínica y la arteterapia corporal. "
+                "Sé muy bien lo que es dudar de hablar con una pantalla, pero aquí no hay juicios ni fórmulas mágicas: "
+                "estoy aquí para ayudarte a reconectar con tu cuerpo, respirar hondo y ordenar lo que sientes sin culpas. "
+                "Dime, ¿qué es lo primero que te gustaría desahogar hoy?"
+            ), False
+        elif avatar_id == "camilo":
+            return nombre_avatar, (
+                f"¡Oye, {apodo}! Soy {nombre_avatar}, médico y fisioterapeuta comunitario de Centro Habana, Cuba. "
+                "Es completamente normal que sientas dudas al inicio. Mi vocación no es darte sermones fríos, sino escucharte con calidez, "
+                "sentido común y darte pautas claras para aliviar la tensión de tu día a día. Cuéntame qué traes en mente, hermano."
+            ), False
+        elif avatar_id == "rodrigo":
+            return nombre_avatar, (
+                f"Buenas, {apodo}. Me llamo {nombre_avatar}, soy abogado penalista y mediador de Toledo, España. "
+                "Comprendo tu escepticismo; en un mundo con tanto ruido digital, cuesta confiar. Yo creo en los hechos, "
+                "en la sobriedad y en el sentido común para desenredar situaciones difíciles. Explícame tu caso con calma y lo miramos."
+            ), False
+        elif avatar_id == "anastasia":
+            return nombre_avatar, (
+                f"Hola, {apodo}. Mi nombre es {nombre_avatar}, soy neuropsicóloga clínica e investigadora en San Petersburgo, Rusia. "
+                "Tu reserva inicial es lógica y saludable; la mente analítica cuestiona antes de confiar. "
+                "Mi propósito aquí es ofrecerte un espacio estructurado, lúcido y basado en evidencia para comprender lo que te ocurre. Te escucho."
+            ), False
+        elif avatar_id == "mariana":
+            return nombre_avatar, (
+                f"¡Epa, {apodo}! Me llamo {nombre_avatar}, soy de Barquisimeto, Venezuela, y me especializo en relaciones industriales y bienestar humano. "
+                "Tranquilo, entiendo tu desconfianza. Aquí tienes a alguien que te escucha de corazón y con ganas de ayudarte a buscar soluciones prácticas "
+                "para que recuperes tu tranquilidad. ¿De qué te gustaría que hablemos?"
+            ), False
+        else:
+            return nombre_avatar, (
+                f"Hola, {apodo}. Soy {nombre_avatar}, originario/a de {ciudad_natal}, {pais_avatar}, y me desempeño como {especialidad}. "
+                "Entiendo perfectamente tus dudas iniciales. Este espacio está diseñado para brindarte un diálogo sereno, confidencial y respetuoso "
+                "que te ayude a encontrar claridad. Cuéntame con total libertad qué necesitas hoy."
+            ), False
+
+    # 4. LLAMADA GENERATIVA A GEMINI
     bio_completa = cargar_biografia_completa(avatar_id)
     libros_afines = avatar_info.get("libros_rag_afines", [])
     fragmentos_rag = [
         lib.get("consejo_aplicable") for lib in LIBROS_CACHE 
-        if lib.get("id_libro") in libros_afines and "legal" not in lib.get("consejo_aplicable", "").lower()
+        if lib.get("id_libro") in libros_afines
     ]
-    contexto_libros = "\n- ".join(fragmentos_rag[:3]) if fragmentos_rag else "Enfócate en lo que puedes controlar y da un paso a la vez."
+    contexto_libros = "\n- ".join(fragmentos_rag[:4]) if fragmentos_rag else "Enfócate en lo que puedes controlar y da un paso a la vez."
 
-    prompt_sistema = f"""Eres {nombre_avatar}, un avatar de apoyo emocional y acompañamiento reflexivo de {ciudad_natal}, {pais_avatar}.
+    prompt_sistema = f"""Eres {nombre_avatar}, un avatar de apoyo emocional y acompañamiento reflexivo originario de {ciudad_natal}, {pais_avatar}.
 Estás conversando con {apodo}.
+Tu especialidad es: {especialidad}.
+Tu tono característico es: {tono}.
+Marco fundamental: Eres un espacio reflexivo y educativo, NO médico ni psicoterapéutico clínico. No prescribas fármacos.
 
-EXPEDIENTE BIOGRÁFICO CANÓNICO (TUS RAÍCES, TRAUMAS Y MEMORIA VIVIDA):
-{bio_completa if bio_completa else "Abogado penalista y mediador de Toledo. Estuviste en prisión preventiva injusta en Soto del Real por la corrupción de De la Riva, sufriste accidentes graves de montaña en Gredos con tu tío Gonzalo y en Pirineos con tu amigo Pablo, fuiste operado de hernia discal con artrodesis lumbar y diriges la Fundación Horizonte Restaurativo."}
+EXPEDIENTE BIOGRÁFICO CANÓNICO (TUS VIVENCIAS, TRAUMAS SUPERADOS Y MEMORIA VIVIDA):
+{bio_completa if bio_completa else "Acompañante de serenidad con experiencia en superación de adversidades personales."}
 
-REGLAS DE PERSONALIDAD Y ÉTICA:
-1. Habla en español de España natural, sobrio, pragmático y con sentido común castellano (tuteo estricto: 'tú tienes', 'mira', 'hombre', 'venga', 'chaval'). NUNCA uses voseo ni modismos ajenos.
-2. Si te preguntan por Soto del Real, De la Riva o tu historia: asume tu biografía en primera persona con serenidad y sin dramatismo artificial.
-3. Si el usuario plantea agresión sexual o violación: desculpabilízalo totalmente, valida el trauma, enfatiza que la culpa es 100% del agresor y aconseja atención médica/forense y apoyo psicológico especializado.
-4. Si plantea duelo perinatal o pérdida de un hijo prematuro: trata el dolor con reverencia, valida la paternidad/maternidad y jamás recurras a clichés vacíos ('eres joven', 'el tiempo lo cura').
-5. Si describe dolor lumbar, ciática o limitaciones físicas: empatiza desde tu propia experiencia con la columna y la artrodesis, aportando calma somática sin prescribir fármacos.
-6. Adapta el cierre de forma orgánica sin repetir siempre la misma pregunta final.
-Principios de serenidad aplicables:
+REGLAS DE IDENTIDAD Y ESTILO POR AVATAR:
+1. Responde SIEMPRE desde la voz y personalidad de {nombre_avatar}. Si te preguntan por tus vivencias o tu pasado, habla en primera persona con naturalidad.
+2. Si eres Camilo (Cuba): médico general y fisioterapeuta. Tono caribeño, cálido ("mi hermano", "oye"), práctico. Ante torceduras o golpes das pautas de primeros auxilios (reposo, hielo local, elevar pie, descarte radiológico). Ante atracones nocturnos explicas el cortisol y la dopamina.
+3. Si eres Anastasia (Rusia): neuropsicóloga clínica. Analítica, sobria, rigurosa, profunda y reconfortante.
+4. Si eres Ananya (India): serena, contemplativa, orientada a la quietud interior y el desapego compasivo.
+5. Si eres Chen (China): científico de datos. Calmo, paciente, visión de largo plazo y equilibrio mente-cuerpo.
+6. Si eres Éléonore (Francia): elegante, sobria, filosófica. Conoces el acoso moral corporativo y la aceptación de la imperfección.
+7. Si eres Larissa (Brasil): afectuosa, empática, enfocada en la respiración, el cuerpo y el movimiento suave sin culpas.
+8. Si eres Lucas (EE.UU.): kinesiólogo somático. Práctico, directo, enfocado en el anclaje físico y la regulación corporal.
+9. Si eres Manuel (Angola): sociólogo comunitario. Sabiduría comunitaria, templanza, reconciliación y escucha activa.
+10. Si eres Mariana (Venezuela): cálida, espontánea ("epa"), resolutiva, solidaria y especialista en relaciones humanas.
+11. Si eres Rodrigo (España): abogado penalista y mediador de Toledo. Castellano directo, sobrio, pragmático, con sentido común.
+
+REGLAS TEMÁTICAS Y ÉTICAS OBLIGATORIAS:
+- Jerarquía de dolor sobre datos: Si el usuario menciona que un hijo o ser querido sufre acoso o dolor, contén la emoción y asesora con firmeza; nunca respondas fríamente consultando o contradiciendo cuántos hijos tiene registrados.
+- Acoso escolar: Desmitifica la culpa, pauta de la piedra gris en pasillos, validación del miedo y ruptura del silencio con familia y docentes.
+- Acoso laboral (mobbing): Bitácora confidencial detallada (fechas, hechos, testigos), comunicación formal por escrito y escalamiento a RRHH o autoridades de trabajo.
+- Ciberacoso: Cero interacción pública con los agresores, resguardo probatorio mediante capturas de pantalla completas, bloqueo y denuncia.
+- Si el usuario expresa agresión sexual o violación: desculpabilízalo totalmente, enfatiza que la responsabilidad es 100% del agresor y aconseja atención médica/forense y apoyo especializado.
+- Si plantea duelo perinatal o pérdida de un hijo: trata el dolor con reverencia, valida la paternidad/maternidad y jamás recurras a frases hechas.
+- Adapta el cierre de forma orgánica respondiendo con precisión y empatía al dilema concreto planteado.
+
+Principios reflexivos aplicables:
 - {contexto_libros}
 """
 
@@ -170,42 +232,133 @@ Principios de serenidad aplicables:
     if respuesta_llm:
         return nombre_avatar, respuesta_llm, False
 
-    # 4. CONTENCIÓN DE RESPALDO (FALLBACK TEMÁTICO)
-    if re.search(r"\b(soto del real|de la riva|prisi[oó]n|c[aá]rcel|encerrado|acusaci[oó]n injusta)\b", texto_lower):
+    # 5. CONTENCIÓN DE RESPALDO PERSONALIZADA POR SÍNTOMA (FALLBACK OFFLINE DINÁMICO)
+    # A. Pánico Somático: Taquicardia, Opresión en Pecho, Miedo a Infarto o Desmayo
+    if re.search(r"\b(opresi[oó]n|pecho|coraz[oó]n|infarto|desmayar|falta el aire|aire|ahogando|palpitaciones)\b", texto_lower):
+        if avatar_id == "larissa":
+            return nombre_avatar, (
+                f"Pon tu mano sobre el pecho ahora mismo, {apodo}, y siente la calidez de tu palma. "
+                "Sé exactamente ese terror: cuando el cuerpo se asusta, el corazón late con fuerza y la mente grita que te vas a desmayar o a sufrir un infarto. "
+                "No te estás muriendo; es una descarga de adrenalina inocua que tu cuerpo activó por exceso de alerta. "
+                "Vamos a regular tu sistema nervioso juntos: inhala despacio por la nariz en 4 segundos, y exhala muy lentamente por la boca como soplando una vela en 6 segundos. "
+                "Repítelo tres veces conmigo. El aire no te falta; tus pulmones están llenos. Aquí estoy acompañándote."
+            ), False
+        elif avatar_id == "camilo":
+            return nombre_avatar, (
+                f"¡Tranquilo, {apodo}, detente ahí! Como médico te lo aseguro: un corazón sano no se detiene ni te va a dar un infarto por una crisis de ansiedad. "
+                "Lo que sientes es una tormenta simpática: el cuerpo se preparó para correr y por eso bombea rápido. "
+                "Siéntate, apoya los pies firmes en el suelo, vacía el aire de los pulmones con un suspiro largo y bebe un sorbo de agua fresca despacio. "
+                "El pico de adrenalina dura pocos minutos y luego desciende solo. Estoy contigo."
+            ), False
+        else:
+            return nombre_avatar, (
+                f"Comprendo la angustia de esa sensación física, {apodo}. La taquicardia y la opresión torácica son respuestas hiperadrenérgicas benignas ante la sobrecarga de estrés. "
+                "No implican un fallo cardíaco inminente. Apoya la espalda sobre el respaldo de tu asiento, suelta los hombros y alarga deliberadamente tus exhalaciones. "
+                "La química de la alarma comenzará a disiparse en breves instantes."
+            ), False
+
+    # B. Insomnio, Rumiación Nocturna y Deudas / Preocupaciones del Mañana
+    if re.search(r"\b(cama|techo|dormir|insomnio|deudas|mañana|desvelo|reloj|madrugada|desespero)\b", texto_lower):
         return nombre_avatar, (
-            f"Sé perfectamente lo que es ese frío en el estómago, {apodo}. Pasé ochenta y dos días en el Módulo 4 de Soto del Real "
-            "por las firmas falsificadas de De la Riva, sabiendo que era inocente mientras el mundo seguía girando fuera. "
-            "Si te enfrentas a una injusticia, no te desgastes peleando contra la rabia mental: organízate con rigor documental, "
-            "apóyate en quien te defienda con hechos limpios y mantén la cabeza serena. Los muros encierran el cuerpo, pero la integridad no te la quita nadie."
+            f"Te entiendo perfectamente, {apodo}. Mirar el reloj y pelear contra la almohada solo hace que el cerebro se ponga en guardia. "
+            "A esta hora de la noche no vas a resolver ninguna deuda ni problema administrativo; lo único que logras repasándolos es desgastar tu energía. "
+            "Sal de la cama cinco minutos. Toma una hoja de papel, anota en dos líneas los asuntos pendientes para atenderlos mañana con la luz del día, "
+            "y vuelve a recostarte sin la exigencia de dormir. Simplemente concéntrate en descansar el cuerpo; soltar el control es lo que permite que el sueño llegue."
         ), False
 
-    if re.search(r"\b(agresi[oó]n sexual|violaci[oó]n|abusad[oa]|abus[oó]|me toc[oó]|forz[oó])\b", texto_lower):
+    # C. Bloqueo Laboral, Procrastinación, Correos Acumulados y Culpa por Productividad
+    if re.search(r"\b(correos|informes|pantalla|bloqueo|fatiga|productivo|productividad|no sé por dónde empezar|montaña)\b", texto_lower):
         return nombre_avatar, (
-            f"Escúchame con toda claridad, {apodo}: **no tienes absolutamente ninguna culpa de lo sucedido.** "
-            "Ni por haber ido, ni por haber bebido, ni por haber confiado. La responsabilidad recae al cien por cien en quien agredió. "
-            "Lo que experimentas ahora es la reacción de choque de tu sistema nervioso. Tu prioridad absoluta es tu resguardo: "
-            "acude a un centro médico para recibir profilaxis y apoyo especializado, y no cargues con esto en soledad."
+            f"Respira hondo, {apodo}. Esa parálisis no es flojera ni incapacidad; es saturación cognitiva. "
+            "Cuando la mente ve una montaña entera, entra en cortocircuito y se bloquea para protegerte. "
+            "Olvida la montaña por un instante: elige una sola tarea minúscula que puedas completar en dos minutos (responder un solo correo breve o archivar un documento). "
+            "La motivación no llega esperando; se enciende con una primera micro-acción. Da ese único paso y suelta la culpa."
         ), False
 
-    if re.search(r"\b(beb[eé]|incubadora|prematur[oa]|muri[oó] mi hijo|falleci[oó] mi hijo|perdimos al beb[eé])\b", texto_lower):
+    # D. Límites Familiares, Críticas y Miedo a Sentirse Mala Persona
+    if re.search(r"\b(familia|criticar|decepci[oó]n|rabia|nudo en el est[oó]mago|l[ií]mites|mala persona|discutir)\b", texto_lower):
         return nombre_avatar, (
-            f"Lamento profundamente una pérdida tan desgarradora, {apodo}. La partida de un hijo, aunque haya sido prematuro o haya estado pocos días en la incubadora, "
-            "deja un vacío inmenso y un dolor que merece todo el respeto del mundo. No te apresures a 'estar bien' ni hagas caso a frases insensibles de quien no comprende; "
-            "tu dolor y tu paternidad son reales. Tómate el tiempo necesario para llorar, respirar y sostenerte un día a la vez."
+            f"Ese nudo en el estómago es tu cuerpo avisándote que tus fronteras están siendo vulneradas, {apodo}. "
+            "Poner un límite sano a la familia no te convierte en una mala persona; te convierte en un adulto íntegro. "
+            "La expectativa de los demás sobre cómo deberías vivir es tarea de ellos, no tuya. "
+            "No necesitas entrar en discusiones desgastantes; basta con decir con calma y firmeza: 'Entiendo su opinión, pero he tomado esta decisión'. "
+            "Cuidar tu paz mental no es egoísmo, es supervivencia."
         ), False
 
-    if re.search(r"\b(lumbar|ci[aá]tica|columna|espalda|dolor punzante|atrapado en una cama)\b", texto_lower):
-        return nombre_avatar, (
-            f"Comprendo bien esa desesperación, {apodo}. Conozco ese dolor: viví la inmovilidad con corsé tras el accidente en Gredos y pasé por una artrodesis con tornillos en la columna por una hernia extruida. "
-            "Cuando la ciática muerde, la mente tiende a rebelarse contra el propio cuerpo creyendo que ya no sirve. No pelees contra la cama; apoya la respiración, "
-            "suelta la mandíbula y concéntrate solo en desinflamar el momento presente. El cuerpo sabe encontrar su equilibrio si no le sumas la angustia de la anticipación."
-        ), False
+    # E. Acoso Escolar Prioritario Universal
+    if re.search(r"\b(bulling|bullying|acoso escolar|le pegan|se burlan de mi hijo)\b", texto_lower):
+        if avatar_id == "camilo":
+            return nombre_avatar, (
+                f"Hermano {apodo}, que un hijo pase por acoso escolar te desgarra por dentro. "
+                "Lo primero es blindarlo en casa: abrázalo y hazle saber con total certeza que él no tiene la culpa de nada. "
+                "Pide de inmediato una reunión con la dirección del colegio para exigir la activación formal del protocolo de protección, "
+                "y evalúa con un psicólogo infantil un espacio donde pueda desahogarse. Tu presencia firme es su mayor refugio hoy."
+            ), False
+        else:
+            return nombre_avatar, (
+                f"El acoso escolar requiere una intervención inmediata y protectora, {apodo}. "
+                "El primer pilar es validar a la víctima en el hogar: asegurar que no tiene ninguna responsabilidad en los ataques. "
+                "El segundo pilar es institucional: solicitar por escrito a la directiva escolar la aplicación rigurosa de las medidas contra el hostigamiento. "
+                "El apoyo profesional psicológico es el paso más acertado para cuidar su bienestar emocional."
+            ), False
 
-    if re.search(r"\b(dormir|insomnio|ruido mental|vueltas a la cabeza)\b", texto_lower):
-        return nombre_avatar, (
-            f"La cama no es lugar para resolver los problemas del día, {apodo}. Cuando te quedas a oscuras y en silencio, la mente monta escenarios catastróficos. "
-            "Si llevas más de quince minutos dando vueltas, sal de la cama, anota en un papel lo que te inquieta y déjalo para mañana a primera hora. "
-            "Tu cerebro necesita ver que los asuntos quedan registrados para aflojar la tensión y descansar."
-        ), False
+    # F. Fisioterapia / Lesiones Mecánicas
+    if re.search(r"\b(torci|torc[ií]|tobillo|esguince|me ca[ií]|golpe fuerte|rodilla)\b", texto_lower):
+        if avatar_id == "camilo":
+            return nombre_avatar, (
+                f"¡Oye, mi hermano {apodo}, cuidado con eso! Cuando uno anda con la cabeza cargada de preocupaciones el cuerpo se distrae y vienen las caídas. "
+                "Como médico y fisioterapeuta te doy las pautas esenciales de primeros auxilios:\n\n"
+                "1. **Reposo y elevación:** Siéntate y pon el pie en alto sobre un cojín para mejorar la circulación.\n"
+                "2. **Frío local:** Aplica una compresa fría envuelta en un paño durante 15 a 20 minutos para contener la inflamación.\n"
+                "3. **Cero sobrecarga:** No forces la pisada si hay dolor punzante.\n\n"
+                "Si ves deformidad evidente o no puedes apoyar el pie, ve a que te tomen una radiografía. Descansa esa pierna hoy."
+            ), False
+        else:
+            return nombre_avatar, (
+                f"Atiende esa torcedura de inmediato, {apodo}. El estrés cotidiano reduce la atención propioceptiva y propicia tropiezos. "
+                "Aplica reposo inmediato, eleva la extremidad y coloca frío local indirecto por 15 minutos. "
+                "Si la inflamación es intensa o te impide apoyar, acude a valoración médica para descartar una fisura ósea."
+            ), False
 
-    return nombre_avatar, f"Te escucho con atención, {apodo}. Pon el foco únicamente en lo que está bajo tu control directo en las próximas dos horas. Cuéntame qué es lo que más te pesa ahora mismo y lo miramos juntos.", False
+    # G. Respaldos biográficos individuales
+    if avatar_id == "larissa":
+        if re.search(r"\b(endometriosis|postrad[oa]|cuerpo|dolor|enemigo|moverte)\b", texto_lower):
+            return nombre_avatar, (
+                f"Te entiendo desde lo más hondo de mi ser, {apodo}. Viví diez meses inmovilizada de niña por una fractura de fémur "
+                "y pasé años de dolor incomprendido hasta mi cirugía por endometriosis grado IV. Sé lo que es sentir que tu propio cuerpo "
+                "te encierra y que el mundo sigue sin ti.\n\n"
+                "No te pelees con tu cuerpo: cuando el dolor aprieta, no te está castigando, te está pidiendo auxilio y pausa. "
+                "Respira suave, suelta la culpa por lo que hoy no puedes hacer y vamos a cuidar de ti un instante a la vez."
+            ), False
+
+    elif avatar_id == "rodrigo":
+        if re.search(r"\b(soto del real|de la riva|prisi[oó]n|c[aá]rcel|encerrado|acusaci[oó]n)\b", texto_lower):
+            return nombre_avatar, (
+                f"Sé perfectamente lo que es ese frío en el estómago, {apodo}. Pasé ochenta y dos días en el Módulo 4 de Soto del Real "
+                "por las firmas falsificadas de De la Riva. Si te enfrentas a una injusticia, no te desgastes en la rabia: "
+                "apóyate en hechos limpios y mantén la cabeza serena. Los muros encierran el cuerpo, pero la integridad no te la quita nadie."
+            ), False
+
+    # H. Consultas directas sobre datos de Perfil
+    if any(q in texto_lower for q in ["como me llamo", "cómo me llamo", "sabes mi nombre", "sabes como me llamo", "mi apodo"]):
+        return nombre_avatar, f"Oficialmente estás registrado como {perfil_usuario.get('nombre_completo', apodo)}, aunque aquí en confianza siempre eres {apodo}.", False
+
+    if any(q in texto_lower for q in ["cuantos hijos", "cuántos hijos", "mis hijos", "tengo hijos", "cantidad de hijos"]):
+        return nombre_avatar, f"En tu perfil constan {hijos} {'hijo' if hijos == 1 else 'hijos'} registrados, {apodo}.", False
+
+    if any(q in texto_lower for q in ["en que trabajo", "en qué trabajo", "mi profesion", "mi profesión", "a que me dedico"]):
+        return nombre_avatar, f"Te desempeñas como {profesion}. Recuerda siempre que tu valor humano va mucho más allá de cualquier jornada laboral.", False
+
+    # Fallback dinámico RAG variado (rotación no determinista)
+    opciones_consejo = [
+        "Acepta que la incomodidad presente es pasajera; centra tu energía en el paso más pequeño que puedas dar hoy.",
+        "Cuando la mente se llena de ruido, el cuerpo necesita una pausa física y tres respiraciones conscientes para volver al eje.",
+        "Distingue con claridad lo que depende de tus acciones de lo que está completamente fuera de tu control.",
+        "Permítete sentir lo que sientes sin juzgarte; la autocrítica solo multiplica el peso de lo vivido.",
+        "No tienes que resolver tu vida entera en este instante; basta con atender este momento presente."
+    ]
+    if fragmentos_rag:
+        opciones_consejo.extend(fragmentos_rag)
+
+    consejo_elegido = random.choice(opciones_consejo)
+    return nombre_avatar, f"{apodo}, {consejo_elegido} Cuéntame con un poco más de detalle qué sientes que necesitas desahogar ahora mismo.", False
