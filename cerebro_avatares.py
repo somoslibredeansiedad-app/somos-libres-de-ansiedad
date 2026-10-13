@@ -359,16 +359,31 @@ Principios reflexivos aplicables:
     if any(q in texto_lower for q in ["en que trabajo", "en qué trabajo", "mi profesion", "mi profesión", "a que me dedico"]):
         return nombre_avatar, f"Te desempeñas como {profesion}. Recuerda siempre que tu valor humano va mucho más allá de cualquier jornada laboral.", False
 
-    # Fallback dinámico variado
-    opciones_consejo = [
-        "Acepta que la incomodidad presente es pasajera; centra tu energía en el paso más pequeño que puedas dar hoy.",
-        "Cuando la mente se llena de ruido, el cuerpo necesita una pausa física y tres respiraciones conscientes para volver al eje.",
-        "Distingue con claridad lo que depende de tus acciones de lo que está completamente fuera de tu control.",
-        "Permítete sentir lo que sientes sin juzgarte; la autocrítica solo multiplica el peso de lo vivido.",
-        "No tienes que resolver tu vida entera en este instante; basta con atender este momento presente."
-    ]
-    if fragmentos_rag:
-        opciones_consejo.extend(fragmentos_rag)
+    # 8. RESPUESTA CONVERSACIONAL NATURAL O SALUDO (FALLBACK OFFLINE AMIGABLE)
+    if any(saludo in texto_lower for saludo in ["hola", "buenos días", "buenas tardes", "buenas noches", "como estas", "cómo estás", "que tal", "qué tal", "saludos"]):
+        if avatar_id == "larissa":
+            return nombre_avatar, f"¡Olá, {apodo}! Qué alegría leerte por aquí. Respira hondo y dime, ¿cómo llega tu corazón hoy a este espacio?", False
+        elif avatar_id == "rodrigo":
+            return nombre_avatar, f"Hola, {apodo}. Me alegra saludarte. Pasa, toma asiento y dime con calma qué te trae por aquí hoy.", False
+        elif avatar_id == "camilo":
+            return nombre_avatar, f"¡Epa, {apodo}, mi hermano! Qué gusto saludarte. Siéntate con confianza y dime en qué te puedo acompañar hoy.", False
+        elif avatar_id == "anastasia":
+            return nombre_avatar, f"Hola, {apodo}. Es un gusto saludarte. Tómate un instante para pausar el ritmo y cuéntame qué pasa por tu mente.", False
+        elif avatar_id == "mariana":
+            return nombre_avatar, f"¡Epa, {apodo}! Qué bueno saludarte. Ponte cómodo y dime qué necesitas desahogar o conversar en este momento.", False
+        else:
+            return nombre_avatar, f"Hola, {apodo}. Qué gusto saludarte. Estoy aquí a tu lado para escucharte y conversar con calma. Cuéntame, ¿cómo te sientes?", False
 
-    consejo_elegido = random.choice(opciones_consejo)
-    return nombre_avatar, f"{apodo}, {consejo_elegido} Cuéntame con un poco más de detalle qué sientes que necesitas desahogar ahora mismo.", False
+    # Fallback dinámico general para consultas abiertas sin patrón específico
+    if avatar_id == "larissa":
+        return nombre_avatar, f"Te escucho con todo el corazón, {apodo}. A veces las palabras no alcanzan, pero estamos aquí para respirar y ordenar lo que sientes juntas. Cuéntame un poco más.", False
+    elif avatar_id == "rodrigo":
+        return nombre_avatar, f"Comprendo lo que mencionas, {apodo}. Analicemos esto con tranquilidad y sentido común. Desglosa un poco más qué te preocupa para ver qué podemos hacer.", False
+    elif avatar_id == "camilo":
+        return nombre_avatar, f"Oye, {apodo}, entiendo perfectamente que no sea fácil. Explícame un poco más los detalles para ver cómo lo abordamos con calma.", False
+    elif avatar_id == "anastasia":
+        return nombre_avatar, f"Analicemos esto con serenidad, {apodo}. Pon en palabras lo que sientes para poder observar el panorama con claridad. ¿Qué es lo que más te pesa ahora mismo?", False
+    elif avatar_id == "mariana":
+        return nombre_avatar, f"Tranquilo, {apodo}, aquí estoy para apoyarte. Cuéntame con más confianza de qué se trata para resolverlo paso a paso.", False
+    else:
+        return nombre_avatar, f"{apodo}, estoy aquí acompañándote paso a paso. Cuéntame con un poco más de detalle qué necesitas desahogar ahora mismo para darle claridad juntos.", False
