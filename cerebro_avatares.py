@@ -4,6 +4,10 @@ import random
 import re
 from typing import Dict, Any, Tuple, List
 import httpx
+from dotenv import load_dotenv
+
+# Carga obligatoria de variables de entorno desde el archivo .env
+load_dotenv()
 
 CATALOGO_CACHE: Dict[str, Any] = {}
 LIBROS_CACHE = []
@@ -61,6 +65,7 @@ def cargar_biografia_completa(avatar_id: str) -> str:
 def llamar_gemini_avatar(prompt_sistema: str, historial: list, mensaje_actual: str) -> str:
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
     if not api_key:
+        print("[DIAGNÓSTICO GEMINI] Alerta: GEMINI_API_KEY no encontrada en las variables de entorno.")
         return ""
 
     conversacion_previa = "\n".join(historial[-6:]) if historial else ""
@@ -83,10 +88,11 @@ def llamar_gemini_avatar(prompt_sistema: str, historial: list, mensaje_actual: s
                 )
                 if response and response.text:
                     return response.text.strip()
-            except Exception:
+            except Exception as e_mod:
+                print(f"[DIAGNÓSTICO GEMINI] Error modelo {modelo} (SDK genai): {e_mod}")
                 continue
-    except Exception:
-        pass
+    except Exception as e_sdk:
+        print(f"[DIAGNÓSTICO GEMINI] SDK moderno no disponible: {e_sdk}")
 
     # Intento 2: SDK legado google.generativeai
     try:
@@ -98,12 +104,13 @@ def llamar_gemini_avatar(prompt_sistema: str, historial: list, mensaje_actual: s
                 response = model_inst.generate_content(prompt_completo)
                 if response and response.text:
                     return response.text.strip()
-            except Exception:
+            except Exception as e_leg:
+                print(f"[DIAGNÓSTICO GEMINI] Error modelo {modelo} (SDK legacy): {e_leg}")
                 continue
-    except Exception:
-        pass
+    except Exception as e_sdk_leg:
+        print(f"[DIAGNÓSTICO GEMINI] SDK legado no disponible: {e_sdk_leg}")
 
-    # Intento 3: Llamada REST directa por HTTP (Fallback robusto y libre de dependencias rotas)
+    # Intento 3: Llamada REST directa por HTTP (Fallback robusto)
     try:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
         payload = {
@@ -124,8 +131,10 @@ def llamar_gemini_avatar(prompt_sistema: str, historial: list, mensaje_actual: s
                     partes = candidatos[0].get("content", {}).get("parts", [])
                     if partes:
                         return partes[0].get("text", "").strip()
-    except Exception:
-        pass
+            else:
+                print(f"[DIAGNÓSTICO GEMINI] Error HTTP REST {resp.status_code}: {resp.text}")
+    except Exception as e_http:
+        print(f"[DIAGNÓSTICO GEMINI] Excepción en llamada HTTP REST: {e_http}")
 
     return ""
 

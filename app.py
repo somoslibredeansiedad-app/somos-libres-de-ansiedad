@@ -1,7 +1,12 @@
+import os
+from dotenv import load_dotenv
+
+# Carga obligatoria de variables de entorno desde el archivo .env
+load_dotenv()
+
 import base64
 import io
 import json
-import os
 import urllib.parse
 from datetime import datetime, timedelta, timezone
 from PIL import Image
@@ -223,7 +228,6 @@ st.markdown(f"""
     </style>
 """, unsafe_allow_html=True)
 
-# Normalización determinista de API_URL para asegurar sufijo /api[cite: 7]
 raw_api_url = os.getenv("API_URL", "https://somos-libres-de-ansiedad-1.onrender.com").rstrip("/")
 API_URL = raw_api_url if raw_api_url.endswith("/api") else f"{raw_api_url}/api"
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://somoslibredeansiedad-app.streamlit.app")
@@ -509,7 +513,6 @@ else:
                 es_actual = (st.session_state.avatar_activo and st.session_state.avatar_activo.get("id") == av_vinc.get("id"))
                 label_boton = f"👉 {av_vinc.get('bandera')} {av_vinc.get('nombre')}" if es_actual else f"{av_vinc.get('bandera')} {av_vinc.get('nombre')}"
                 
-                # Salto directo al chat con este avatar con un solo clic
                 if st.sidebar.button(label_boton, key=f"side_av_{av_vinc.get('id')}"):
                     st.session_state.avatar_activo = av_vinc
                     st.session_state.menu_nav_seleccionado = "Chat con Avatar"
@@ -599,7 +602,6 @@ else:
         else:
             av = st.session_state.avatar_activo
 
-            # CABECERA VISUAL FIJA DEL AVATAR
             with st.container():
                 st.markdown(f"""
                     <div class="avatar-header-box">
@@ -612,7 +614,6 @@ else:
                     </div>
                 """, unsafe_allow_html=True)
 
-            # Memoria conversacional efímera (Auto-purga a las 72 horas)
             chat_key = f"messages_{st.session_state.user_id}_{av.get('id')}"
             ahora_utc = datetime.now(timezone.utc)
             limite_72h = ahora_utc - timedelta(hours=72)
@@ -625,7 +626,6 @@ else:
                     "timestamp": ahora_utc.isoformat()
                 }]
             else:
-                # Filtrar mensajes de más de 72 horas
                 mensajes_vigentes = []
                 for m in st.session_state[chat_key]:
                     ts_str = m.get("timestamp")
@@ -645,7 +645,6 @@ else:
                     "timestamp": ahora_utc.isoformat()
                 }]
 
-            # CONTENEDOR DE ALTURA FIJA CON SCROLL PROPIO (LA CABECERA NUNCA SUBE)
             chat_container = st.container(height=500)
             with chat_container:
                 for m in st.session_state[chat_key]:
@@ -774,7 +773,6 @@ else:
             if st.session_state.user_plan == "gratis":
                 st.info("ℹ️ Estás explorando la comunidad en Plan Gratis. Los miembros de planes superiores aparecen en modo incógnito. Para enviar solicitudes de amistad, asciende a Plan Comunicador.")
 
-            # CHAT ACTIVO CON MIEMBRO SELECCIONADO (ESTILO NATIVO)
             if st.session_state.dm_activo_contacto:
                 c_sel = st.session_state.dm_activo_contacto
                 st.markdown(f"#### 💬 Conversación Directa con {c_sel.get('apodo')}")
@@ -936,7 +934,6 @@ else:
                         </div>
                     """, unsafe_allow_html=True)
 
-                    # HILO DE COMENTARIOS
                     comentarios = post.get("comentarios", [])
                     with st.expander(f"💬 Comentarios ({len(comentarios)})", expanded=False):
                         if not comentarios:
