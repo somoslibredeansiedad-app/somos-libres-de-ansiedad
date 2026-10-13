@@ -3,6 +3,7 @@ import io
 import json
 import os
 import urllib.parse
+from datetime import datetime, timedelta, timezone
 from PIL import Image
 import requests
 import streamlit as st
@@ -96,7 +97,7 @@ st.markdown(f"""
         color: #1E4D3B;
         text-align: center;
         box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-        margin-bottom: 24px;
+        margin-bottom: 20px;
     }}
     .welcome-banner h2 {{
         margin: 0 0 10px 0 !important;
@@ -108,27 +109,24 @@ st.markdown(f"""
         font-weight: 500 !important;
     }}
     
-    /* CABECERA FIJA DE CHAT (STICKY) */
-    .sticky-chat-header {{
-        position: sticky;
-        top: 0;
-        z-index: 99;
-        background-color: #EBF7F2;
-        padding: 12px 16px;
+    /* CABECERA FIJA DE CHAT */
+    .avatar-header-box {{
+        background-color: #FFFFFF;
+        padding: 12px 18px;
         border-radius: 12px;
         border: 1.5px solid #C2EAD9;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-        margin-bottom: 20px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        margin-bottom: 14px;
     }}
 
-    /* GLOBOS DE CHAT CON CONTRASTE REFORZADO */
+    /* GLOBOS DE CHAT */
     [data-testid="stChatMessage"] {{
-        padding: 16px 20px !important;
+        padding: 14px 18px !important;
         border-radius: 12px !important;
-        margin-bottom: 14px !important;
+        margin-bottom: 12px !important;
     }}
     
-    /* MENSAJE DEL USUARIO: FONDO OSCURO Y TEXTO BLANCO NÍTIDO OBLIGATORIO */
+    /* MENSAJE DEL USUARIO */
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {{
         background-color: #2D4036 !important;
         border-left: 6px solid #4E8A72 !important;
@@ -152,7 +150,6 @@ st.markdown(f"""
         line-height: 1.65 !important;
     }}
     
-    /* CONTROL DE LISTAS Y VIÑETAS DENTRO DEL ASISTENTE */
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) ul,
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) ol,
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) li {{
@@ -166,8 +163,8 @@ st.markdown(f"""
         color: #1E4D3B !important;
         font-size: 16px !important;
         font-weight: 600 !important;
-        margin-top: -6px !important;
-        margin-bottom: 6px !important;
+        margin-top: -4px !important;
+        margin-bottom: 4px !important;
     }}
 
     [data-testid="stChatInput"] textarea {{
@@ -226,7 +223,7 @@ st.markdown(f"""
     </style>
 """, unsafe_allow_html=True)
 
-# Normalización determinista de API_URL para asegurar sufijo /api
+# Normalización determinista de API_URL para asegurar sufijo /api[cite: 7]
 raw_api_url = os.getenv("API_URL", "https://somos-libres-de-ansiedad-1.onrender.com").rstrip("/")
 API_URL = raw_api_url if raw_api_url.endswith("/api") else f"{raw_api_url}/api"
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://somoslibredeansiedad-app.streamlit.app")
@@ -252,11 +249,12 @@ if "horas_restantes_plan" not in st.session_state:
     st.session_state.horas_restantes_plan = None
 if "dm_activo_contacto" not in st.session_state:
     st.session_state.dm_activo_contacto = None
+if "menu_nav_seleccionado" not in st.session_state:
+    st.session_state.menu_nav_seleccionado = "Seleccionar Avatar"
 
 ref_url = st.query_params.get("ref", "")
 
 def comprimir_imagen(imagen_archivo) -> str:
-    """Comprime cualquier foto subida a un avatar liviano de máx 50KB."""
     try:
         img = Image.open(imagen_archivo)
         img = img.convert("RGB")
@@ -332,6 +330,7 @@ if not st.session_state.authenticated:
                             st.session_state.user_apodo = d.get("apodo", "")
                             st.session_state.token = d.get("access_token")
                             st.session_state.horas_restantes_plan = d.get("horas_restantes")
+                            st.session_state.menu_nav_seleccionado = "Seleccionar Avatar"
                             st.success(f"¡Bienvenido/a {st.session_state.user_apodo}!")
                             if d.get("pensamiento_dia"):
                                 st.info(f"💡 {d.get('pensamiento_dia')}")
@@ -370,26 +369,9 @@ if not st.session_state.authenticated:
             * «Somos Libres de Ansiedad» es una plataforma digital de carácter estrictamente educativo, reflexivo y de acompañamiento emocional asistido por Inteligencia Artificial.
             * **NO constituye un servicio médico, psiquiátrico, psicológico clínico ni psicoterapéutico.**
             * El software, sus creadores, colaboradores y avatares virtuales **NO son médicos colegiados ni terapeutas facultativos**, y bajo ninguna circunstancia emiten diagnósticos clínicos, altas, dictámenes patológicos ni prescripción, retiro o modificación de medicamentos o psicofármacos.
-            * La utilización de esta herramienta es voluntaria y complementaria a tu desarrollo personal, y jamás debe reemplazar la valoración, consulta, supervisión o tratamiento de un profesional de la salud debidamente certificado.
             
             **2. Protocolo de Crisis y Exención en Emergencias:**
-            * Esta aplicación **NO es un servicio de urgencias médicas ni monitoriza crisis en tiempo real.**
-            * Si estás atravesando una emergencia médica, angustia invalidante, crisis aguda de pánico o pensamientos relacionados con autolesión o ideación suicida, debes suspender el uso de esta app de inmediato y acudir a un centro asistencial o comunicarte con las líneas gratuitas de auxilio de tu país:
-              - **Global:** Befrienders Worldwide (https://www.befrienders.org)
-              - **Venezuela:** Línea FPV 0212-4163116 / 0212-4163118 / Emergencias 911
-              - **España:** Línea 024 / Teléfono de la Esperanza 717 003 717 / Emergencias 112
-              - **EE.UU. / Canadá:** Línea 988 / Emergencias 911
-              - **Otros países:** Acudir de inmediato al servicio de urgencias hospitalarias local.
-            
-            **3. Transparencia Algorítmica y Cero Engaño (Fraude Cero):**
-            * Cada «Guía» o «Avatar» disponible en esta aplicación es una representación algorítmica de software diseñada para ofrecer reflexiones basadas en literatura pública de crecimiento y bienestar. Ningún avatar pretende hacerse pasar por una persona humana física ni por un profesional médico.
-            * Los planes de suscripción o colaboración económica financian exclusivamente la infraestructura técnica del software y el acceso a funciones digitales, no honorarios facultativos.
-            
-            **4. Privacidad, Confidencialidad y Seguridad de Datos:**
-            * Las contraseñas de acceso son protegidas y cifradas de forma irreversible mediante el algoritmo estándar de la industria `bcrypt`.
-            * Toda la información biográfica y emocional que compartas se utiliza única y exclusivamente para contextualizar tus conversaciones dentro de tu propia sesión.
-            * **Política de Cero Venta:** Tus datos e interacciones jamás serán vendidos, cedidos, transferidos ni comercializados con terceros ni anunciantes.
-            * Tienes el derecho irrevocable de solicitar en cualquier momento la eliminación completa o rectificación de tu cuenta y datos a través de los canales de soporte.
+            * Si estás atravesando una emergencia médica, angustia invalidante, crisis aguda de pánico o pensamientos relacionados con autolesión o ideación suicida, acude de inmediato a un centro asistencial o a las líneas de auxilio gratuitas de tu país.
             """)
 
         t1 = st.checkbox("He leído, comprendo y acepto los Términos de Servicio y la Política de Privacidad. (*)", key="chk_terms")
@@ -483,7 +465,11 @@ else:
     if st.session_state.user_role == "admin":
         opciones.append("Panel de Administración")
 
-    menu = st.sidebar.selectbox("Navegación", opciones)
+    # Índice de sincronización del selector de navegación
+    idx_actual = opciones.index(st.session_state.menu_nav_seleccionado) if st.session_state.menu_nav_seleccionado in opciones else 0
+    menu = st.sidebar.selectbox("Navegación", opciones, index=idx_actual, key="sb_nav_menu")
+    st.session_state.menu_nav_seleccionado = menu
+
     st.sidebar.markdown(f"**Plan:** <span style='color:#4E8A72; font-weight:bold;'>{st.session_state.user_plan.upper()}</span>", unsafe_allow_html=True)
 
     # Despliegue del contador de horas de vigencia de plan
@@ -511,35 +497,39 @@ else:
             del st.session_state[key]
         st.rerun()
 
-    # --- PANEL DE GUÍAS ACTIVOS EN LA BARRA LATERAL ---
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### 🌿 Tus Guías Activos")
-    
-    if not st.session_state.avatares_vinculados:
-        st.sidebar.caption("Aún no tienes ningún avatar vinculado. Ve a 'Seleccionar Avatar'.")
-    else:
-        for av_vinc in st.session_state.avatares_vinculados:
-            es_actual = (st.session_state.avatar_activo and st.session_state.avatar_activo.get("id") == av_vinc.get("id"))
-            label_boton = f"👉 {av_vinc.get('bandera')} {av_vinc.get('nombre')}" if es_actual else f"{av_vinc.get('bandera')} {av_vinc.get('nombre')}"
-            
-            if st.sidebar.button(label_boton, key=f"side_av_{av_vinc.get('id')}"):
-                st.session_state.avatar_activo = av_vinc
-                st.rerun()
+    # --- BARRA LATERAL CONTEXTUAL 1: GUÍAS ACTIVOS (SOLO EN SELECCIÓN O CHAT) ---
+    if menu in ["Seleccionar Avatar", "Chat con Avatar"]:
+        st.sidebar.markdown("---")
+        st.sidebar.markdown("### 🌿 Tus Guías Activos")
+        
+        if not st.session_state.avatares_vinculados:
+            st.sidebar.caption("Aún no tienes ningún avatar vinculado.")
+        else:
+            for av_vinc in st.session_state.avatares_vinculados:
+                es_actual = (st.session_state.avatar_activo and st.session_state.avatar_activo.get("id") == av_vinc.get("id"))
+                label_boton = f"👉 {av_vinc.get('bandera')} {av_vinc.get('nombre')}" if es_actual else f"{av_vinc.get('bandera')} {av_vinc.get('nombre')}"
                 
-        st.sidebar.caption(f"Mensajes semanales disponibles: **{chats_disp_semana}**")
+                # Salto directo al chat con este avatar con un solo clic
+                if st.sidebar.button(label_boton, key=f"side_av_{av_vinc.get('id')}"):
+                    st.session_state.avatar_activo = av_vinc
+                    st.session_state.menu_nav_seleccionado = "Chat con Avatar"
+                    st.rerun()
+                    
+            st.sidebar.caption(f"Mensajes semanales disponibles: **{chats_disp_semana}**")
 
-    # --- PANEL DE CHATS CON MIEMBROS EN LA BARRA LATERAL ---
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### 💬 Chats con Miembros")
-    if not mis_contactos_dm:
-        st.sidebar.caption("Sin chats activos. Puedes conectar en 'Comunidad y Amigos'.")
-    else:
-        for c_dm in mis_contactos_dm:
-            es_dm_sel = (st.session_state.dm_activo_contacto and st.session_state.dm_activo_contacto.get("id") == c_dm.get("id"))
-            label_dm = f"💬 👉 {c_dm.get('apodo')}" if es_dm_sel else f"💬 {c_dm.get('apodo')}"
-            if st.sidebar.button(label_dm, key=f"side_dm_{c_dm.get('id')}"):
-                st.session_state.dm_activo_contacto = c_dm
-                st.rerun()
+    # --- BARRA LATERAL CONTEXTUAL 2: CHATS CON MIEMBROS (SOLO EN RED SOCIAL) ---
+    elif menu == "Red Social y Comunidad":
+        st.sidebar.markdown("---")
+        st.sidebar.markdown("### 💬 Chats con Miembros")
+        if not mis_contactos_dm:
+            st.sidebar.caption("Sin chats activos. Explora en 'Comunidad y Amigos'.")
+        else:
+            for c_dm in mis_contactos_dm:
+                es_dm_sel = (st.session_state.dm_activo_contacto and st.session_state.dm_activo_contacto.get("id") == c_dm.get("id"))
+                label_dm = f"💬 👉 {c_dm.get('apodo')}" if es_dm_sel else f"💬 {c_dm.get('apodo')}"
+                if st.sidebar.button(label_dm, key=f"side_dm_{c_dm.get('id')}"):
+                    st.session_state.dm_activo_contacto = c_dm
+                    st.rerun()
 
     if menu == "Red Social y Comunidad":
         banner_msg = "Bienvenido a tu red de apoyo emocional y crecimiento mutuo."
@@ -587,6 +577,7 @@ else:
                     st.caption("✅ Ya forma parte de tus guías activos")
                     if st.button("Conversar con este Guía", key=f"sel_act_{av.get('id')}"):
                         st.session_state.avatar_activo = av
+                        st.session_state.menu_nav_seleccionado = "Chat con Avatar"
                         st.rerun()
                 else:
                     if st.button("Seleccionar este Guía", key=f"sel_{av.get('id')}"):
@@ -594,43 +585,76 @@ else:
                             r = requests.post(f"{API_URL}/avatares/seleccionar", headers=headers_auth, json={"avatar_id": av.get("id")}, timeout=30)
                             if r.status_code == 200:
                                 st.session_state.avatar_activo = av
+                                st.session_state.menu_nav_seleccionado = "Chat con Avatar"
                                 st.rerun()
                             else:
                                 st.error(r.json().get("detail", "Límite de avatares alcanzado en tu plan."))
                         except Exception as e:
                             st.error(f"Error: {e}")
 
-    # 2. CHAT CON AVATAR (CABECERA STICKY)
+    # 2. CHAT CON AVATAR (CABECERA FIJA Y CONTENEDOR CON SCROLL INDEPENDIENTE)
     elif menu == "Chat con Avatar":
         if not st.session_state.avatar_activo:
             st.warning("Selecciona un guía primero en la pestaña 'Seleccionar Avatar'.")
         else:
             av = st.session_state.avatar_activo
 
-            col_f, col_t = st.columns([1, 6])
-            with col_f:
-                mostrar_imagen(av, ancho=85)
-            with col_t:
+            # CABECERA VISUAL FIJA DEL AVATAR
+            with st.container():
                 st.markdown(f"""
-                    <div style="margin-top: 4px;">
-                        <h3 style="margin: 0; font-size: 1.4rem !important;">Conversando con {av.get('nombre')}</h3>
-                        <p class="avatar-subtitle" style="margin: 2px 0 0 0;">{av.get('bandera')} {av.get('pais')} | {av.get('tono')}</p>
+                    <div class="avatar-header-box">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.5rem !important;">Conversando con {av.get('nombre')}</h3>
+                                <p class="avatar-subtitle" style="margin: 2px 0 0 0;">{av.get('bandera')} {av.get('pais')} | {av.get('tono')}</p>
+                            </div>
+                        </div>
                     </div>
                 """, unsafe_allow_html=True)
 
-            st.markdown("---")
-
+            # Memoria conversacional efímera (Auto-purga a las 72 horas)
             chat_key = f"messages_{st.session_state.user_id}_{av.get('id')}"
-            if chat_key not in st.session_state:
-                st.session_state[chat_key] = [{"role": "assistant", "content": av.get("disparador_inicial", "Hola, estoy aquí para acompañarte."), "is_crisis": False}]
+            ahora_utc = datetime.now(timezone.utc)
+            limite_72h = ahora_utc - timedelta(hours=72)
 
-            for m in st.session_state[chat_key]:
-                icono = "🌿" if m["role"] == "assistant" else "👤"
-                if m.get("is_crisis"):
-                    st.error(m["content"])
-                else:
-                    with st.chat_message(m["role"], avatar=icono):
-                        st.markdown(m["content"])
+            if chat_key not in st.session_state:
+                st.session_state[chat_key] = [{
+                    "role": "assistant",
+                    "content": av.get("disparador_inicial", "Hola, estoy aquí para acompañarte."),
+                    "is_crisis": False,
+                    "timestamp": ahora_utc.isoformat()
+                }]
+            else:
+                # Filtrar mensajes de más de 72 horas
+                mensajes_vigentes = []
+                for m in st.session_state[chat_key]:
+                    ts_str = m.get("timestamp")
+                    if ts_str:
+                        try:
+                            m_time = datetime.fromisoformat(ts_str)
+                            if m_time >= limite_72h:
+                                mensajes_vigentes.append(m)
+                        except Exception:
+                            mensajes_vigentes.append(m)
+                    else:
+                        mensajes_vigentes.append(m)
+                st.session_state[chat_key] = mensajes_vigentes if mensajes_vigentes else [{
+                    "role": "assistant",
+                    "content": av.get("disparador_inicial", "Hola, estoy aquí para acompañarte."),
+                    "is_crisis": False,
+                    "timestamp": ahora_utc.isoformat()
+                }]
+
+            # CONTENEDOR DE ALTURA FIJA CON SCROLL PROPIO (LA CABECERA NUNCA SUBE)
+            chat_container = st.container(height=500)
+            with chat_container:
+                for m in st.session_state[chat_key]:
+                    icono = "🌿" if m["role"] == "assistant" else "👤"
+                    if m.get("is_crisis"):
+                        st.error(m["content"])
+                    else:
+                        with st.chat_message(m["role"], avatar=icono):
+                            st.markdown(m["content"])
 
             if user_text := st.chat_input("Escribe tu pensamiento o inquietud..."):
                 historial_reciente = [
@@ -639,9 +663,12 @@ else:
                     if not m.get("is_crisis")
                 ]
 
-                st.session_state[chat_key].append({"role": "user", "content": user_text, "is_crisis": False})
-                with st.chat_message("user", avatar="👤"):
-                    st.markdown(user_text)
+                ahora_msg = datetime.now(timezone.utc).isoformat()
+                st.session_state[chat_key].append({"role": "user", "content": user_text, "is_crisis": False, "timestamp": ahora_msg})
+                
+                with chat_container:
+                    with st.chat_message("user", avatar="👤"):
+                        st.markdown(user_text)
 
                 try:
                     payload = {
@@ -658,14 +685,21 @@ else:
                             es_crisis = d_resp.get("is_crisis", False)
                             chats_rest = d_resp.get("chats_restantes")
                             
-                            st.session_state[chat_key].append({"role": "assistant", "content": ans, "is_crisis": es_crisis})
+                            st.session_state[chat_key].append({
+                                "role": "assistant", 
+                                "content": ans, 
+                                "is_crisis": es_crisis,
+                                "timestamp": datetime.now(timezone.utc).isoformat()
+                            })
                             
-                            if es_crisis:
-                                st.error(ans)
-                            else:
-                                with st.chat_message("assistant", avatar="🌿"):
-                                    st.markdown(ans)
-                                    st.caption(f"Mensajes restantes de tu plan: {chats_rest}")
+                            with chat_container:
+                                if es_crisis:
+                                    st.error(ans)
+                                else:
+                                    with st.chat_message("assistant", avatar="🌿"):
+                                        st.markdown(ans)
+                                        st.caption(f"Mensajes restantes de tu plan: {chats_rest}")
+                            st.rerun()
                         except Exception as e_json:
                             st.error(f"Error interpretando la respuesta del servidor: {e_json}")
                     else:
@@ -752,12 +786,15 @@ else:
                         mensajes_dm = r_chat_m.json().get("mensajes", [])
                         if not mensajes_dm:
                             st.info("Aún no tienes mensajes con este usuario. Escribe el primer mensaje a continuación.")
-                        for m_dm in mensajes_dm:
-                            es_propio = (m_dm.get("remitente_id") == st.session_state.user_id)
-                            rol_msg = "user" if es_propio else "assistant"
-                            ico = "👤" if es_propio else "🌿"
-                            with st.chat_message(rol_msg, avatar=ico):
-                                st.markdown(m_dm.get("contenido"))
+                        
+                        dm_container = st.container(height=380)
+                        with dm_container:
+                            for m_dm in mensajes_dm:
+                                es_propio = (m_dm.get("remitente_id") == st.session_state.user_id)
+                                rol_msg = "user" if es_propio else "assistant"
+                                ico = "👤" if es_propio else "🌿"
+                                with st.chat_message(rol_msg, avatar=ico):
+                                    st.markdown(m_dm.get("contenido"))
                                 
                     nuevo_dm_texto = st.text_input("Escribe tu mensaje privado:", key=f"dm_input_box_{c_sel.get('id')}")
                     col_dm1, col_dm2 = st.columns([1, 4])

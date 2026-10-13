@@ -58,6 +58,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def normalizar_fecha_utc(val: Union[datetime, str, None]) -> Optional[datetime]:
+    """Convierte de forma blindada cualquier formato de fecha o string ISO a un datetime consciente de zona horaria UTC."""
+    if val is None:
+        return None
+    if isinstance(val, str):
+        try:
+            val_limpio = val.replace("Z", "+00:00")
+            dt = datetime.fromisoformat(val_limpio)
+            return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+        except Exception:
+            return None
+    if isinstance(val, datetime):
+        return val if val.tzinfo else val.replace(tzinfo=timezone.utc)
+    return None
+
 # --- RUTAS DE HEALTH CHECK Y DISPONIBILIDAD RAÍZ ---
 @app.get("/")
 async def root():
@@ -173,7 +188,7 @@ class MeetingRoomModel(Base):
     descripcion: Mapped[str] = mapped_column(String(1000))
     fecha_propuesta: Mapped[str] = mapped_column(String(80))
     enlace_reunion: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    estatus: Mapped[str] = mapped_column(String(30), default="pendiente") # pendiente, activa, cerrada
+    estatus: Mapped[str] = mapped_column(String(30), default="pendiente")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     closed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     solicitante = relationship("UserModel")
@@ -297,7 +312,7 @@ class MeetingRoomCreate(BaseModel):
 class MeetingRoomUpdateAdmin(BaseModel):
     sala_id: int
     enlace_reunion: Optional[str] = None
-    estatus: str = "activa" # activa, cerrada
+    estatus: str = "activa"
 
 class BuzonCreate(BaseModel):
     categoria: str = "Consulta general"
@@ -338,9 +353,9 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado.")
 
-    # Control estricto de caducidad en tiempo real
-    if user.suscripcion_expira and user.role != "admin":
-        exp = user.suscripcion_expira if user.suscripcion_expira.tzinfo else user.suscripcion_expira.replace(tzinfo=timezone.utc)
+    # Control estricto de caducidad con normalización blindada
+    exp = normalizar_fecha_utc(user.suscripcion_expira)
+    if exp and user.role != "admin":
         if datetime.now(timezone.utc) > exp:
             user.plan_nivel = "gratis"
             user.suscripcion_expira = None
@@ -458,8 +473,8 @@ async def acceder_usuario(data: UserLogin, db: AsyncSession = Depends(get_db)):
 
     horas_disp = None
     exp_iso = None
-    if user.suscripcion_expira:
-        exp = user.suscripcion_expira if user.suscripcion_expira.tzinfo else user.suscripcion_expira.replace(tzinfo=timezone.utc)
+    exp = normalizar_fecha_utc(user.suscripcion_expira)
+    if exp:
         ahora = datetime.now(timezone.utc)
         if ahora > exp and user.role != "admin":
             user.plan_nivel = "gratis"
@@ -488,8 +503,8 @@ async def acceder_usuario(data: UserLogin, db: AsyncSession = Depends(get_db)):
 async def obtener_mi_perfil(current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     horas_disp = None
     exp_iso = None
-    if current_user.suscripcion_expira:
-        exp = current_user.suscripcion_expira if current_user.suscripcion_expira.tzinfo else current_user.suscripcion_expira.replace(tzinfo=timezone.utc)
+    exp = normalizar_fecha_utc(current_user.suscripcion_expira)
+    if exp:
         ahora = datetime.now(timezone.utc)
         if ahora > exp and current_user.role != "admin":
             current_user.plan_nivel = "gratis"
@@ -646,7 +661,8 @@ async def enviar_dm(data: DirectMessageCreate, current_user: UserModel = Depends
     if not son_amigos and current_user.role != "admin":
         max_dms = {"gratis": 1, "comunicador": 5, "amigo_todos": 999999}.get(current_user.plan_nivel, 1)
         hoy = datetime.now(timezone.utc).date()
-        if current_user.ultimo_dm_fecha and current_user.ultimo_dm_fecha.date() != hoy:
+        ultimo_dm = normalizar_fecha_utc(current_user.ultimo_dm_fecha)
+        if ultimo_dm and ultimo_dm.date() != hoy:
             current_user.mensajes_directos_hoy = 0
 
         if current_user.mensajes_directos_hoy >= max_dms:
@@ -679,13 +695,6 @@ async def ver_conversacion(otro_usuario_id: int, current_user: UserModel = Depen
 
 @app.get("/api/comunidad/mis-chats")
 async def listar_mis_chats(current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    # Extrae IDs únicos de usuarios con quienes se ha intercambiado DMs
-    subq = select(
-        or_(DirectMessageModel.remitente_id, DirectMessageModel.destinatario_id)
-    ).where(
-        or_(DirectMessageModel.remitente_id == current_user.id, DirectMessageModel.destinatario_id == current_user.id)
-    )
-    
     res_dms = await db.execute(select(DirectMessageModel).where(
         or_(DirectMessageModel.remitente_id == current_user.id, DirectMessageModel.destinatario_id == current_user.id)
     ).order_by(DirectMessageModel.created_at.desc()))
@@ -810,7 +819,6 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
     current_user.chats_usados_semana += 1
     current_user.last_active_at = datetime.now(timezone.utc)
     await db.commit()
-    # RECARGA VITAL: Garantiza datos reales y actualizados del perfil
     await db.refresh(current_user)
 
     perfil_dict = {
@@ -823,7 +831,6 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
         "biografia": current_user.biografia
     }
 
-    # Integración del historial hacia Rafael
     nombre_av, resp, es_crisis = procesar_respuesta_avatar(
         avatar_id=data.avatar_id, 
         mensaje_usuario=data.message, 
@@ -842,7 +849,6 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
 # --- MURO UNIVERSAL CON COMENTARIOS ---
 @app.get("/api/muro")
 async def obtener_muro(categoria: Optional[str] = None, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    # Visibilidad universal: todos los usuarios leen todas las publicaciones activas
     query = select(MuroPostModel).options(
         selectinload(MuroPostModel.autor),
         selectinload(MuroPostModel.comentarios).selectinload(MuroComentarioModel.autor)
@@ -916,7 +922,6 @@ async def agregar_comentario_muro(post_id: int, data: MuroCommentCreate, current
 # --- CÍRCULOS DE APOYO Y SALAS DE REUNIÓN ---
 @app.get("/api/reuniones/salas")
 async def listar_salas_reuniones(current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    # Muestra salas activas o cerradas hace menos de 24h
     res = await db.execute(
         select(MeetingRoomModel).options(selectinload(MeetingRoomModel.solicitante)).where(
             MeetingRoomModel.estatus.in_(["pendiente", "activa", "cerrada"])
@@ -1008,12 +1013,14 @@ async def canjear_cupon(data: CouponRedeem, current_user: UserModel = Depends(ge
     if not cupon or cupon.is_used:
         raise HTTPException(status_code=400, detail="Cupón inexistente o previamente utilizado.")
     
-    exp = cupon.expires_at if cupon.expires_at.tzinfo else cupon.expires_at.replace(tzinfo=timezone.utc)
-    if datetime.now(timezone.utc) > exp:
+    exp = normalizar_fecha_utc(cupon.expires_at)
+    if not exp or datetime.now(timezone.utc) > exp:
         raise HTTPException(status_code=400, detail="El cupón ha expirado.")
 
     current_user.plan_nivel = cupon.tipo_plan
     current_user.suscripcion_expira = datetime.now(timezone.utc) + timedelta(days=cupon.duracion_dias)
+    # REINICIO VITAL: Al subir de plan, se reinician los avatares para permitir una nueva selección libre
+    current_user.avatares_activos = "[]"
     current_user.last_active_at = datetime.now(timezone.utc)
     cupon.is_used = True
     await db.commit()
@@ -1061,10 +1068,13 @@ async def premiar_afiliado(data: RewardAffiliateCreate, admin: UserModel = Depen
     nombre_premio = "1 Semana Amigo de Todos" if data.tipo_premio == "bono_conversion" else "1 Año Amigo de Todos"
 
     ahora = datetime.now(timezone.utc)
-    base_fecha = user.suscripcion_expira if (user.suscripcion_expira and user.suscripcion_expira > ahora) else ahora
+    f_exp = normalizar_fecha_utc(user.suscripcion_expira)
+    base_fecha = f_exp if (f_exp and f_exp > ahora) else ahora
     
     user.plan_nivel = "amigo_todos"
     user.suscripcion_expira = base_fecha + timedelta(days=dias_a_sumar)
+    # Permite acceso pleno a todos los avatares
+    user.avatares_activos = "[]"
     await db.commit()
 
     return {
@@ -1095,19 +1105,14 @@ async def ejecutar_mantenimiento_programado(x_cron_key: Optional[str] = Header(N
             chats_reseteados += 1
         
         if u.suscripcion_expira and u.role != "admin":
-            exp = u.suscripcion_expira if u.suscripcion_expira.tzinfo else u.suscripcion_expira.replace(tzinfo=timezone.utc)
-            if ahora > exp:
+            exp = normalizar_fecha_utc(u.suscripcion_expira)
+            if exp and ahora > exp:
                 u.plan_nivel = "gratis"
                 u.suscripcion_expira = None
                 planes_revertidos += 1
 
-    # 1. Purgar DMs de más de 7 días exactos
     dms_del = await db.execute(delete(DirectMessageModel).where(DirectMessageModel.created_at < hace_7_dias))
-
-    # 2. Purgar publicaciones del Muro de más de 72 horas (3 días) con sus comentarios en cascada
     muro_del = await db.execute(delete(MuroPostModel).where(MuroPostModel.created_at < hace_72_horas))
-
-    # 3. Purgar salas de reunión cerradas hace más de 24 horas
     salas_del = await db.execute(delete(MeetingRoomModel).where(
         and_(MeetingRoomModel.estatus == "cerrada", MeetingRoomModel.closed_at < hace_24_horas)
     ))
@@ -1164,7 +1169,11 @@ async def auditar_usuarios(admin: UserModel = Depends(get_current_admin), db: As
     res = await db.execute(select(UserModel).order_by(UserModel.created_at.desc()))
     usuarios = res.scalars().all()
     hace_24h = datetime.now(timezone.utc) - timedelta(hours=24)
-    reg_24h = sum(1 for u in usuarios if (u.created_at if u.created_at.tzinfo else u.created_at.replace(tzinfo=timezone.utc)) >= hace_24h)
+    reg_24h = 0
+    for u in usuarios:
+        c_at = normalizar_fecha_utc(u.created_at)
+        if c_at and c_at >= hace_24h:
+            reg_24h += 1
     return {
         "status": "success",
         "metricas": {"total_registrados": len(usuarios), "registros_ultimas_24h": reg_24h},

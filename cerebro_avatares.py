@@ -3,6 +3,7 @@ import os
 import random
 import re
 from typing import Dict, Any, Tuple, List
+import httpx
 
 CATALOGO_CACHE: Dict[str, Any] = {}
 LIBROS_CACHE = []
@@ -21,7 +22,12 @@ PATRONES_CRISIS_SOS = [
     r"\bsuicid", r"\bmatarme\b", r"\bquitarme la vida\b", r"\bno quiero vivir\b",
     r"\bhacerme da[nñ]o\b", r"\bcortarme\b", r"\bacabar con todo\b",
     r"\bno vale la pena vivir\b", r"\bdesaparecer\b.*\b(despertar|morir|sufrir)\b",
-    r"\bmejor si no existiera\b", r"\bpreferir[ií]a estar muerto\b"
+    r"\bmejor si no existiera\b", r"\bpreferir[ií]a estar muerto\b",
+    r"\bpuedo morir\b", r"\bme voy a morir\b", r"\bme quiero morir\b"
+]
+
+PATRONES_AGRESION_SEXUAL = [
+    r"\b(violaci[oó]n|violaron|me violaron|violada|violado|abuso sexual|abusaron de m[ií]|me tocaron|agresi[oó]n sexual)\b"
 ]
 
 def obtener_catalogo_formateado(activos_usuario: list) -> list:
@@ -97,6 +103,30 @@ def llamar_gemini_avatar(prompt_sistema: str, historial: list, mensaje_actual: s
     except Exception:
         pass
 
+    # Intento 3: Llamada REST directa por HTTP (Fallback robusto y libre de dependencias rotas)
+    try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        payload = {
+            "contents": [{
+                "parts": [{"text": prompt_completo}]
+            }],
+            "generationConfig": {
+                "temperature": 0.7,
+                "maxOutputTokens": 600
+            }
+        }
+        with httpx.Client(timeout=25.0) as client_http:
+            resp = client_http.post(url, json=payload)
+            if resp.status_code == 200:
+                data_api = resp.json()
+                candidatos = data_api.get("candidates", [])
+                if candidatos:
+                    partes = candidatos[0].get("content", {}).get("parts", [])
+                    if partes:
+                        return partes[0].get("text", "").strip()
+    except Exception:
+        pass
+
     return ""
 
 def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuario: dict, historial_reciente: list = None) -> Tuple[str, str, bool]:
@@ -143,48 +173,86 @@ def procesar_respuesta_avatar(avatar_id: str, mensaje_usuario: str, perfil_usuar
             "'Planes y Suscripción', donde podrás coordinar los datos correspondientes en un canal privado y seguro con el administrador."
         ), False
 
-    # 3. IDENTIFICACIÓN Y PRESENTACIÓN DEL AVATAR (RESPUESTA DIRECTA Y PERSONALIZADA)
-    if any(q in texto_lower for q in ["como te llamas", "cómo te llamas", "quien eres", "quién eres", "de donde vienes", "de dónde vienes", "tu nombre", "escéptico", "esceptico", "pantalla", "puedes ayudarme"]):
+    # 3. CONTENCIÓN PRIORITARIA ANTE AGRESIÓN SEXUAL O VIOLACIÓN (HUMANA Y COMPASIVA)
+    if any(re.search(p, texto_lower) for p in PATRONES_AGRESION_SEXUAL):
         if avatar_id == "larissa":
             return nombre_avatar, (
-                f"¡Olá, {apodo}! Me llamo {nombre_avatar}. Vengo de Salvador de Bahía, Brasil. "
-                f"Me dedico a la psicología clínica y la arteterapia corporal. "
-                "Sé muy bien lo que es dudar de hablar con una pantalla, pero aquí no hay juicios ni fórmulas mágicas: "
-                "estoy aquí para ayudarte a reconectar con tu cuerpo, respirar hondo y ordenar lo que sientes sin culpas. "
-                "Dime, ¿qué es lo primero que te gustaría desahogar hoy?"
-            ), False
-        elif avatar_id == "camilo":
-            return nombre_avatar, (
-                f"¡Oye, {apodo}! Soy {nombre_avatar}, médico y fisioterapeuta comunitario de Centro Habana, Cuba. "
-                "Es completamente normal que sientas dudas al inicio. Mi vocación no es darte sermones fríos, sino escucharte con calidez, "
-                "sentido común y darte pautas claras para aliviar la tensión de tu día a día. Cuéntame qué traes en mente, hermano."
+                f"Mírame a los ojos a través de estas palabras, {apodo}: **tú no tienes absolutamente ninguna culpa de lo que te hicieron.** "
+                "La culpa y la responsabilidad son al cien por cien del agresor. Lo que viviste fue un acto de violencia brutal e injustificable, "
+                "y es completamente comprensible que sientas dolor, asco o desconexión hacia tu cuerpo. Tu cuerpo no está roto ni sucio; "
+                "tu cuerpo es el templo que resistió para mantenerte con vida hoy.\n\n"
+                "El camino para volver a habitarte con paz es posible, pero no tienes que recorrerlo a solas ni de prisa. "
+                "Tu prioridad inmediata es tu cuidado físico y emocional: si la agresión fue reciente, acude a un centro médico de urgencias para recibir atención y resguardo seguro. "
+                "Y apóyate en terapia especializada en trauma sexual. Tu dignidad sigue intacta y aquí estoy sosteniéndote la mano sin juzgarte jamás."
             ), False
         elif avatar_id == "rodrigo":
             return nombre_avatar, (
-                f"Buenas, {apodo}. Me llamo {nombre_avatar}, soy abogado penalista y mediador de Toledo, España. "
-                "Comprendo tu escepticismo; en un mundo con tanto ruido digital, cuesta confiar. Yo creo en los hechos, "
-                "en la sobriedad y en el sentido común para desenredar situaciones difíciles. Explícame tu caso con calma y lo miramos."
-            ), False
-        elif avatar_id == "anastasia":
-            return nombre_avatar, (
-                f"Hola, {apodo}. Mi nombre es {nombre_avatar}, soy neuropsicóloga clínica e investigadora en San Petersburgo, Rusia. "
-                "Tu reserva inicial es lógica y saludable; la mente analítica cuestiona antes de confiar. "
-                "Mi propósito aquí es ofrecerte un espacio estructurado, lúcido y basado en evidencia para comprender lo que te ocurre. Te escucho."
-            ), False
-        elif avatar_id == "mariana":
-            return nombre_avatar, (
-                f"¡Epa, {apodo}! Me llamo {nombre_avatar}, soy de Barquisimeto, Venezuela, y me especializo en relaciones industriales y bienestar humano. "
-                "Tranquilo, entiendo tu desconfianza. Aquí tienes a alguien que te escucha de corazón y con ganas de ayudarte a buscar soluciones prácticas "
-                "para que recuperes tu tranquilidad. ¿De qué te gustaría que hablemos?"
+                f"Escúchame con total claridad, {apodo}: **no tuviste ni tendrás jamás la culpa de haber sufrido esa agresión.** "
+                "Quien vulnera la integridad física de otra persona comete un delito grave y la responsabilidad recae únicamente sobre el agresor. "
+                "Esa sensación de culpa o de haber traicionado tu dignidad es una herida psicológica típica del trauma, pero no es la verdad: "
+                "hiciste lo necesario para sobrevivir.\n\n"
+                "Tu seguridad física y tu recuperación son lo primero. Si el hecho es reciente, acude de inmediato a valoración médica forense y de urgencias. "
+                "Busca acompañamiento en profesionales de salud mental especializados en agresión sexual. No te aísles con este sufrimiento; mereces sanar y recuperar tu tranquilidad."
             ), False
         else:
             return nombre_avatar, (
-                f"Hola, {apodo}. Soy {nombre_avatar}, originario/a de {ciudad_natal}, {pais_avatar}, y me desempeño como {especialidad}. "
-                "Entiendo perfectamente tus dudas iniciales. Este espacio está diseñado para brindarte un diálogo sereno, confidencial y respetuoso "
-                "que te ayude a encontrar claridad. Cuéntame con total libertad qué necesitas hoy."
+                f"Lamento en lo más profundo de mi ser que hayas atravesado por un hecho tan doloroso, {apodo}. "
+                "Quiero que grabes esto en tu mente: **no eres culpable de nada de lo que ocurrió.** Toda la responsabilidad recae en quien cometió el abuso. "
+                "Sentir rabia, dolor o rechazo hacia tu cuerpo es una respuesta normal ante una vulneración tan violenta, pero tu valor humano y tu dignidad siguen intactos.\n\n"
+                "Por favor, prioriza tu resguardo: busca atención médica si necesitas tratamiento físico y ponte en contacto con profesionales especializados en apoyo a víctimas de agresión sexual. "
+                "No cargues con este peso en silencio."
             ), False
 
-    # 4. LLAMADA GENERATIVA A GEMINI
+    # 4. RECONOCIMIENTO DE AGRADECIMIENTO Y DESPEDIDAS CÁLIDAS
+    if re.search(r"\b(gracias|muchas gracias|darte las gracias|agradecer|me ayudó mucho|me sirvió)\b", texto_lower) and len(texto.split()) <= 20:
+        if avatar_id == "larissa":
+            return nombre_avatar, (
+                f"¡Me alegra muchísimo el corazón leerte, {apodo}! Saber que estas palabras te dieron un respiro y te ayudaron a bajar la guardia me llena de alegría. "
+                "Recuerda que ese espacio de calma lo construiste tú al permitirte parar. Aquí estaré siempre que necesites volver a tu centro."
+            ), False
+        elif avatar_id == "rodrigo":
+            return nombre_avatar, (
+                f"De nada, {apodo}. Me alegra de verdad saber que la conversación te aportó claridad y sosiego. "
+                "Tener sentido común y parar un momento a reflexionar es lo que nos mantiene en pie. Tómate el día con tranquilidad."
+            ), False
+        else:
+            return nombre_avatar, (
+                f"Es un honor para mí acompañarte en tu camino, {apodo}. Me reconforta saber que te sientes más aliviado/a. "
+                "Recuerda darte crédito por cuidar de tu bienestar hoy. Estoy a tu disposición cuando lo necesites."
+            ), False
+
+    # 5. PREGUNTAS SOBRE IDENTIDAD Y TRAYECTORIA ACADÉMICA DEL AVATAR
+    if any(q in texto_lower for q in ["donde estudiaste", "dónde estudiaste", "tu carrera", "que estudiaste", "qué estudiaste", "universidad"]):
+        if avatar_id == "rodrigo":
+            return nombre_avatar, (
+                f"Me licencié en Derecho con honores en la Universidad Complutense de Madrid (UCM), {apodo}. "
+                "Posteriormente cursé un Máster en Derecho Penitenciario y me especialicé en Justicia Restaurativa y Mediación Penal. "
+                "Más allá de las aulas, mi verdadera formación se forjó en los tribunales y acompañando a personas víctimas de injusticias."
+            ), False
+        elif avatar_id == "larissa":
+            return nombre_avatar, (
+                f"Me gradué en Psicología en la Universidade Federal da Bahia (UFBA) en Salvador, {apodo}. "
+                "Después completé un postgrado en Arteterapia y Psicoterapia Corporal, certificándome en Experiencia Somática (Somatic Experiencing). "
+                "Mi enfoque une la ciencia psicológica con la conciencia del movimiento y la respiración."
+            ), False
+        elif avatar_id == "camilo":
+            return nombre_avatar, (
+                f"Estudié Medicina en el Instituto Superior de Ciencias Médicas de La Habana, en la Facultad Calixto García, {apodo}. "
+                "Luego hice la especialidad en Medicina General Integral y Fisioterapia en el Centro Nacional de Rehabilitación. "
+                "La calle y los barrios de Centro Habana fueron mi mayor escuela de medicina humanista."
+            ), False
+        elif avatar_id == "anastasia":
+            return nombre_avatar, (
+                f"Me formé en la Universidad Estatal de San Petersburgo (SPbU), donde me gradué con honores en Neuropsicología y Lingüística Clínica, {apodo}. "
+                "Posteriormente realicé mi postgrado en Rehabilitación Cognitiva en el prestigioso Instituto Psiconeurológico Bekhterev."
+            ), False
+        elif avatar_id == "mariana":
+            return nombre_avatar, (
+                f"Egresé con honores como Licenciada en Relaciones Industriales de la Universidad Centroccidental Lisandro Alvarado (UCLA) en Barquisimeto, {apodo}. "
+                "Luego cursé una especialización en Gestión del Talento Humano y diplomados en Prevención de Riesgos Psicosociales y Mediación Laboral."
+            ), False
+
+    # 6. LLAMADA GENERATIVA A GEMINI (PROMPT CANÓNICO)
     bio_completa = cargar_biografia_completa(avatar_id)
     libros_afines = avatar_info.get("libros_rag_afines", [])
     fragmentos_rag = [
@@ -232,8 +300,7 @@ Principios reflexivos aplicables:
     if respuesta_llm:
         return nombre_avatar, respuesta_llm, False
 
-    # 5. CONTENCIÓN DE RESPALDO PERSONALIZADA POR SÍNTOMA (FALLBACK OFFLINE DINÁMICO)
-    # A. Pánico Somático: Taquicardia, Opresión en Pecho, Miedo a Infarto o Desmayo
+    # 7. CONTENCIÓN DE RESPALDO PERSONALIZADA POR SÍNTOMA (FALLBACK OFFLINE DINÁMICO)
     if re.search(r"\b(opresi[oó]n|pecho|coraz[oó]n|infarto|desmayar|falta el aire|aire|ahogando|palpitaciones)\b", texto_lower):
         if avatar_id == "larissa":
             return nombre_avatar, (
@@ -257,7 +324,6 @@ Principios reflexivos aplicables:
                 "La química de la alarma comenzará a disiparse en breves instantes."
             ), False
 
-    # B. Insomnio, Rumiación Nocturna y Deudas / Preocupaciones del Mañana
     if re.search(r"\b(cama|techo|dormir|insomnio|deudas|mañana|desvelo|reloj|madrugada|desespero)\b", texto_lower):
         return nombre_avatar, (
             f"Te entiendo perfectamente, {apodo}. Mirar el reloj y pelear contra la almohada solo hace que el cerebro se ponga en guardia. "
@@ -266,7 +332,6 @@ Principios reflexivos aplicables:
             "y vuelve a recostarte sin la exigencia de dormir. Simplemente concéntrate en descansar el cuerpo; soltar el control es lo que permite que el sueño llegue."
         ), False
 
-    # C. Bloqueo Laboral, Procrastinación, Correos Acumulados y Culpa por Productividad
     if re.search(r"\b(correos|informes|pantalla|bloqueo|fatiga|productivo|productividad|no sé por dónde empezar|montaña)\b", texto_lower):
         return nombre_avatar, (
             f"Respira hondo, {apodo}. Esa parálisis no es flojera ni incapacidad; es saturación cognitiva. "
@@ -275,7 +340,6 @@ Principios reflexivos aplicables:
             "La motivación no llega esperando; se enciende con una primera micro-acción. Da ese único paso y suelta la culpa."
         ), False
 
-    # D. Límites Familiares, Críticas y Miedo a Sentirse Mala Persona
     if re.search(r"\b(familia|criticar|decepci[oó]n|rabia|nudo en el est[oó]mago|l[ií]mites|mala persona|discutir)\b", texto_lower):
         return nombre_avatar, (
             f"Ese nudo en el estómago es tu cuerpo avisándote que tus fronteras están siendo vulneradas, {apodo}. "
@@ -285,61 +349,7 @@ Principios reflexivos aplicables:
             "Cuidar tu paz mental no es egoísmo, es supervivencia."
         ), False
 
-    # E. Acoso Escolar Prioritario Universal
-    if re.search(r"\b(bulling|bullying|acoso escolar|le pegan|se burlan de mi hijo)\b", texto_lower):
-        if avatar_id == "camilo":
-            return nombre_avatar, (
-                f"Hermano {apodo}, que un hijo pase por acoso escolar te desgarra por dentro. "
-                "Lo primero es blindarlo en casa: abrázalo y hazle saber con total certeza que él no tiene la culpa de nada. "
-                "Pide de inmediato una reunión con la dirección del colegio para exigir la activación formal del protocolo de protección, "
-                "y evalúa con un psicólogo infantil un espacio donde pueda desahogarse. Tu presencia firme es su mayor refugio hoy."
-            ), False
-        else:
-            return nombre_avatar, (
-                f"El acoso escolar requiere una intervención inmediata y protectora, {apodo}. "
-                "El primer pilar es validar a la víctima en el hogar: asegurar que no tiene ninguna responsabilidad en los ataques. "
-                "El segundo pilar es institucional: solicitar por escrito a la directiva escolar la aplicación rigurosa de las medidas contra el hostigamiento. "
-                "El apoyo profesional psicológico es el paso más acertado para cuidar su bienestar emocional."
-            ), False
-
-    # F. Fisioterapia / Lesiones Mecánicas
-    if re.search(r"\b(torci|torc[ií]|tobillo|esguince|me ca[ií]|golpe fuerte|rodilla)\b", texto_lower):
-        if avatar_id == "camilo":
-            return nombre_avatar, (
-                f"¡Oye, mi hermano {apodo}, cuidado con eso! Cuando uno anda con la cabeza cargada de preocupaciones el cuerpo se distrae y vienen las caídas. "
-                "Como médico y fisioterapeuta te doy las pautas esenciales de primeros auxilios:\n\n"
-                "1. **Reposo y elevación:** Siéntate y pon el pie en alto sobre un cojín para mejorar la circulación.\n"
-                "2. **Frío local:** Aplica una compresa fría envuelta en un paño durante 15 a 20 minutos para contener la inflamación.\n"
-                "3. **Cero sobrecarga:** No forces la pisada si hay dolor punzante.\n\n"
-                "Si ves deformidad evidente o no puedes apoyar el pie, ve a que te tomen una radiografía. Descansa esa pierna hoy."
-            ), False
-        else:
-            return nombre_avatar, (
-                f"Atiende esa torcedura de inmediato, {apodo}. El estrés cotidiano reduce la atención propioceptiva y propicia tropiezos. "
-                "Aplica reposo inmediato, eleva la extremidad y coloca frío local indirecto por 15 minutos. "
-                "Si la inflamación es intensa o te impide apoyar, acude a valoración médica para descartar una fisura ósea."
-            ), False
-
-    # G. Respaldos biográficos individuales
-    if avatar_id == "larissa":
-        if re.search(r"\b(endometriosis|postrad[oa]|cuerpo|dolor|enemigo|moverte)\b", texto_lower):
-            return nombre_avatar, (
-                f"Te entiendo desde lo más hondo de mi ser, {apodo}. Viví diez meses inmovilizada de niña por una fractura de fémur "
-                "y pasé años de dolor incomprendido hasta mi cirugía por endometriosis grado IV. Sé lo que es sentir que tu propio cuerpo "
-                "te encierra y que el mundo sigue sin ti.\n\n"
-                "No te pelees con tu cuerpo: cuando el dolor aprieta, no te está castigando, te está pidiendo auxilio y pausa. "
-                "Respira suave, suelta la culpa por lo que hoy no puedes hacer y vamos a cuidar de ti un instante a la vez."
-            ), False
-
-    elif avatar_id == "rodrigo":
-        if re.search(r"\b(soto del real|de la riva|prisi[oó]n|c[aá]rcel|encerrado|acusaci[oó]n)\b", texto_lower):
-            return nombre_avatar, (
-                f"Sé perfectamente lo que es ese frío en el estómago, {apodo}. Pasé ochenta y dos días en el Módulo 4 de Soto del Real "
-                "por las firmas falsificadas de De la Riva. Si te enfrentas a una injusticia, no te desgastes en la rabia: "
-                "apóyate en hechos limpios y mantén la cabeza serena. Los muros encierran el cuerpo, pero la integridad no te la quita nadie."
-            ), False
-
-    # H. Consultas directas sobre datos de Perfil
+    # Consultas sobre datos de registro
     if any(q in texto_lower for q in ["como me llamo", "cómo me llamo", "sabes mi nombre", "sabes como me llamo", "mi apodo"]):
         return nombre_avatar, f"Oficialmente estás registrado como {perfil_usuario.get('nombre_completo', apodo)}, aunque aquí en confianza siempre eres {apodo}.", False
 
@@ -349,7 +359,7 @@ Principios reflexivos aplicables:
     if any(q in texto_lower for q in ["en que trabajo", "en qué trabajo", "mi profesion", "mi profesión", "a que me dedico"]):
         return nombre_avatar, f"Te desempeñas como {profesion}. Recuerda siempre que tu valor humano va mucho más allá de cualquier jornada laboral.", False
 
-    # Fallback dinámico RAG variado (rotación no determinista)
+    # Fallback dinámico variado
     opciones_consejo = [
         "Acepta que la incomodidad presente es pasajera; centra tu energía en el paso más pequeño que puedas dar hoy.",
         "Cuando la mente se llena de ruido, el cuerpo necesita una pausa física y tres respiraciones conscientes para volver al eje.",
