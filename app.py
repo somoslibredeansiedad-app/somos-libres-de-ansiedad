@@ -255,6 +255,8 @@ if "dm_activo_contacto" not in st.session_state:
     st.session_state.dm_activo_contacto = None
 if "menu_nav_seleccionado" not in st.session_state:
     st.session_state.menu_nav_seleccionado = "Seleccionar Avatar"
+if "last_profile_sync" not in st.session_state:
+    st.session_state.last_profile_sync = 0.0
 
 ref_url = st.query_params.get("ref", "")
 
@@ -335,6 +337,7 @@ if not st.session_state.authenticated:
                             st.session_state.token = d.get("access_token")
                             st.session_state.horas_restantes_plan = d.get("horas_restantes")
                             st.session_state.menu_nav_seleccionado = "Seleccionar Avatar"
+                            st.session_state.last_profile_sync = datetime.now().timestamp()
                             st.success(f"¡Bienvenido/a {st.session_state.user_apodo}!")
                             if d.get("pensamiento_dia"):
                                 st.info(f"💡 {d.get('pensamiento_dia')}")
@@ -424,22 +427,25 @@ if not st.session_state.authenticated:
 # --- PANTALLA PRINCIPAL CON SESIÓN INICIADA ---
 else:
     headers_auth = {"Authorization": f"Bearer {st.session_state.token}"}
+    ahora_ts = datetime.now().timestamp()
     
-    # Sincronización proactiva de plan y contador en tiempo real desde el perfil
-    try:
-        r_sync = requests.get(f"{API_URL}/usuario/mi-perfil", headers=headers_auth, timeout=15)
-        if r_sync.status_code == 200:
-            d_perfil = r_sync.json().get("perfil", {})
-            st.session_state.user_plan = d_perfil.get("plan_nivel", "gratis")
-            st.session_state.horas_restantes_plan = d_perfil.get("horas_restantes")
-    except Exception:
-        pass
+    # Sincronización optimizada: solo cada 60 segundos o bajo demanda para evitar demoras
+    if ahora_ts - st.session_state.last_profile_sync > 60:
+        try:
+            r_sync = requests.get(f"{API_URL}/usuario/mi-perfil", headers=headers_auth, timeout=12)
+            if r_sync.status_code == 200:
+                d_perfil = r_sync.json().get("perfil", {})
+                st.session_state.user_plan = d_perfil.get("plan_nivel", "gratis")
+                st.session_state.horas_restantes_plan = d_perfil.get("horas_restantes")
+                st.session_state.last_profile_sync = ahora_ts
+        except Exception:
+            pass
 
-    # Sincronización de catálogo y avatares vinculados
+    # Sincronización del catálogo oficial de guías
     catalogo_completo = []
     chats_disp_semana = 25
     try:
-        r_cat = requests.get(f"{API_URL}/avatares/catalogo", headers=headers_auth, timeout=15)
+        r_cat = requests.get(f"{API_URL}/avatares/catalogo", headers=headers_auth, timeout=12)
         if r_cat.status_code == 200:
             d_c = r_cat.json()
             catalogo_completo = d_c.get("avatares", [])
@@ -456,27 +462,26 @@ else:
     except Exception:
         pass
 
-    # Sincronización de contactos de DMs comunitarios
+    # Sincronización contextual de contactos comunitarios
     mis_contactos_dm = []
-    try:
-        r_dm_contacts = requests.get(f"{API_URL}/comunidad/mis-chats", headers=headers_auth, timeout=15)
-        if r_dm_contacts.status_code == 200:
-            mis_contactos_dm = r_dm_contacts.json().get("contactos", [])
-    except Exception:
-        pass
+    if st.session_state.menu_nav_seleccionado == "Red Social y Comunidad":
+        try:
+            r_dm_contacts = requests.get(f"{API_URL}/comunidad/mis-chats", headers=headers_auth, timeout=12)
+            if r_dm_contacts.status_code == 200:
+                mis_contactos_dm = r_dm_contacts.json().get("contactos", [])
+        except Exception:
+            pass
 
     opciones = ["Seleccionar Avatar", "Chat con Avatar", "Red Social y Comunidad", "Planes y Suscripción"]
     if st.session_state.user_role == "admin":
         opciones.append("Panel de Administración")
 
-    # Índice de sincronización del selector de navegación
     idx_actual = opciones.index(st.session_state.menu_nav_seleccionado) if st.session_state.menu_nav_seleccionado in opciones else 0
     menu = st.sidebar.selectbox("Navegación", opciones, index=idx_actual, key="sb_nav_menu")
     st.session_state.menu_nav_seleccionado = menu
 
     st.sidebar.markdown(f"**Plan:** <span style='color:#4E8A72; font-weight:bold;'>{st.session_state.user_plan.upper()}</span>", unsafe_allow_html=True)
 
-    # Despliegue del contador de horas de vigencia de plan
     if st.session_state.user_role != "admin" and st.session_state.horas_restantes_plan is not None:
         horas = st.session_state.horas_restantes_plan
         if horas > 0:
@@ -496,12 +501,16 @@ else:
             st.session_state.horas_restantes_plan = None
             st.rerun()
 
+    # Cierre de sesión seguro manteniendo el referido de entrada
     if st.sidebar.button("Cerrar Sesión"):
+        saved_ref = st.query_params.get("ref", "")
         for key in list(st.session_state.keys()):
             del st.session_state[key]
+        if saved_ref:
+            st.query_params["ref"] = saved_ref
         st.rerun()
 
-    # --- BARRA LATERAL CONTEXTUAL 1: GUÍAS ACTIVOS (SOLO EN SELECCIÓN O CHAT) ---
+    # Barra lateral contextual: Guías Activos
     if menu in ["Seleccionar Avatar", "Chat con Avatar"]:
         st.sidebar.markdown("---")
         st.sidebar.markdown("### 🌿 Tus Guías Activos")
@@ -520,7 +529,7 @@ else:
                     
             st.sidebar.caption(f"Mensajes semanales disponibles: **{chats_disp_semana}**")
 
-    # --- BARRA LATERAL CONTEXTUAL 2: CHATS CON MIEMBROS (SOLO EN RED SOCIAL) ---
+    # Barra lateral contextual: Chats con Miembros
     elif menu == "Red Social y Comunidad":
         st.sidebar.markdown("---")
         st.sidebar.markdown("### 💬 Chats con Miembros")
@@ -595,7 +604,7 @@ else:
                         except Exception as e:
                             st.error(f"Error: {e}")
 
-    # 2. CHAT CON AVATAR (CABECERA FIJA Y CONTENEDOR CON SCROLL INDEPENDIENTE)
+    # 2. CHAT CON AVATAR (CABECERA FIJA, RECUPERACIÓN ASÍNCRONA DE HISTORIAL Y SCROLL INTERNO)
     elif menu == "Chat con Avatar":
         if not st.session_state.avatar_activo:
             st.warning("Selecciona un guía primero en la pestaña 'Seleccionar Avatar'.")
@@ -615,35 +624,32 @@ else:
                 """, unsafe_allow_html=True)
 
             chat_key = f"messages_{st.session_state.user_id}_{av.get('id')}"
-            ahora_utc = datetime.now(timezone.utc)
-            limite_72h = ahora_utc - timedelta(hours=72)
 
+            # Recuperación inicial del historial persistente desde el backend (72 horas)
             if chat_key not in st.session_state:
-                st.session_state[chat_key] = [{
-                    "role": "assistant",
-                    "content": av.get("disparador_inicial", "Hola, estoy aquí para acompañarte."),
-                    "is_crisis": False,
-                    "timestamp": ahora_utc.isoformat()
-                }]
-            else:
-                mensajes_vigentes = []
-                for m in st.session_state[chat_key]:
-                    ts_str = m.get("timestamp")
-                    if ts_str:
-                        try:
-                            m_time = datetime.fromisoformat(ts_str)
-                            if m_time >= limite_72h:
-                                mensajes_vigentes.append(m)
-                        except Exception:
-                            mensajes_vigentes.append(m)
-                    else:
-                        mensajes_vigentes.append(m)
-                st.session_state[chat_key] = mensajes_vigentes if mensajes_vigentes else [{
-                    "role": "assistant",
-                    "content": av.get("disparador_inicial", "Hola, estoy aquí para acompañarte."),
-                    "is_crisis": False,
-                    "timestamp": ahora_utc.isoformat()
-                }]
+                st.session_state[chat_key] = []
+                try:
+                    r_hist = requests.get(f"{API_URL}/chat/historial/{av.get('id')}", headers=headers_auth, timeout=12)
+                    if r_hist.status_code == 200:
+                        mensajes_remotos = r_hist.json().get("mensajes", [])
+                        for mr in mensajes_remotos:
+                            st.session_state[chat_key].append({
+                                "role": mr.get("role"),
+                                "content": mr.get("content"),
+                                "is_crisis": mr.get("is_crisis", False),
+                                "timestamp": mr.get("timestamp")
+                            })
+                except Exception:
+                    pass
+
+                # Si no hay historial previo, se inyecta el disparador de bienvenida
+                if not st.session_state[chat_key]:
+                    st.session_state[chat_key].append({
+                        "role": "assistant",
+                        "content": av.get("disparador_inicial", "Hola, estoy aquí para acompañarte."),
+                        "is_crisis": False,
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    })
 
             chat_container = st.container(height=500)
             with chat_container:
@@ -664,10 +670,6 @@ else:
 
                 ahora_msg = datetime.now(timezone.utc).isoformat()
                 st.session_state[chat_key].append({"role": "user", "content": user_text, "is_crisis": False, "timestamp": ahora_msg})
-                
-                with chat_container:
-                    with st.chat_message("user", avatar="👤"):
-                        st.markdown(user_text)
 
                 try:
                     payload = {
@@ -675,32 +677,21 @@ else:
                         "message": user_text,
                         "historial_previo": historial_reciente
                     }
-                    r = requests.post(f"{API_URL}/chat", headers=headers_auth, json=payload, timeout=60)
+                    r = requests.post(f"{API_URL}/chat", headers=headers_auth, json=payload, timeout=35)
                     
                     if r.status_code == 200:
-                        try:
-                            d_resp = r.json()
-                            ans = d_resp.get("respuesta")
-                            es_crisis = d_resp.get("is_crisis", False)
-                            chats_rest = d_resp.get("chats_restantes")
-                            
-                            st.session_state[chat_key].append({
-                                "role": "assistant", 
-                                "content": ans, 
-                                "is_crisis": es_crisis,
-                                "timestamp": datetime.now(timezone.utc).isoformat()
-                            })
-                            
-                            with chat_container:
-                                if es_crisis:
-                                    st.error(ans)
-                                else:
-                                    with st.chat_message("assistant", avatar="🌿"):
-                                        st.markdown(ans)
-                                        st.caption(f"Mensajes restantes de tu plan: {chats_rest}")
-                            st.rerun()
-                        except Exception as e_json:
-                            st.error(f"Error interpretando la respuesta del servidor: {e_json}")
+                        d_resp = r.json()
+                        ans = d_resp.get("respuesta")
+                        es_crisis = d_resp.get("is_crisis", False)
+                        chats_rest = d_resp.get("chats_restantes")
+                        
+                        st.session_state[chat_key].append({
+                            "role": "assistant", 
+                            "content": ans, 
+                            "is_crisis": es_crisis,
+                            "timestamp": datetime.now(timezone.utc).isoformat()
+                        })
+                        st.rerun()
                     else:
                         try:
                             detalle = r.json().get("detail", r.text[:250])
@@ -708,7 +699,7 @@ else:
                             detalle = r.text[:250] if r.text else f"Error HTTP {r.status_code}"
                         st.error(f"Aviso del servidor ({r.status_code}): {detalle}")
                 except requests.exceptions.Timeout:
-                    st.error("El servidor tardó más de 60 segundos en responder. Si el backend estaba en reposo, espera un momento y vuelve a enviar el mensaje.")
+                    st.error("El servidor demoró en responder. Espera un instante y vuelve a intentarlo.")
                 except Exception as e:
                     st.error(f"Falla de conexión con el backend: {e}")
 
@@ -721,7 +712,7 @@ else:
         with tab_mi_perfil:
             st.markdown("### 👤 Tu Perfil Personal")
             try:
-                res_me = requests.get(f"{API_URL}/usuario/mi-perfil", headers=headers_auth, timeout=30)
+                res_me = requests.get(f"{API_URL}/usuario/mi-perfil", headers=headers_auth, timeout=15)
                 if res_me.status_code == 200:
                     mi_p = res_me.json().get("perfil", {})
                     col_p1, col_p2 = st.columns([1, 4])
@@ -741,7 +732,7 @@ else:
                     st.markdown("---")
                     st.markdown("#### Actualizar Datos")
                     
-                    archivo_foto = st.file_uploader("Actualizar foto de perfil (se optimizará a 50 KB automáticamente):", type=["jpg", "jpeg", "png"])
+                    archivo_foto = st.file_uploader("Actualizar foto de perfil (se optimiza automáticamente a 50 KB):", type=["jpg", "jpeg", "png"], key="fu_perfil_foto")
                     foto_b64 = mi_p.get("foto_perfil")
                     if archivo_foto:
                         foto_b64 = comprimir_imagen(archivo_foto)
@@ -751,18 +742,19 @@ else:
                     nuevo_estado = st.selectbox("Situación Sentimental:", ["Prefiero no decir", "Soltero/a", "En pareja / Casado/a", "Divorciado/a", "Viudo/a"], index=0)
                     nuevos_hijos = st.number_input("Hijos:", min_value=0, max_value=10, value=mi_p.get("cantidad_hijos") or 0)
                     
-                    st.caption("💡 **Tip para tu biografía:** *Defínete como eres, cómo quieres que te vean, qué es lo que haces y cómo es tu día. Escribe entre 100 y 1000 palabras para que tu avatar guía te conozca en profundidad.*")
+                    st.caption("💡 **Tip para tu biografía:** *Defínete como eres, cómo quieres que te vean y qué haces día a día para que tu guía te conozca en profundidad.*")
                     nueva_bio = st.text_area("Biografía / Pensamiento de Serenidad:", value=mi_p.get("biografia") or "", height=150)
                     
                     if st.button("Guardar Cambios de Perfil"):
                         r_up = requests.put(f"{API_URL}/usuario/mi-perfil", headers=headers_auth, json={
-                            "profesion": nueva_prof,
+                            "profesion": nueva_prof.strip() or None,
                             "situacion_sentimental": None if nuevo_estado == "Prefiero no decir" else nuevo_estado,
                             "cantidad_hijos": int(nuevos_hijos),
-                            "biografia": nueva_bio,
+                            "biografia": nueva_bio.strip() or None,
                             "foto_perfil": foto_b64
-                        }, timeout=30)
+                        }, timeout=25)
                         if r_up.status_code == 200:
+                            st.session_state.last_profile_sync = 0.0
                             st.success("Perfil actualizado con éxito.")
                             st.rerun()
             except Exception as e:
@@ -776,10 +768,10 @@ else:
             if st.session_state.dm_activo_contacto:
                 c_sel = st.session_state.dm_activo_contacto
                 st.markdown(f"#### 💬 Conversación Directa con {c_sel.get('apodo')}")
-                st.caption(f"Profesión: {c_sel.get('profesion') or 'Miembro'} | *Los mensajes de más de 7 días se purgan automáticamente por privacidad.*")
+                st.caption(f"Profesión: {c_sel.get('profesion') or 'Miembro'} | *Los mensajes de más de 7 días se purgan automáticamente.*")
                 
                 try:
-                    r_chat_m = requests.get(f"{API_URL}/comunidad/conversacion/{c_sel.get('id')}", headers=headers_auth, timeout=30)
+                    r_chat_m = requests.get(f"{API_URL}/comunidad/conversacion/{c_sel.get('id')}", headers=headers_auth, timeout=15)
                     if r_chat_m.status_code == 200:
                         mensajes_dm = r_chat_m.json().get("mensajes", [])
                         if not mensajes_dm:
@@ -802,7 +794,7 @@ else:
                                 r_post_dm = requests.post(f"{API_URL}/comunidad/dm", headers=headers_auth, json={
                                     "destinatario_id": c_sel.get("id"),
                                     "contenido": nuevo_dm_texto.strip()
-                                }, timeout=30)
+                                }, timeout=20)
                                 if r_post_dm.status_code == 200:
                                     st.success("Mensaje enviado.")
                                     st.rerun()
@@ -817,7 +809,7 @@ else:
                 st.markdown("---")
 
             try:
-                res_perf = requests.get(f"{API_URL}/comunidad/perfiles", headers=headers_auth, timeout=30)
+                res_perf = requests.get(f"{API_URL}/comunidad/perfiles", headers=headers_auth, timeout=15)
                 if res_perf.status_code == 200:
                     for p in res_perf.json().get("perfiles", []):
                         es_incog = p.get("es_incognito", False)
@@ -839,7 +831,7 @@ else:
                                         st.caption("⚠️ Para enviar solicitud de amistad a este usuario debes ascender a Plan Comunicador.")
                                     else:
                                         if st.button("Enviar Solicitud de Amistad", key=f"sol_{p.get('id')}"):
-                                            requests.post(f"{API_URL}/comunidad/amistad/solicitar", headers=headers_auth, json={"usuario_id": p.get("id")}, timeout=30)
+                                            requests.post(f"{API_URL}/comunidad/amistad/solicitar", headers=headers_auth, json={"usuario_id": p.get("id")}, timeout=20)
                                             st.success("Solicitud enviada.")
                                             st.rerun()
                                 elif estatus_a == "pendiente":
@@ -849,10 +841,10 @@ else:
                                         st.warning("📩 Te ha enviado una solicitud de amistad:")
                                         col_si, col_no = st.columns(2)
                                         if col_si.button("Aceptar", key=f"ac_{p.get('amistad_id')}"):
-                                            requests.post(f"{API_URL}/comunidad/amistad/{p.get('amistad_id')}/responder?aceptar=true", headers=headers_auth, timeout=30)
+                                            requests.post(f"{API_URL}/comunidad/amistad/{p.get('amistad_id')}/responder?aceptar=true", headers=headers_auth, timeout=20)
                                             st.rerun()
                                         if col_no.button("Rechazar", key=f"rc_{p.get('amistad_id')}"):
-                                            requests.post(f"{API_URL}/comunidad/amistad/{p.get('amistad_id')}/responder?aceptar=false", headers=headers_auth, timeout=30)
+                                            requests.post(f"{API_URL}/comunidad/amistad/{p.get('amistad_id')}/responder?aceptar=false", headers=headers_auth, timeout=20)
                                             st.rerun()
                                 elif estatus_a == "aceptada":
                                     st.success("🤝 ¡Son Amigos! (Chat directo ilimitado habilitado)")
@@ -887,7 +879,7 @@ else:
                                 "contenido": post_txt.strip(),
                                 "categoria_emocional": map_cat[cat_emocional],
                                 "is_anonimo": anon
-                            }, timeout=30)
+                            }, timeout=25)
                             st.success("Publicación realizada.")
                             st.rerun()
             else:
@@ -909,7 +901,7 @@ else:
             cat_query = map_filtro[filtro_cat]
             url_muro = f"{API_URL}/muro" if cat_query == "todas" else f"{API_URL}/muro?categoria={cat_query}"
             
-            res_muro = requests.get(url_muro, headers=headers_auth, timeout=30)
+            res_muro = requests.get(url_muro, headers=headers_auth, timeout=20)
             if res_muro.status_code == 200:
                 posts = res_muro.json().get("posts", [])
                 if not posts:
@@ -953,7 +945,7 @@ else:
                                     r_c = requests.post(f"{API_URL}/muro/{post.get('id')}/comentar", headers=headers_auth, json={
                                         "contenido": nuevo_com.strip(),
                                         "is_anonimo": anon_com
-                                    }, timeout=30)
+                                    }, timeout=20)
                                     if r_c.status_code == 201:
                                         st.success("Comentario publicado.")
                                         st.rerun()
@@ -984,7 +976,7 @@ else:
                                 "tema": tema_sala.strip(),
                                 "descripcion": desc_sala.strip(),
                                 "fecha_propuesta": fecha_sala.strip()
-                            }, timeout=30)
+                            }, timeout=25)
                             if r_sol.status_code == 201:
                                 st.success("Solicitud enviada con éxito. El Administrador te asignará el enlace en este panel.")
                                 st.rerun()
@@ -993,7 +985,7 @@ else:
 
                 st.markdown("#### Salas Disponibles y Programadas")
                 try:
-                    r_salas = requests.get(f"{API_URL}/reuniones/salas", headers=headers_auth, timeout=30)
+                    r_salas = requests.get(f"{API_URL}/reuniones/salas", headers=headers_auth, timeout=15)
                     if r_salas.status_code == 200:
                         salas_list = r_salas.json().get("salas", [])
                         if not salas_list:
@@ -1017,10 +1009,13 @@ else:
             asu = st.text_input("Asunto:")
             det = st.text_area("Mensaje detallado:")
             if st.button("Enviar al Administrador"):
-                requests.post(f"{API_URL}/buzon/ticket", headers=headers_auth, json={"categoria": cat, "asunto": asu, "mensaje": det}, timeout=30)
-                st.success("Ticket registrado correctamente.")
+                if asu.strip() and det.strip():
+                    requests.post(f"{API_URL}/buzon/ticket", headers=headers_auth, json={"categoria": cat, "asunto": asu.strip(), "mensaje": det.strip()}, timeout=20)
+                    st.success("Ticket registrado correctamente.")
+                else:
+                    st.warning("Completa el asunto y el mensaje.")
 
-    # 4. PLANES Y CONCILIACIÓN DE PAGOS PROTEGIDA
+    # 4. PLANES Y CONCILIACIÓN DE PAGOS PROTEGIDA (CON SUBIDA DE COMPROBANTE)
     elif menu == "Planes y Suscripción":
         tab_p, tab_c, tab_pago_guiado = st.tabs(["Planes Oficiales", "Canjear y Compartir Referido", "Coordinar Pago Privado con Admin"])
 
@@ -1034,8 +1029,9 @@ else:
             st.markdown("### 🎟️ Canjear Cupón Promocional")
             cod = st.text_input("Introduce tu Código de Cupón (Ej: SL-VERDE-4821):")
             if st.button("Canjear Cupón"):
-                r = requests.post(f"{API_URL}/cupones/canjear", headers=headers_auth, json={"codigo": cod.strip()}, timeout=30)
+                r = requests.post(f"{API_URL}/cupones/canjear", headers=headers_auth, json={"codigo": cod.strip()}, timeout=20)
                 if r.status_code == 200:
+                    st.session_state.last_profile_sync = 0.0
                     st.success(r.json().get("message"))
                     st.rerun()
                 else:
@@ -1044,7 +1040,7 @@ else:
             st.markdown("---")
             st.markdown("### 📢 Comparte tu Enlace y Gana Recompensas")
             try:
-                res_me = requests.get(f"{API_URL}/usuario/mi-perfil", headers=headers_auth, timeout=30)
+                res_me = requests.get(f"{API_URL}/usuario/mi-perfil", headers=headers_auth, timeout=15)
                 cod_ref_mio = res_me.json().get("perfil", {}).get("codigo_referido", "") if res_me.status_code == 200 else ""
             except Exception:
                 cod_ref_mio = ""
@@ -1066,7 +1062,7 @@ else:
 
         with tab_pago_guiado:
             st.markdown("### 🔒 Coordinación de Pago Privado con el Administrador")
-            st.caption("Tus solicitudes y los datos bancarios se gestionan de forma confidencial dentro del canal privado.")
+            st.caption("Tus solicitudes y los comprobantes se gestionan de forma confidencial dentro del canal privado.")
 
             opcion_tramite = st.selectbox("1. ¿Qué operación deseas realizar?:", [
                 "Comprar Plan Comunicador ($5 USD / 30 días)",
@@ -1086,19 +1082,22 @@ else:
             if accion_pago == "Ya realicé mi pago y deseo enviar el reporte con comprobante":
                 monto_ref = st.text_input("Monto cancelado en Bs / USD y Banco Emisor:")
                 num_comprobante = st.text_input("Número de Referencia del Comprobante:")
-                nota_adicional = st.text_area("Mensaje adicional o duda para el Administrador:")
+                archivo_comprobante = st.file_uploader("Adjuntar captura del comprobante (se optimiza a <50 KB):", type=["jpg", "jpeg", "png"], key="fu_comprobante_pago")
+                nota_adicional = st.text_area("Mensaje adicional para el Administrador:")
                 
                 if st.button("Enviar Reporte de Pago"):
                     if not num_comprobante.strip():
                         st.warning("Por favor ingresa el número de referencia.")
                     else:
+                        comp_b64 = comprimir_imagen(archivo_comprobante) if archivo_comprobante else None
                         mensaje_formateado = f"Plan: {opcion_tramite} | Monto: {monto_ref} | Ref: {num_comprobante} | Nota: {nota_adicional}"
                         r_pay = requests.post(f"{API_URL}/pagos/enviar-mensaje", headers=headers_auth, json={
                             "mensaje": mensaje_formateado,
                             "plan_solicitado": opcion_tramite,
                             "metodo_pago": "Reporte de Pago",
-                            "monto_referencia": num_comprobante
-                        }, timeout=30)
+                            "monto_referencia": num_comprobante.strip(),
+                            "comprobante_url": comp_b64
+                        }, timeout=25)
                         if r_pay.status_code == 200:
                             st.success("Reporte enviado al Administrador. Te responderá por este canal.")
                             st.rerun()
@@ -1109,14 +1108,14 @@ else:
                         "mensaje": mensaje_pedido,
                         "plan_solicitado": opcion_tramite,
                         "metodo_pago": accion_pago
-                    }, timeout=30)
+                    }, timeout=25)
                     if r_ped.status_code == 200:
                         st.success("Solicitud enviada. El Administrador te suministrará los datos por este chat.")
                         st.rerun()
 
             st.markdown("#### Conversación Privada y Cupones Entregados")
             try:
-                r_my_p = requests.get(f"{API_URL}/pagos/mis-mensajes", headers=headers_auth, timeout=30)
+                r_my_p = requests.get(f"{API_URL}/pagos/mis-mensajes", headers=headers_auth, timeout=15)
                 if r_my_p.status_code == 200:
                     mensajes_pago = r_my_p.json().get("mensajes", [])
                     if not mensajes_pago:
@@ -1124,6 +1123,8 @@ else:
                     for mp in mensajes_pago:
                         emisor = "Tú" if mp.get("emisor_rol") == "user" else "🌟 Administrador (Juan Carlos)"
                         st.markdown(f"**{emisor}:** {mp.get('mensaje')}")
+                        if mp.get("comprobante_url"):
+                            st.image(mp.get("comprobante_url"), width=160, caption="Comprobante Adjunto")
             except Exception as e:
                 st.error(f"Error: {e}")
 
@@ -1138,7 +1139,7 @@ else:
             st.markdown("### Emisión de Cupones de Activación (Válidos por 30 minutos)")
             color = st.selectbox("Color del Cupón:", ["verde", "azul", "rojo", "morado"])
             if st.button("Generar Código"):
-                r = requests.post(f"{API_URL}/admin/cupones", headers=headers_auth, json={"tipo": color}, timeout=30)
+                r = requests.post(f"{API_URL}/admin/cupones", headers=headers_auth, json={"tipo": color}, timeout=20)
                 if r.status_code == 200:
                     d = r.json()
                     st.success(f"Código: `{d.get('codigo')}` | Plan: {d.get('tipo_plan')} | Días: {d.get('duracion_dias')}")
@@ -1146,37 +1147,40 @@ else:
         with tab_pagos_adm:
             st.markdown("### Bandeja de Conciliación de Pagos")
             try:
-                r_conv = requests.get(f"{API_URL}/admin/pagos/conversaciones", headers=headers_auth, timeout=30)
+                r_conv = requests.get(f"{API_URL}/admin/pagos/conversaciones", headers=headers_auth, timeout=15)
                 if r_conv.status_code == 200:
                     usuarios = r_conv.json().get("usuarios_con_pago", [])
                     if not usuarios:
                         st.info("No hay pagos pendientes de revisión.")
                     for u in usuarios:
                         with st.expander(f"Usuario: {u.get('apodo')} ({u.get('correo')}) - Plan: {u.get('plan')}"):
-                            r_hist = requests.get(f"{API_URL}/admin/pagos/usuario/{u.get('id')}", headers=headers_auth, timeout=30)
+                            r_hist = requests.get(f"{API_URL}/admin/pagos/usuario/{u.get('id')}", headers=headers_auth, timeout=15)
                             if r_hist.status_code == 200:
                                 for h in r_hist.json().get("mensajes", []):
                                     st.caption(f"{'Usuario' if h.get('emisor_rol') == 'user' else 'Admin'}: {h.get('mensaje')}")
+                                    if h.get("comprobante_url"):
+                                        st.image(h.get("comprobante_url"), width=150, caption="Comprobante Adjunto")
                             
                             st.caption("💡 *Plantilla rápida para enviar datos Pago Móvil BDV:*")
                             if st.button("📋 Pegar Coordenadas BDV", key=f"bdv_{u.get('id')}"):
                                 texto_bdv = "Datos BDV: Banco de Venezuela (0102) | Tel: 04128014962 | CI: 84608666 | Monto al cambio BCV del día según plan."
-                                requests.post(f"{API_URL}/admin/pagos/responder", headers=headers_auth, json={"para_usuario_id": u.get("id"), "mensaje": texto_bdv}, timeout=30)
+                                requests.post(f"{API_URL}/admin/pagos/responder", headers=headers_auth, json={"para_usuario_id": u.get("id"), "mensaje": texto_bdv}, timeout=20)
                                 st.success("Coordenadas enviadas.")
                                 st.rerun()
 
                             resp_admin = st.text_area(f"Responder o entregar cupón a {u.get('apodo')}:", key=f"adm_resp_{u.get('id')}")
                             if st.button("Enviar Respuesta", key=f"btn_adm_resp_{u.get('id')}"):
-                                requests.post(f"{API_URL}/admin/pagos/responder", headers=headers_auth, json={"para_usuario_id": u.get("id"), "mensaje": resp_admin}, timeout=30)
-                                st.success("Respuesta enviada.")
-                                st.rerun()
+                                if resp_admin.strip():
+                                    requests.post(f"{API_URL}/admin/pagos/responder", headers=headers_auth, json={"para_usuario_id": u.get("id"), "mensaje": resp_admin.strip()}, timeout=20)
+                                    st.success("Respuesta enviada.")
+                                    st.rerun()
             except Exception as e:
                 st.error(f"Error: {e}")
 
         with tab_reuniones_adm:
             st.markdown("### Gestión de Salas de Círculos de Apoyo")
             try:
-                r_adm_salas = requests.get(f"{API_URL}/reuniones/salas", headers=headers_auth, timeout=30)
+                r_adm_salas = requests.get(f"{API_URL}/reuniones/salas", headers=headers_auth, timeout=15)
                 if r_adm_salas.status_code == 200:
                     salas_adm = r_adm_salas.json().get("salas", [])
                     if not salas_adm:
@@ -1195,7 +1199,7 @@ else:
                                     "sala_id": s_a.get("id"),
                                     "enlace_reunion": enlace_input.strip() or None,
                                     "estatus": nuevo_est
-                                }, timeout=30)
+                                }, timeout=20)
                                 if r_up_s.status_code == 200:
                                     st.success("Sala actualizada.")
                                     st.rerun()
@@ -1205,7 +1209,7 @@ else:
         with tab_afiliados_adm:
             st.markdown("### 👥 Auditoría de Referidos y Programa de Recompensas")
             try:
-                r_af = requests.get(f"{API_URL}/admin/afiliados", headers=headers_auth, timeout=30)
+                r_af = requests.get(f"{API_URL}/admin/afiliados", headers=headers_auth, timeout=15)
                 if r_af.status_code == 200:
                     afiliados = r_af.json().get("afiliados", [])
                     afiliados_activos = [a for a in afiliados if a.get("total_referidos", 0) > 0]
@@ -1221,7 +1225,7 @@ else:
                                     if st.button("🏆 Adjudicar Bono Conversión (7 días)", key=f"btn_bono_{a.get('usuario_id')}"):
                                         r_rew = requests.post(f"{API_URL}/admin/afiliados/premiar", headers=headers_auth, json={
                                             "usuario_id": a.get("usuario_id"), "tipo_premio": "bono_conversion"
-                                        }, timeout=30)
+                                        }, timeout=20)
                                         if r_rew.status_code == 200:
                                             st.success(r_rew.json().get("message"))
                                             st.rerun()
@@ -1234,7 +1238,7 @@ else:
                                     if st.button("👑 Adjudicar Gran Meta (1 año)", key=f"btn_meta_{a.get('usuario_id')}"):
                                         r_rew = requests.post(f"{API_URL}/admin/afiliados/premiar", headers=headers_auth, json={
                                             "usuario_id": a.get("usuario_id"), "tipo_premio": "gran_meta"
-                                        }, timeout=30)
+                                        }, timeout=20)
                                         if r_rew.status_code == 200:
                                             st.success(r_rew.json().get("message"))
                                             st.rerun()
@@ -1245,7 +1249,7 @@ else:
 
         with tab_metricas_adm:
             try:
-                r_m = requests.get(f"{API_URL}/admin/usuarios", headers=headers_auth, timeout=30)
+                r_m = requests.get(f"{API_URL}/admin/usuarios", headers=headers_auth, timeout=15)
                 if r_m.status_code == 200:
                     met = r_m.json().get("metricas", {})
                     st.metric("Total Usuarios Registrados", met.get("total_registrados", 0))
@@ -1257,7 +1261,7 @@ else:
             st.markdown("### 💾 Respaldo Integral de la Base de Datos")
             if st.button("Generar Respaldo JSON"):
                 try:
-                    r_bk = requests.get(f"{API_URL}/admin/backup", headers=headers_auth, timeout=40)
+                    r_bk = requests.get(f"{API_URL}/admin/backup", headers=headers_auth, timeout=30)
                     if r_bk.status_code == 200:
                         st.download_button(
                             label="📥 Descargar Archivo de Respaldo",
@@ -1272,10 +1276,10 @@ else:
             st.markdown("### ⚙️ Disparador Manual de Mantenimiento Semanal")
             if st.button("🚀 Ejecutar Mantenimiento Ahora"):
                 try:
-                    r_cron = requests.post(f"{API_URL}/cron/mantenimiento", headers={"X-Cron-Key": CRON_SECRET_KEY}, timeout=40)
+                    r_cron = requests.post(f"{API_URL}/cron/mantenimiento", headers={"X-Cron-Key": CRON_SECRET_KEY}, timeout=30)
                     if r_cron.status_code == 200:
                         d_res = r_cron.json()
-                        st.success(f"Mantenimiento ejecutado: {d_res.get('chats_semanales_reseteados')} chats reseteados, {d_res.get('planes_vencidos_revertidos')} planes expirados, {d_res.get('mensajes_directos_purgados_7d')} DMs purgados (7d), {d_res.get('posts_muro_purgados_72h')} posts del muro purgados (72h) y {d_res.get('salas_reunion_purgadas_24h')} salas cerradas purgadas (24h).")
+                        st.success(f"Mantenimiento ejecutado: {d_res.get('chats_semanales_reseteados')} chats reseteados, {d_res.get('planes_vencidos_revertidos')} planes expirados, {d_res.get('mensajes_directos_purgados_7d')} DMs purgados (7d), {d_res.get('posts_muro_purgados_72h')} posts del muro purgados (72h), {d_res.get('salas_reunion_purgadas_24h')} salas cerradas purgadas (24h) y {d_res.get('chats_avatares_purgados_72h')} mensajes de avatares purgados (72h).")
                     else:
                         st.error("Error al disparar mantenimiento.")
                 except Exception as e:

@@ -15,7 +15,7 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, select, o
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, selectinload
 
-# Delegación estricta al motor cognitivo de Rafael
+# Delegación estricta al motor cognitivo asíncrono de Rafael
 from cerebro_avatares import (
     obtener_catalogo_formateado,
     existe_avatar,
@@ -119,6 +119,16 @@ class UserModel(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     last_active_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
+class ChatMessageModel(Base):
+    __tablename__ = "mensajes_chat_avatar"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("usuarios.id"), index=True)
+    avatar_id: Mapped[str] = mapped_column(String(50), index=True)
+    role: Mapped[str] = mapped_column(String(20)) # "user" o "assistant"
+    content: Mapped[str] = mapped_column(String(3000))
+    is_crisis: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
+
 class FriendshipModel(Base):
     __tablename__ = "amistades"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -144,7 +154,7 @@ class PaymentChatMessageModel(Base):
     metodo_pago: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     monto_referencia: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     mensaje: Mapped[str] = mapped_column(String(2000))
-    comprobante_url: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    comprobante_url: Mapped[Optional[str]] = mapped_column(String(100000), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 class CouponModel(Base):
@@ -774,7 +784,7 @@ async def responder_pago_admin(data: PaymentMessageCreate, admin: UserModel = De
     await db.commit()
     return {"status": "success", "message": "Respuesta de pago enviada."}
 
-# --- CATÁLOGO Y CHAT DELEGADO AL CEREBRO MODULAR DE RAFAEL ---
+# --- CATÁLOGO Y CHAT ASÍNCRONO DELEGADO AL CEREBRO DE RAFAEL ---
 @app.get("/api/avatares/catalogo")
 async def obtener_avatares(current_user: UserModel = Depends(get_current_user)):
     activos = json.loads(current_user.avatares_activos)
@@ -806,6 +816,34 @@ async def seleccionar_avatar(data: AvatarSelectRequest, current_user: UserModel 
     await db.commit()
     return {"status": "success", "message": "Avatar seleccionado con éxito.", "activos": activos}
 
+@app.get("/api/chat/historial/{avatar_id}")
+async def obtener_historial_chat(avatar_id: str, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    """Recupera el historial de conversación con un avatar específico dentro de la ventana de 72 horas."""
+    hace_72h = datetime.now(timezone.utc) - timedelta(hours=72)
+    res = await db.execute(
+        select(ChatMessageModel).where(
+            and_(
+                ChatMessageModel.user_id == current_user.id,
+                ChatMessageModel.avatar_id == avatar_id,
+                ChatMessageModel.created_at >= hace_72h
+            )
+        ).order_by(ChatMessageModel.created_at.asc())
+    )
+    mensajes = res.scalars().all()
+    return {
+        "status": "success",
+        "mensajes": [
+            {
+                "id": m.id,
+                "role": m.role,
+                "content": m.content,
+                "is_crisis": m.is_crisis,
+                "timestamp": m.created_at.isoformat()
+            }
+            for m in mensajes
+        ]
+    }
+
 @app.post("/api/chat")
 async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     if not existe_avatar(data.avatar_id):
@@ -818,6 +856,16 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
 
     current_user.chats_usados_semana += 1
     current_user.last_active_at = datetime.now(timezone.utc)
+    
+    # Registro del mensaje del usuario en la base de datos
+    msg_user = ChatMessageModel(
+        user_id=current_user.id,
+        avatar_id=data.avatar_id,
+        role="user",
+        content=data.message,
+        is_crisis=False
+    )
+    db.add(msg_user)
     await db.commit()
     await db.refresh(current_user)
 
@@ -831,12 +879,24 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
         "biografia": current_user.biografia
     }
 
-    nombre_av, resp, es_crisis = procesar_respuesta_avatar(
+    # Llamada asíncrona no bloqueante al motor cognitivo
+    nombre_av, resp, es_crisis = await procesar_respuesta_avatar(
         avatar_id=data.avatar_id, 
         mensaje_usuario=data.message, 
         perfil_usuario=perfil_dict, 
         historial_reciente=data.historial_previo or []
     )
+
+    # Persistencia de la respuesta del avatar
+    msg_avatar = ChatMessageModel(
+        user_id=current_user.id,
+        avatar_id=data.avatar_id,
+        role="assistant",
+        content=resp,
+        is_crisis=es_crisis
+    )
+    db.add(msg_avatar)
+    await db.commit()
 
     return {
         "status": "success",
@@ -1083,7 +1143,7 @@ async def premiar_afiliado(data: RewardAffiliateCreate, admin: UserModel = Depen
         "nueva_expiracion": user.suscripcion_expira.isoformat()
     }
 
-# --- CRON CON PURGAS ESTRICTAS (DMs: 7 Días | Muro: 72 Horas | Salas: 24 Horas) ---
+# --- CRON CON PURGAS ESTRICTAS (DMs: 7 Días | Muro: 72 Horas | Salas: 24 Horas | Chat Avatares: 72 Horas) ---
 @app.post("/api/cron/mantenimiento")
 async def ejecutar_mantenimiento_programado(x_cron_key: Optional[str] = Header(None), db: AsyncSession = Depends(get_db)):
     if x_cron_key != CRON_SECRET_KEY:
@@ -1116,6 +1176,7 @@ async def ejecutar_mantenimiento_programado(x_cron_key: Optional[str] = Header(N
     salas_del = await db.execute(delete(MeetingRoomModel).where(
         and_(MeetingRoomModel.estatus == "cerrada", MeetingRoomModel.closed_at < hace_24_horas)
     ))
+    chat_del = await db.execute(delete(ChatMessageModel).where(ChatMessageModel.created_at < hace_72_horas))
 
     await db.commit()
 
@@ -1125,7 +1186,8 @@ async def ejecutar_mantenimiento_programado(x_cron_key: Optional[str] = Header(N
         "planes_vencidos_revertidos": planes_revertidos,
         "mensajes_directos_purgados_7d": dms_del.rowcount,
         "posts_muro_purgados_72h": muro_del.rowcount,
-        "salas_reunion_purgadas_24h": salas_del.rowcount
+        "salas_reunion_purgadas_24h": salas_del.rowcount,
+        "chats_avatares_purgados_72h": chat_del.rowcount
     }
 
 @app.get("/api/admin/backup")
