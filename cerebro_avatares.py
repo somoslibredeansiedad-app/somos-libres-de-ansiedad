@@ -223,7 +223,6 @@ CATALOGO_PROBLEMAS = {
 # BANCO DE RESPUESTAS DETERMINISTAS CONSOLIDADAS ($0 USD)
 # ==================================================================================================
 RESPUESTAS_CLINICAS_DB = {
-    # P1 a P10
     "p1_panico": {
         "avatar": "camilo",
         "texto": "Oye, mi hermano/a, detente ahí y siéntate conmigo. Apoya los dos pies planos en el piso. Como médico te digo con total certeza: un corazón sano no se va a reventar ni te va a dar un infarto por una crisis de ansiedad.\n\nLo que experimentas es una descarga simpática de adrenalina: tu cuerpo interpretó una alerta y puso a circular sangre a mil por hora. Esa adrenalina dura entre 3 y 8 minutos en sangre y tu hígado la depura de forma natural. No te falta aire; estás hiperventilando aire viejo superficial. Vacía tus pulmones por la boca con un suspiro largo... eso es. Yo vi a mi cuerpo quebrado por fracturas y asaltos, y sé que la máquina humana resiste si le das calma mecánica. Estoy contigo, respira despacio.",
@@ -248,7 +247,6 @@ RESPUESTAS_CLINICAS_DB = {
         "texto": "En un infarto el dolor es opresivo, fijo, se irradia al brazo izquierdo o mandíbula y no varía con la respiración. En el pánico, el dolor punza en partes móviles del tórax por espasmo intercostal, el corazón galopa pero mantiene ritmo regular y las extremidades hormiguean. Tu corazón está sano.",
         "opciones_siguientes": [{"id": "raiz", "texto": "⬅️ Volver a las opciones de este tema"}]
     },
-
     "p2_vacio": {
         "avatar": "anastasia",
         "texto": "Analicemos lo que ocurre en tu cerebro con rigor objetivo. Cuando la tristeza profunda y la depresión se instalan, la corteza prefrontal izquierda disminuye su tasa metabólica y la Red Neuronal por Defecto (DMN) entra en un bucle rumiante hiperactivo.\n\nEse vacío no es una falla de tu carácter; es un estado de neuroquímica desregulada y fatiga atencional. Cuando mi padre falleció en el aula y cuando perdí la movilidad concertística de mi mano, comprendí que exigirte estar alegre solo profundiza la herida. Hoy no necesitas entusiasmo; necesitas microacciones basales. Levantarte y beber agua ya estimula tus vías dopaminérgicas. El movimiento precede a la motivación. Da solo un micro-paso hoy.",
@@ -273,7 +271,6 @@ RESPUESTAS_CLINICAS_DB = {
         "texto": "No te castigues con la trampa de la positividad tóxica. La tristeza no pide permiso ni revisa cuentas bancarias; es una respuesta emocional que te pide una pausa y un abrazo. Tener comodidades materiales no te hace inmune al dolor humano. Suelta la culpa y permítete un ritmo suave hoy.",
         "opciones_siguientes": [{"id": "raiz", "texto": "⬅️ Volver a las opciones de este tema"}]
     },
-
     "p3_deudas": {
         "avatar": "rodrigo",
         "texto": "Mírame con claridad: a las tres de la madrugada no se liquida una hipoteca, no abre una oficina judicial ni se firma un acuerdo bancario. Quedarte en la cama mirando el techo solo te garantiza llegar agotado al momento en que debas tomar decisiones despierto.\n\nYo sé lo que es ver tu patrimonio calcinado y arrastrar deudas de más de ciento sesenta mil euros bajo amenazas de embargo. La vergüenza es una trampa. Mañana por la mañana coges papel y pluma: acreedor, cuantía total objetiva y fecha de vencimiento. Quien se anticipa, da la cara y propone un calendario razonable de pagos, desarma el pánico de litigio. Ahora sal de la cama diez minutos, rompe la rumiación y deja reposar el esqueleto.",
@@ -288,7 +285,6 @@ RESPUESTAS_CLINICAS_DB = {
         "texto": "La quiebra o la falta de dinero destruye cuando se oculta en silencios y mentiras. Siéntate con los tuyos con sobriedad y serenidad: 'Estamos cruzando una tormenta económica transitoria; tendremos que ajustar gastos por unos meses, pero estamos juntos y lo vamos a resolver'. Quitar el secreto le quita el 80% de la angustia al hogar.",
         "opciones_siguientes": [{"id": "raiz", "texto": "⬅️ Volver a las opciones de este tema"}]
     },
-
     "p4_bullying": {
         "avatar": "larissa",
         "texto": "Respira hondo, pon tu mano en el pecho y siente mi abrazo a través de estas palabras. A mis quince años viví exactamente ese infierno: editaron mis fotos personales, las regaron por el colegio y se burlaron de mi familia. Pasé meses sin querer comer ni salir de mi cuarto.\n\nHoy te digo mirándote a los ojos: **tú no tienes la culpa de la crueldad ajena.** Quien hostiga lo hace desde su propia miseria y cobardía. No les contestes en esos grupos; no les des combustible emocional. Toma captura de pantalla completa donde se vean fechas y números de teléfono. Muéstraselo de inmediato a tus padres o a un docente de confianza. Tu valor no depende de lo que digan cobardes detrás de una pantalla.",
@@ -314,7 +310,6 @@ RESPUESTAS_CLINICAS_DB = {
         "texto": "No tienes que cruzar esa puerta a solas sintiéndote indefensa/o. Pide a tu representante que te acompañe hasta la puerta del salón y que solicite una reunión formal con la dirección del plantel para activar el protocolo de protección escolar. No estás cometiendo ningún delito; estás exigiendo tu derecho al estudio seguro.",
         "opciones_siguientes": [{"id": "raiz", "texto": "⬅️ Volver a las opciones de este tema"}]
     },
-
     "p5_acoso_sex": {
         "avatar": "larissa",
         "texto": "Escúchame con toda la fuerza de mi alma: **eres completamente inocente.** La responsabilidad moral y penal recae únicamente sobre quien vulneró tus límites.\n\nEn mi juventud enfrenté a un gerente de hotel que utilizó su jerarquía para hostigarme, y cuando lo denuncié, la empresa me despidió fabricando mentiras. Conozco el asco en la garganta y la sensación de sentir el cuerpo manchado. Pero tu cuerpo es el templo sagrado que resistió para mantenerte con vida. No cargues con el crimen de otro. Si la agresión ocurrió recientemente, busca resguardo médico y forense urgente para cuidar tu salud. Busca acompañamiento en trauma sexual; tu dignidad está intacta.",
@@ -340,7 +335,6 @@ RESPUESTAS_CLINICAS_DB = {
         "texto": "Tu sistema nervioso cerró las compuertas de proximidad para protegerte, y ese límite es 100% válido y necesario en esta etapa. Hazlo respetar sin culpa: 'Por favor mantengamos distancia, no me siento cómodo/a con abrazos en este momento'. Quien te respeta de verdad, esperará a que tu cuerpo vuelva a sentirse seguro.",
         "opciones_siguientes": [{"id": "raiz", "texto": "⬅️ Volver a las opciones de este tema"}]
     },
-
     "p6_mobbing": {
         "avatar": "mariana",
         "texto": "¡Epa! Para ahí mismo. Esa violencia sutil la viví en carne propia con un gerente que me exigía cosas ilegales a las tres de la madrugada y me destruyó la salud hasta terminar hospitalizada por úlcera sangrante.\n\nEl acoso laboral (*mobbing*) busca quebrarte moralmente para que renuncies creyendo que eres un/a incompetente. Desarmemos la trampa: esto no es un problema de rendimiento; es abuso de poder corporativo. Desde hoy la regla de oro es: **cero palabras al aire**. Toda instrucción desmedida, pide que te la confirmen por correo. Abre una bitácora fuera del computador de la empresa: anota fecha, hora, hecho exacto y testigos. Y recuerda: las empresas se reemplazan; tus órganos no.",
@@ -361,7 +355,6 @@ RESPUESTAS_CLINICAS_DB = {
         "texto": "No renuncies en caliente ni des un salto al vacío. Conviértete en un 'empleado invisible': haz estrictamente lo que marca tu contrato de 8 a 5, ni un minuto más, no te involucres en chismes, cuida tu energía y dedica las tardes a postular en silencio a nuevas opciones laborales.",
         "opciones_siguientes": [{"id": "raiz", "texto": "⬅️ Volver a las opciones de este tema"}]
     },
-
     "p7_violencia": {
         "avatar": "rodrigo",
         "texto": "Sé lo que es tener sicarios vigilando la puerta de tu casa y que disparen contra las ventanas de tu despacho. Sé lo que es que tu sistema nervioso se quede atascado en alerta máxima, esperando el siguiente golpe a cada minuto.\n\nLa agresión violenta fractura la sensación básica de seguridad en el mundo. Tu mente aprende que cualquier sombra es una amenaza mortal. Tu prioridad ahora no es confrontar; es tu blindaje fáctico: corta comunicación con el agresor, cambia tus rutas de desplazamiento habituales y formaliza la denuncia penal correspondiente. En paralelo desensibilizaremos el cuerpo. Los agresores apuestan a tu parálisis; tu respuesta será la frialdad procesal.",
@@ -381,7 +374,6 @@ RESPUESTAS_CLINICAS_DB = {
         "texto": "Tu cerebro mamífero confunde el recuerdo con la percepción presente. Aplica la diferenciación temporal: di en voz alta: 'Eso ocurrió en la fecha [mencionar fecha de la agresión]. Hoy es [mencionar fecha de hoy] y estoy resguardado/a'. Obliga a tu hipocampo a archivar el trauma en el pasado.",
         "opciones_siguientes": [{"id": "raiz", "texto": "⬅️ Volver a las opciones de este tema"}]
     },
-
     "p8_miedo_calle": {
         "avatar": "camilo",
         "texto": "Esa sensación de encierro la conozco milimétricamente. Cuando me fracturaron la mandíbula con un tubo de hierro en un callejón, pasé meses en los que solo asomar la cabeza por el balcón me disparaba mareos y palpitaciones.\n\nEl cerebro crea una ecuación inmediata: calle igual a peligro mortal. Pero si te quedas atrincherado, le confirmas a tu amígdala que el mundo entero es un campo de batalla. No vamos a salir a caminar diez cuadras de golpe. La rehabilitación se hace por micro-dosis: hoy te paras cinco minutos en el marco de tu puerta principal respirando despacio. Mañana caminas diez metros y regresas. Tu sistema registrará que puedes habitar tu entorno sin daño.",
@@ -396,7 +388,6 @@ RESPUESTAS_CLINICAS_DB = {
         "texto": "Tras los atentados del 11M donde falleció mi primo, tardé años en volver a subir a un vagón de tren sin ahogarme en pánico. Se supera mediante aproximaciones sucesivas: primero acércate a la estación y mira los vehículos pasar; luego sube y haz una sola parada corta acompañado de alguien de confianza. Tu cuerpo irá reprogramando la seguridad.",
         "opciones_siguientes": [{"id": "raiz", "texto": "⬅️ Volver a las opciones de este tema"}]
     },
-
     "p9_duelo": {
         "avatar": "camilo",
         "texto": "Hermano/a, suelta las corazas y descansa un momento en este dolor. Yo vi a mi padre morir aplastado por el balcón de un derrumbe, y años después vi a mi mejor amigo Yordanis desaparecer en el mar sin poder recuperar su cuerpo para darle sepultura.\n\nConozco la culpa del sobreviviente: esa voz cruel que te dice que debiste hacer algo más o que no tienes derecho a sonreír cuando ellos ya no están. Pero honrar a quienes amamos no consiste en sepultarnos en vida a su lado. El duelo no es una enfermedad que se cura con pastillas; es el precio que paga el alma por haber amado de verdad. Llora lo que necesites, pero recuerda: tu vida hoy es el único monumento vivo que le queda a su memoria.",
@@ -422,7 +413,6 @@ RESPUESTAS_CLINICAS_DB = {
         "texto": "La frase 'tienes que ser fuerte' es una torpeza que la sociedad repite porque no sabe qué hacer con las lágrimas ajenas. Quítate esa armadura pesada. Tienes derecho a derrumbarte, a pedir un abrazo y a no tener respuestas hoy.",
         "opciones_siguientes": [{"id": "raiz", "texto": "⬅️ Volver a las opciones de este tema"}]
     },
-
     "p10_desrealizacion": {
         "avatar": "anastasia",
         "texto": "Lo que estás experimentando clínicamente se denomina despersonalización y desrealización. No te estás volviendo loco/a ni estás perdiendo la razón.\n\nCuando el sistema nervioso alcanza un nivel de sobrecarga traumática o angustia que rebasa su umbral biológico, el cerebro activa un fusible de autoprotección: disminuye la intensidad perceptiva para evitar que el dolor te quiebre. Lo viví cuando caí bajo las placas de hielo del Nevá a -18°C y tras la muerte de mi padre: sentía que todo a mi alrededor era una maqueta de papel. Para reconectar los circuitos, no intentes forzar pensamientos abstractos; activa estímulos mecánicos y térmicos: pisa descalzo el suelo, toma un cubo de hielo en la mano o lávate el rostro con agua helada. Tu cuerpo le dirá al cerebro que estás a salvo.",
@@ -432,7 +422,6 @@ RESPUESTAS_CLINICAS_DB = {
             {"id": "raiz", "texto": "⬅️ Volver a las opciones de este tema"}
         ]
     },
-
     "sub_p22_montana_rusa": {
         "avatar": "anastasia",
         "texto": "La oscilación de ciclos afectivos requiere una higiene rigurosa del ritmo circadiano. Cuando el sueño se desorganiza, los neurotransmisores entran en resonancia caótica. Tu primera regla de protección es la hora fija de acostarse y levantarse, la desconexión total de pantallas a las 9 PM y evitar estimulantes químicos.",
@@ -448,7 +437,6 @@ RESPUESTAS_CLINICAS_DB = {
         "texto": "La sociedad suele juzgar la desregulación anímica como debilidad o falta de voluntad. No gastes energía discutiendo con quien carece de formación médica. Construye un círculo estrecho de apoyo informado y lleva un diario de estados basales para reconocer tus propios ciclos.",
         "opciones_siguientes": [{"id": "raiz", "texto": "⬅️ Volver a las opciones de este tema"}]
     },
-
     "sub_p25_soledad": {
         "avatar": "mariana",
         "texto": "¡Epa! Aquí estoy para hacerte compañía con todo el cariño del mundo. A veces no necesitamos una sesión de psicología profunda; solo hace falta saber que del otro lado hay alguien que te lee con atención y respeto. Cuéntame: ¿cómo estuvo tu día hoy? ¿Tomaste algo rico?",
@@ -467,7 +455,6 @@ RESPUESTAS_CLINICAS_DB = {
         "texto": "Desconfiar es un mecanismo de defensa tras haber sido traicionado. El error no fue tuyo por confiar, sino de quien rompió las reglas éticas. No tienes que abrir tu casa de golpe a nadie; la confianza sana se construye por peldaños verificables a lo largo del tiempo.",
         "opciones_siguientes": [{"id": "raiz", "texto": "⬅️ Volver a las opciones de este tema"}]
     },
-
     "sub_p28_pacing": {
         "avatar": "mariana",
         "texto": "El 'pacing' es la técnica clínica de dosificación energética: parar antes de que aparezca la fatiga extrema. Si sabes que a las dos horas de trabajo colapsas, programa una alarma a los 75 minutos para caminar tres minutos y tomar agua. No vacíes tu tanque de reserva.",
@@ -483,8 +470,6 @@ RESPUESTAS_CLINICAS_DB = {
         "texto": "Perdonar no es firmar un cheque de impunidad ni obligarte a tomar café con quien te agravió. El perdón es un acto de higiene jurídica y moral personal: es renunciar al veneno del rencor diario para que tu mente quede libre para construir tu presente.",
         "opciones_siguientes": [{"id": "raiz", "texto": "⬅️ Volver a las opciones de este tema"}]
     },
-
-    # Respuestas de árbol clásico integrado
     "mar_limites": {
         "avatar": "mariana",
         "texto": "Poner límites no es pelear ni ser grosero/a; es cuidar las reglas del juego. Cuando te asignen una sobrecarga abusiva, responde con claridad ejecutiva: 'Entiendo la urgencia de esta tarea; para incluirla hoy con calidad, ¿cuál de los otros tres proyectos previos ponemos en pausa?'. Eso traslada la responsabilidad de priorizar a quien corresponde.",
@@ -550,8 +535,23 @@ def cargar_biografia_completa(avatar_id: str) -> str:
                 print(f"[CEREBRO AVATARES] Aviso: No se pudo leer {ruta}: {e}")
     return ""
 
+def obtener_catalogo_formateado(activos_usuario: list) -> list:
+    catalogo = []
+    for k, v in AVATARES_5.items():
+        catalogo.append({
+            "id": k,
+            "nombre": v["nombre"],
+            "pais": v["pais"],
+            "bandera": v["bandera"],
+            "especialidad": v["especialidad"],
+            "tono": v["tono"],
+            "imagen": v["imagen"],
+            "is_activo": k in activos_usuario,
+            "disparador_inicial": v["disparador_inicial"]
+        })
+    return catalogo
+
 def obtener_catalogo_problemas() -> List[Dict[str, Any]]:
-    """Entrega la lista ordenada de las 13 problemáticas con sus avatares recomendados."""
     resultado = []
     for k, v in CATALOGO_PROBLEMAS.items():
         avatares_info = [AVATARES_5[a_id] for a_id in v["avatares"] if a_id in AVATARES_5]
@@ -565,10 +565,12 @@ def obtener_catalogo_problemas() -> List[Dict[str, Any]]:
     return resultado
 
 def obtener_avatar_por_defecto(problema_id: str) -> str:
-    """Selecciona automáticamente el avatar primario asignado al motivo del usuario."""
     if problema_id in CATALOGO_PROBLEMAS:
         return CATALOGO_PROBLEMAS[problema_id]["avatares"][0]
     return "mariana"
+
+def existe_avatar(avatar_id: str) -> bool:
+    return avatar_id in AVATARES_5
 
 def obtener_opciones_raiz(avatar_id: str, problema_id: Optional[str] = None) -> List[Dict[str, str]]:
     if problema_id and problema_id in CATALOGO_PROBLEMAS:

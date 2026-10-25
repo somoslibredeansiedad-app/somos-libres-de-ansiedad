@@ -284,7 +284,7 @@ class AvatarSelectRequest(BaseModel):
     avatar_id: str
 
 class UserMessage(BaseModel):
-    avatar_id: str
+    avatar_id: Optional[str] = None
     message: Optional[str] = ""
     opcion_id: Optional[str] = None
     problema_id: Optional[str] = None
@@ -893,12 +893,12 @@ async def obtener_historial_chat(avatar_id: str, current_user: UserModel = Depen
 
 @app.post("/api/chat")
 async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    # Si no se pasó avatar pero se pasó problema, asignar el avatar por defecto del tema
+    # Si no se pasó avatar explícito pero sí problema_id, asigna el guía correspondiente
     avatar_id_efectivo = data.avatar_id
     if (not avatar_id_efectivo or not existe_avatar(avatar_id_efectivo)) and data.problema_id:
         avatar_id_efectivo = obtener_avatar_por_defecto(data.problema_id)
 
-    if not existe_avatar(avatar_id_efectivo):
+    if not avatar_id_efectivo or not existe_avatar(avatar_id_efectivo):
         raise HTTPException(status_code=404, detail="Guía o Avatar no encontrado.")
 
     limite_texto = {"gratis": 25, "comunicador": 100, "amigo_todos": 999999}.get(current_user.plan_nivel, 25)
@@ -936,7 +936,7 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
         "biografia": current_user.biografia
     }
 
-    # Procesamiento con soporte para problema_id en cerebro_avatares
+    # Procesamiento delegando problema_id a cerebro_avatares
     nombre_av, resp, es_crisis, opciones_siguientes = await procesar_respuesta_avatar(
         avatar_id=avatar_id_efectivo, 
         mensaje_usuario=contenido_entrada, 

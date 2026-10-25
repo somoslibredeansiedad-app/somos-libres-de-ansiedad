@@ -64,9 +64,9 @@ st.markdown(f"""
         color: #FFFFFF !important;
         border-radius: 10px !important;
         font-weight: bold !important;
-        font-size: 17px !important;
-        min-height: 48px !important;
-        padding: 8px 18px !important;
+        font-size: 16px !important;
+        min-height: 46px !important;
+        padding: 8px 16px !important;
         width: 100% !important;
         border: none !important;
         box-shadow: 0 3px 6px rgba(0,0,0,0.08) !important;
@@ -76,39 +76,50 @@ st.markdown(f"""
         color: #FFFFFF !important;
     }}
 
-    /* TARJETA VISUAL DE PROBLEMÁTICAS Y MOTIVOS */
-    .problem-card {{
+    /* TARJETA DE DEFINICIÓN DEL PROBLEMA */
+    .problem-box {{
         background-color: #FFFFFF;
         border: 1.5px solid #C2EAD9;
         border-radius: 14px;
-        padding: 18px;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.04);
-        margin-bottom: 18px;
-        min-height: 250px;
+        padding: 20px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.04);
+        margin-bottom: 24px;
+    }}
+    .problem-box h3 {{
+        margin: 0 0 8px 0 !important;
+        font-size: 20px !important;
+        color: #1E4D3B !important;
+    }}
+    .problem-box .problem-desc {{
+        font-size: 15px !important;
+        color: #5C7A6F !important;
+        line-height: 1.5 !important;
+        margin-bottom: 16px;
+    }}
+    
+    /* SUB-TARJETA DE AVATAR IDÓNEO */
+    .avatar-expert-card {{
+        background-color: #F8FDFB;
+        border: 1px solid #C2EAD9;
+        border-radius: 12px;
+        padding: 12px;
+        text-align: center;
+        margin-top: 8px;
+        min-height: 290px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
     }}
-    .problem-card h4 {{
-        margin: 0 0 6px 0 !important;
-        font-size: 19px !important;
+    .avatar-expert-card h4 {{
+        margin: 8px 0 2px 0 !important;
+        font-size: 16px !important;
         color: #1E4D3B !important;
     }}
-    .problem-card .problem-desc {{
-        font-size: 15px !important;
-        color: #5C7A6F !important;
-        line-height: 1.4 !important;
-        margin-bottom: 12px;
-    }}
-    .problem-card .badge-guides {{
-        background-color: #EBF7F2;
-        color: #4E8A72;
-        padding: 4px 10px;
-        border-radius: 10px;
+    .avatar-expert-card .avatar-spec {{
         font-size: 13px !important;
-        font-weight: 700;
-        margin-bottom: 12px;
-        display: inline-block;
+        color: #4E8A72 !important;
+        font-weight: 600;
+        margin-bottom: 6px;
     }}
 
     /* BOTONES DE RUTAS CONVERSACIONALES GUIADAS */
@@ -274,7 +285,6 @@ API_URL = raw_api_url if raw_api_url.endswith("/api") else f"{raw_api_url}/api"
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://somoslibredeansiedad-app.streamlit.app")
 CRON_SECRET_KEY = os.getenv("CRON_SECRET_KEY", "somos-libres-cron-mantenimiento-2026")
 
-# Estado de la sesión
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "user_id" not in st.session_state:
@@ -296,114 +306,137 @@ if "horas_restantes_plan" not in st.session_state:
 if "dm_activo_contacto" not in st.session_state:
     st.session_state.dm_activo_contacto = None
 if "menu_nav_seleccionado" not in st.session_state:
-    st.session_state.menu_nav_seleccionado = "¿Cómo te sientes hoy?"
+    st.session_state.menu_nav_seleccionado = "Definir el problema"
 if "last_profile_sync" not in st.session_state:
     st.session_state.last_profile_sync = 0.0
 
 ref_url = st.query_params.get("ref", "")
 
-# Catálogo local de 13 problemáticas (Fallback robusto y permanente)
+# CATÁLOGO DE LOS 5 AVATARES CON DATOS Y ESPECIALIDADES
+GUIA_INFO = {
+    "mariana": {
+        "id": "mariana",
+        "nombre": "Mariana Elena Rivas Delgado",
+        "pais": "Venezuela",
+        "bandera": "🇻🇪",
+        "especialidad": "Relacionista Industrial y Clima Laboral",
+        "resumen": "Especialista en sobrecarga laboral, burnout, mobbing y límites saludables."
+    },
+    "camilo": {
+        "id": "camilo",
+        "nombre": "Camilo Ernesto Valdés Portuondo",
+        "pais": "Cuba",
+        "bandera": "🇨🇺",
+        "especialidad": "Médico General y Fisioterapeuta",
+        "resumen": "Regulación somática, control de taquicardia, respiración diafragmática y duelo."
+    },
+    "rodrigo": {
+        "id": "rodrigo",
+        "nombre": "Rodrigo Javier Navas Serrano",
+        "pais": "España",
+        "bandera": "🇪🇸",
+        "especialidad": "Abogado Penalista y Mediador",
+        "resumen": "Pragmatismo estoico, desescalada de deudas, defensa ante abusos e insomnio."
+    },
+    "larissa": {
+        "id": "larissa",
+        "nombre": "Larissa Beatriz Fonseca de Oliveira",
+        "pais": "Brasil",
+        "bandera": "🇧🇷",
+        "especialidad": "Psicóloga Somática y Arteterapeuta",
+        "resumen": "Anclaje sensorial 5-4-3-2-1, contención ante acoso, trauma y autocompasión."
+    },
+    "anastasia": {
+        "id": "anastasia",
+        "nombre": "Anastasia Yurievna Volkova",
+        "pais": "Rusia",
+        "bandera": "🇷🇺",
+        "especialidad": "Neuropsicóloga Clínica y Lingüista",
+        "resumen": "Desarticulación de rumiación mental, niebla cognitiva, desrealización y ciclos de ánimo."
+    }
+}
+
+# MATRIZ DE LAS 13 PROBLEMÁTICAS Y SUS AVATARES IDÓNEOS
 LOCAL_PROBLEMAS = [
     {
         "id": "ansiedad_panico",
-        "titulo": "💓 Ansiedad y Pánico Físico",
-        "descripcion": "Taquicardia, palpitaciones, falta de aire y opresión torácica.",
-        "avatares_ids": ["camilo", "larissa"],
-        "avatares_nombres": ["Camilo (Médico)", "Larissa (Psicóloga Somática)"]
+        "titulo": "💓 Ansiedad y Ataques de Pánico",
+        "descripcion": "Taquicardia, palpitaciones, falta de aire, opresión en el pecho y mareos.",
+        "avatares": ["camilo", "larissa"]
     },
     {
         "id": "depresion_vacio",
         "titulo": "🌧️ Depresión, Vacío y Desesperanza",
-        "descripcion": "Tristeza pesada, pérdida de motivación, apatía y aislamiento.",
-        "avatares_ids": ["anastasia", "larissa"],
-        "avatares_nombres": ["Anastasia (Neuropsicóloga)", "Larissa (Psicóloga)"]
+        "descripcion": "Tristeza profunda, falta de energía, apatía, aislamiento y pérdida de sentido.",
+        "avatares": ["anastasia", "larissa"]
     },
     {
         "id": "angustia_deudas",
-        "titulo": "🌙 Angustia, Deudas y Finanzas",
-        "descripcion": "Insomnio por dinero, demandas, compromisos económicos y vergüenza.",
-        "avatares_ids": ["rodrigo", "mariana"],
-        "avatares_nombres": ["Rodrigo (Abogado/Mediador)", "Mariana (Consultora RRHH)"]
+        "titulo": "🌙 Angustia por Deudas y Finanzas",
+        "descripcion": "Insomnio por dinero, compromisos económicos urgentes, quiebras y vergüenza.",
+        "avatares": ["rodrigo", "mariana"]
     },
     {
         "id": "bullying_acoso_escolar",
         "titulo": "📱 Bullying y Ciberacoso",
-        "descripcion": "Burlas escolares, exclusión digital, difamación en redes y stickers.",
-        "avatares_ids": ["larissa", "mariana"],
-        "avatares_nombres": ["Larissa (Psicóloga)", "Mariana (RRHH)"]
+        "descripcion": "Burlas escolares o juveniles, difamación en grupos digitales, stickers y exclusión.",
+        "avatares": ["larissa", "mariana"]
     },
     {
         "id": "acoso_sexual",
-        "titulo": "🛑 Acoso Sexual en el Entorno",
-        "descripcion": "Insinuaciones indebidas, tocamientos no consentidos, chantaje y culpa.",
-        "avatares_ids": ["larissa", "rodrigo"],
-        "avatares_nombres": ["Larissa (Psicóloga Somática)", "Rodrigo (Penalista)"]
+        "titulo": "🛑 Acoso Sexual y Abuso de Poder",
+        "descripcion": "Insinuaciones indebidas, tocamientos no consentidos, chantaje y culpa inducida.",
+        "avatares": ["larissa", "rodrigo"]
     },
     {
         "id": "acoso_laboral_mobbing",
         "titulo": "💼 Acoso Laboral (Mobbing) y Burnout",
-        "descripcion": "Descalificaciones del jefe, sobrecarga, humillación y desgaste extremo.",
-        "avatares_ids": ["mariana", "rodrigo"],
-        "avatares_nombres": ["Mariana (Clima Laboral)", "Rodrigo (Abogado)"]
+        "descripcion": "Descalificaciones del jefe, sobrecarga injusta, humillación y desgaste ocupacional.",
+        "avatares": ["mariana", "rodrigo"]
     },
     {
         "id": "victimas_abuso_violencia",
-        "titulo": "⚡ Víctimas de Violencia Física",
-        "descripcion": "Sobrevivientes de agresiones directas, asaltos y relaciones violentas.",
-        "avatares_ids": ["rodrigo", "larissa"],
-        "avatares_nombres": ["Rodrigo (Defensa Penal)", "Larissa (Trauma SE)"]
+        "titulo": "⚡ Víctimas de Violencia Física o Abusos",
+        "descripcion": "Sobrevivientes de agresiones directas, golpes, asaltos y relaciones violentas.",
+        "avatares": ["rodrigo", "larissa"]
     },
     {
         "id": "miedos_fobias",
-        "titulo": "🚪 Personas con Miedos y Fobias",
+        "titulo": "🚪 Personas que no Pueden Superar sus Miedos",
         "descripcion": "Agorafobia, miedo a salir a la calle o pánico a transportes cerrados.",
-        "avatares_ids": ["camilo", "anastasia"],
-        "avatares_nombres": ["Camilo (Médico Integral)", "Anastasia (Neuropsicóloga)"]
+        "avatares": ["camilo", "anastasia"]
     },
     {
         "id": "duelo_perdida",
-        "titulo": "🕊️ Duelo y Pérdida de un Ser Querido",
-        "descripcion": "Fallecimiento repentino, duelo sin cuerpo y culpa del sobreviviente.",
-        "avatares_ids": ["camilo", "rodrigo"],
-        "avatares_nombres": ["Camilo (Médico)", "Rodrigo (Justicia Restaurativa)"]
+        "titulo": "🕊️ Duelo por Pérdida de un Ser Querido",
+        "descripcion": "Fallecimiento repentino, pérdidas sin despedida y culpa del sobreviviente.",
+        "avatares": ["camilo", "rodrigo"]
     },
     {
         "id": "trauma_complejo_desrealizacion",
-        "titulo": "🌫️ Traumas y Desrealización",
-        "descripcion": "Sensación de flotar o no estar en el propio cuerpo tras un shock.",
-        "avatares_ids": ["anastasia", "larissa"],
-        "avatares_nombres": ["Anastasia (Neuropsicóloga)", "Larissa (Arteterapia)"]
+        "titulo": "🌫️ Traumas Psicológicos y Desrealización",
+        "descripcion": "Sensación de flotar, desconexión del cuerpo o ver la realidad como una película.",
+        "avatares": ["anastasia", "larissa"]
     },
     {
         "id": "desregulacion_bipolar",
-        "titulo": "🎢 Desregulación Afectiva y Ánimo",
-        "descripcion": "Oscilaciones entre entusiasmo sin freno y agotamiento profundo.",
-        "avatares_ids": ["anastasia"],
-        "avatares_nombres": ["Anastasia (Neuropsicóloga Clínica)"]
+        "titulo": "🎢 Desregulación Afectiva y Ciclos de Ánimo",
+        "descripcion": "Oscilaciones marcadas entre entusiasmo sin freno y bajones profundos de energía.",
+        "avatares": ["anastasia"]
     },
     {
         "id": "conversacion_abierta",
         "titulo": "☕ Solo Deseo Conversar y Desahogarme",
-        "descripcion": "Acompañamiento humano, soledad, empatía y escucha sin juicios.",
-        "avatares_ids": ["mariana", "camilo"],
-        "avatares_nombres": ["Mariana (Venezolana)", "Camilo (Cubano)"]
+        "descripcion": "Acompañamiento humano, soledad cotidiana, empatía y escucha sin juicios.",
+        "avatares": ["mariana", "camilo"]
     },
     {
         "id": "aprender_habitos_neurociencia",
-        "titulo": "🧠 Aprender Neurociencia y Hábitos",
-        "descripcion": "Regulación del sistema nervioso, dosificación de energía y perdón.",
-        "avatares_ids": ["anastasia", "camilo"],
-        "avatares_nombres": ["Anastasia (Lingüista)", "Camilo (Fisioterapeuta)"]
+        "titulo": "🧠 Aprender Neurociencia, Técnicas y Hábitos",
+        "descripcion": "Regulación del sistema nervioso, dosificación de energía (pacing) y auto-perdón.",
+        "avatares": ["anastasia", "camilo"]
     }
 ]
-
-GUIA_NOMBRES = {
-    "mariana": {"nombre": "Mariana Elena Rivas Delgado", "pais": "Venezuela", "bandera": "🇻🇪"},
-    "camilo": {"nombre": "Camilo Ernesto Valdés Portuondo", "pais": "Cuba", "bandera": "🇨🇺"},
-    "rodrigo": {"nombre": "Rodrigo Javier Navas Serrano", "pais": "España", "bandera": "🇪🇸"},
-    "larissa": {"nombre": "Larissa Beatriz Fonseca de Oliveira", "pais": "Brasil", "bandera": "🇧🇷"},
-    "anastasia": {"nombre": "Anastasia Yurievna Volkova", "pais": "Rusia", "bandera": "🇷🇺"}
-}
 
 def comprimir_imagen(imagen_archivo) -> str:
     try:
@@ -440,7 +473,7 @@ def resolver_imagen_pil(avatar_id_o_dict):
                 pass
     return None
 
-def mostrar_imagen_avatar(avatar_id_o_dict, ancho: int = 120):
+def mostrar_imagen_avatar(avatar_id_o_dict, ancho: int = 110):
     img = resolver_imagen_pil(avatar_id_o_dict)
     if img:
         st.image(img, width=ancho)
@@ -478,7 +511,7 @@ if not st.session_state.authenticated:
             if not correo_log.strip() or not pass_log.strip():
                 st.warning("Por favor introduce tu correo electrónico y tu contraseña.")
             else:
-                with st.spinner("Verificando tus credenciales... Por favor espera un instante."):
+                with st.spinner("Verificando credenciales..."):
                     try:
                         payload_log = {"correo": correo_log.strip(), "password": pass_log}
                         if preg_secreta:
@@ -494,7 +527,7 @@ if not st.session_state.authenticated:
                             st.session_state.user_apodo = d.get("apodo", "")
                             st.session_state.token = d.get("access_token")
                             st.session_state.horas_restantes_plan = d.get("horas_restantes")
-                            st.session_state.menu_nav_seleccionado = "¿Cómo te sientes hoy?"
+                            st.session_state.menu_nav_seleccionado = "Definir el problema"
                             st.session_state.last_profile_sync = datetime.now().timestamp()
                             st.success(f"¡Bienvenido/a {st.session_state.user_apodo}!")
                             if d.get("pensamiento_dia"):
@@ -616,7 +649,8 @@ else:
         except Exception:
             pass
 
-    opciones = ["¿Cómo te sientes hoy?", "Chat con el Guía", "Red Social y Comunidad", "Planes y Suscripción"]
+    # MENÚ OFICIAL REESTRUCTURADO
+    opciones = ["Definir el problema", "Chat con el Guía", "Red Social y Comunidad", "Planes y Suscripción"]
     if st.session_state.user_role == "admin":
         opciones.append("Panel de Administración")
 
@@ -653,14 +687,15 @@ else:
             st.query_params["ref"] = saved_ref
         st.rerun()
 
-    # Barra lateral de información y guía activo
-    if menu in ["¿Cómo te sientes hoy?", "Chat con el Guía"]:
+    # Barra lateral de información y acceso directo al guía en curso
+    if menu in ["Definir el problema", "Chat con el Guía"]:
         st.sidebar.markdown("---")
         if st.session_state.avatar_activo:
-            av_info = GUIA_NOMBRES.get(st.session_state.avatar_activo, {})
+            av_side = GUIA_INFO.get(st.session_state.avatar_activo, {})
             st.sidebar.markdown("### 🌿 Tu Guía Asignado")
-            st.sidebar.write(f"**{av_info.get('nombre', st.session_state.avatar_activo.capitalize())}**")
-            st.sidebar.caption(f"Origen: {av_info.get('pais', '')}")
+            mostrar_imagen_avatar(st.session_state.avatar_activo, ancho=85)
+            st.sidebar.write(f"**{av_side.get('nombre', '')}**")
+            st.sidebar.caption(f"{av_side.get('bandera', '')} {av_side.get('pais', '')}")
             if st.sidebar.button("💬 Abrir Conversación", key="btn_side_open_chat"):
                 st.session_state.menu_nav_seleccionado = "Chat con el Guía"
                 st.rerun()
@@ -679,10 +714,10 @@ else:
                     st.session_state.dm_activo_contacto = c_dm
                     st.rerun()
 
-    banner_msg = "Selecciona qué situación o síntoma estás experimentando hoy para activar a tu guía especializado."
+    banner_msg = "Selecciona el problema o síntoma que necesitas tratar para activar de inmediato al guía más idóneo."
     if st.session_state.avatar_activo:
-        av_name = GUIA_NOMBRES.get(st.session_state.avatar_activo, {}).get("nombre", st.session_state.avatar_activo)
-        banner_msg = f"Tu guía activo es {av_name}. Puedes continuar tu sesión en 'Chat con el Guía'."
+        av_name = GUIA_INFO.get(st.session_state.avatar_activo, {}).get("nombre", st.session_state.avatar_activo)
+        banner_msg = f"Tu guía activo es {av_name}. Puedes continuar tu sesión directamente en 'Chat con el Guía'."
 
     st.markdown(f"""
         <div class="welcome-banner">
@@ -692,47 +727,52 @@ else:
     """, unsafe_allow_html=True)
 
     # ----------------------------------------------------------------------------------------------
-    # 1. SELECCIONAR MOTIVO O PROBLEMÁTICA (CATÁLOGO DE 13 SITUACIONES)
+    # 1. DEFINIR EL PROBLEMA (SELECCIÓN POR TRASTORNO / CONDICIÓN CON FOTO DEL GUÍA IDÓNEO)
     # ----------------------------------------------------------------------------------------------
-    if menu == "¿Cómo te sientes hoy?":
+    if menu == "Definir el problema":
         st.subheader("🎯 ¿Qué situación o dolor necesitas ordenar hoy?")
-        st.caption("Selecciona tu motivo de consulta. El sistema asignará al guía con mayor experiencia clínica y biográfica para acompañarte.")
+        st.caption("Selecciona el problema de la lista. Se te presentará el avatar con mayor autoridad clínica y biográfica para acompañarte:")
 
-        cols = st.columns(2)
-        for idx, prob in enumerate(LOCAL_PROBLEMAS):
-            col = cols[idx % 2]
-            with col:
+        for prob in LOCAL_PROBLEMAS:
+            with st.container():
                 st.markdown(f"""
-                    <div class="problem-card">
-                        <div>
-                            <h4>{prob['titulo']}</h4>
-                            <p class="problem-desc">{prob['descripcion']}</p>
-                            <span class="badge-guides">Especialistas asignados: {', '.join(prob['avatares_nombres'])}</span>
-                        </div>
+                    <div class="problem-box">
+                        <h3>{prob['titulo']}</h3>
+                        <p class="problem-desc">{prob['descripcion']}</p>
                     </div>
                 """, unsafe_allow_html=True)
                 
-                # Botones para seleccionar al guía primario o secundario
-                c_btn1, c_btn2 = st.columns(len(prob["avatares_ids"]))
-                for b_idx, a_id in enumerate(prob["avatares_ids"]):
-                    c_btn = c_btn1 if b_idx == 0 else c_btn2
-                    with c_btn:
-                        nom_g = GUIA_NOMBRES.get(a_id, {}).get("nombre", a_id).split()[0]
-                        if st.button(f"Hablar con {nom_g}", key=f"btn_sel_{prob['id']}_{a_id}"):
+                # Presentación de 1 o 2 avatares idóneos con su foto de perfil
+                num_avs = len(prob["avatares"])
+                cols_av = st.columns(num_avs)
+                for i_a, a_id in enumerate(prob["avatares"]):
+                    info_a = GUIA_INFO.get(a_id, {})
+                    with cols_av[i_a]:
+                        st.markdown("<div class='avatar-expert-card'>", unsafe_allow_html=True)
+                        mostrar_imagen_avatar(a_id, ancho=110)
+                        st.markdown(f"<h4>{info_a.get('nombre')}</h4>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='avatar-spec'>{info_a.get('bandera')} {info_a.get('especialidad')}</div>", unsafe_allow_html=True)
+                        st.caption(info_a.get("resumen"))
+                        
+                        btn_label = f"Consultar con {info_a.get('nombre').split()[0]}"
+                        if st.button(btn_label, key=f"sel_prob_{prob['id']}_{a_id}"):
                             st.session_state.avatar_activo = a_id
                             st.session_state.problema_activo = prob["id"]
                             st.session_state.menu_nav_seleccionado = "Chat con el Guía"
                             st.rerun()
+                        st.markdown("</div>", unsafe_allow_html=True)
+                
+                st.markdown("<div style='margin-bottom: 25px;'></div>", unsafe_allow_html=True)
 
     # ----------------------------------------------------------------------------------------------
-    # 2. CHAT CON EL GUÍA (BANCO CLÍNICO DETERMINISTA + INPUT LIBRE)
+    # 2. CHAT CON EL GUÍA (BANCO CLÍNICO DETERMINISTA + TEXTO LIBRE)
     # ----------------------------------------------------------------------------------------------
     elif menu == "Chat con el Guía":
         if not st.session_state.avatar_activo:
-            st.warning("Por favor selecciona primero un motivo de consulta en la pestaña '¿Cómo te sientes hoy?'.")
+            st.warning("Por favor selecciona primero un motivo en la pestaña 'Definir el problema'.")
         else:
             av_id = st.session_state.avatar_activo
-            av_info = GUIA_NOMBRES.get(av_id, {"nombre": av_id.capitalize(), "pais": "Internacional"})
+            av_info = GUIA_INFO.get(av_id, {"nombre": av_id.capitalize(), "pais": "Internacional", "bandera": "🌿", "especialidad": "Guía de Serenidad"})
             prob_id = st.session_state.problema_activo or "ansiedad_panico"
 
             with st.container():
@@ -740,8 +780,8 @@ else:
                     <div class="avatar-header-box">
                         <div style="display: flex; align-items: center; justify-content: space-between;">
                             <div>
-                                <h3 style="margin: 0; font-size: 1.4rem !important;">{av_info['nombre']}</h3>
-                                <p class="avatar-subtitle" style="margin: 2px 0 0 0;">📍 {av_info['pais']} | Guía en línea</p>
+                                <h3 style="margin: 0; font-size: 1.4rem !important;">{av_info['bandera']} {av_info['nombre']}</h3>
+                                <p class="avatar-subtitle" style="margin: 2px 0 0 0;">{av_info['especialidad']} | En línea</p>
                             </div>
                             <span style="background:#EBF7F2; padding:4px 12px; border-radius:12px; font-weight:bold; color:#4E8A72; font-size:14px;">Mensajes disponibles: {chats_disp_semana}</span>
                         </div>
@@ -753,7 +793,6 @@ else:
 
             # Opciones iniciales por defecto según el problema
             if opciones_key not in st.session_state:
-                # Opciones iniciales del banco clínico
                 opciones_base = {
                     "ansiedad_panico": [
                         {"id": "p1_panico", "texto": "💓 Siento que el corazón se me va a salir y me falta el aire"},
@@ -832,7 +871,7 @@ else:
             if chat_key not in st.session_state:
                 st.session_state[chat_key] = [{
                     "role": "assistant",
-                    "content": f"Hola, soy {av_info['nombre']}. Estoy aquí para escucharte y darte orientación en lo que estás viviendo. Puedes seleccionar una de las opciones guiadas o escribirme con total confianza.",
+                    "content": f"Hola, soy {av_info['nombre']}. Estoy aquí para acompañarte y darte orientación en lo que estás atravesando. Selecciona una opción o escribe con total libertad.",
                     "is_crisis": False,
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 }]
@@ -847,7 +886,7 @@ else:
                         with st.chat_message(m["role"], avatar=icono):
                             st.markdown(m["content"])
 
-            # BOTONERA INTERACTIVA DE RUTAS DETERMINISTAS ($0 USD)
+            # BOTONERA INTERACTIVA DETERMINISTA ($0 USD)
             opciones_actuales = st.session_state.get(opciones_key, [])
             if opciones_actuales:
                 st.markdown("<p style='font-size:16px; font-weight:600; margin-bottom:4px; color:#4E8A72;'>💡 Opciones recomendadas para continuar:</p>", unsafe_allow_html=True)
