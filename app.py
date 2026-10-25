@@ -76,32 +76,39 @@ st.markdown(f"""
         color: #FFFFFF !important;
     }}
 
-    /* TARJETA VISUAL DE AVATARES */
-    .avatar-card {{
+    /* TARJETA VISUAL DE PROBLEMÁTICAS Y MOTIVOS */
+    .problem-card {{
         background-color: #FFFFFF;
         border: 1.5px solid #C2EAD9;
         border-radius: 14px;
-        padding: 16px;
-        text-align: center;
+        padding: 18px;
         box-shadow: 0 3px 6px rgba(0,0,0,0.04);
-        margin-bottom: 16px;
+        margin-bottom: 18px;
+        min-height: 250px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }}
-    .avatar-card h4 {{
-        margin: 8px 0 2px 0 !important;
-        font-size: 18px !important;
+    .problem-card h4 {{
+        margin: 0 0 6px 0 !important;
+        font-size: 19px !important;
         color: #1E4D3B !important;
     }}
-    .avatar-card .avatar-spec {{
-        font-size: 14px !important;
-        color: #4E8A72 !important;
-        font-weight: 600;
-        margin-bottom: 6px;
-    }}
-    .avatar-card .avatar-desc {{
-        font-size: 14px !important;
+    .problem-card .problem-desc {{
+        font-size: 15px !important;
         color: #5C7A6F !important;
         line-height: 1.4 !important;
         margin-bottom: 12px;
+    }}
+    .problem-card .badge-guides {{
+        background-color: #EBF7F2;
+        color: #4E8A72;
+        padding: 4px 10px;
+        border-radius: 10px;
+        font-size: 13px !important;
+        font-weight: 700;
+        margin-bottom: 12px;
+        display: inline-block;
     }}
 
     /* BOTONES DE RUTAS CONVERSACIONALES GUIADAS */
@@ -162,7 +169,7 @@ st.markdown(f"""
     /* CABECERA FIJA DE CHAT */
     .avatar-header-box {{
         background-color: #FFFFFF;
-        padding: 12px 18px;
+        padding: 14px 18px;
         border-radius: 12px;
         border: 1.5px solid #C2EAD9;
         box-shadow: 0 2px 6px rgba(0,0,0,0.04);
@@ -267,6 +274,7 @@ API_URL = raw_api_url if raw_api_url.endswith("/api") else f"{raw_api_url}/api"
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://somoslibredeansiedad-app.streamlit.app")
 CRON_SECRET_KEY = os.getenv("CRON_SECRET_KEY", "somos-libres-cron-mantenimiento-2026")
 
+# Estado de la sesión
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "user_id" not in st.session_state:
@@ -279,8 +287,8 @@ if "user_apodo" not in st.session_state:
     st.session_state.user_apodo = ""
 if "avatar_activo" not in st.session_state:
     st.session_state.avatar_activo = None
-if "avatares_vinculados" not in st.session_state:
-    st.session_state.avatares_vinculados = []
+if "problema_activo" not in st.session_state:
+    st.session_state.problema_activo = None
 if "token" not in st.session_state:
     st.session_state.token = None
 if "horas_restantes_plan" not in st.session_state:
@@ -288,11 +296,114 @@ if "horas_restantes_plan" not in st.session_state:
 if "dm_activo_contacto" not in st.session_state:
     st.session_state.dm_activo_contacto = None
 if "menu_nav_seleccionado" not in st.session_state:
-    st.session_state.menu_nav_seleccionado = "Seleccionar Avatar"
+    st.session_state.menu_nav_seleccionado = "¿Cómo te sientes hoy?"
 if "last_profile_sync" not in st.session_state:
     st.session_state.last_profile_sync = 0.0
 
 ref_url = st.query_params.get("ref", "")
+
+# Catálogo local de 13 problemáticas (Fallback robusto y permanente)
+LOCAL_PROBLEMAS = [
+    {
+        "id": "ansiedad_panico",
+        "titulo": "💓 Ansiedad y Pánico Físico",
+        "descripcion": "Taquicardia, palpitaciones, falta de aire y opresión torácica.",
+        "avatares_ids": ["camilo", "larissa"],
+        "avatares_nombres": ["Camilo (Médico)", "Larissa (Psicóloga Somática)"]
+    },
+    {
+        "id": "depresion_vacio",
+        "titulo": "🌧️ Depresión, Vacío y Desesperanza",
+        "descripcion": "Tristeza pesada, pérdida de motivación, apatía y aislamiento.",
+        "avatares_ids": ["anastasia", "larissa"],
+        "avatares_nombres": ["Anastasia (Neuropsicóloga)", "Larissa (Psicóloga)"]
+    },
+    {
+        "id": "angustia_deudas",
+        "titulo": "🌙 Angustia, Deudas y Finanzas",
+        "descripcion": "Insomnio por dinero, demandas, compromisos económicos y vergüenza.",
+        "avatares_ids": ["rodrigo", "mariana"],
+        "avatares_nombres": ["Rodrigo (Abogado/Mediador)", "Mariana (Consultora RRHH)"]
+    },
+    {
+        "id": "bullying_acoso_escolar",
+        "titulo": "📱 Bullying y Ciberacoso",
+        "descripcion": "Burlas escolares, exclusión digital, difamación en redes y stickers.",
+        "avatares_ids": ["larissa", "mariana"],
+        "avatares_nombres": ["Larissa (Psicóloga)", "Mariana (RRHH)"]
+    },
+    {
+        "id": "acoso_sexual",
+        "titulo": "🛑 Acoso Sexual en el Entorno",
+        "descripcion": "Insinuaciones indebidas, tocamientos no consentidos, chantaje y culpa.",
+        "avatares_ids": ["larissa", "rodrigo"],
+        "avatares_nombres": ["Larissa (Psicóloga Somática)", "Rodrigo (Penalista)"]
+    },
+    {
+        "id": "acoso_laboral_mobbing",
+        "titulo": "💼 Acoso Laboral (Mobbing) y Burnout",
+        "descripcion": "Descalificaciones del jefe, sobrecarga, humillación y desgaste extremo.",
+        "avatares_ids": ["mariana", "rodrigo"],
+        "avatares_nombres": ["Mariana (Clima Laboral)", "Rodrigo (Abogado)"]
+    },
+    {
+        "id": "victimas_abuso_violencia",
+        "titulo": "⚡ Víctimas de Violencia Física",
+        "descripcion": "Sobrevivientes de agresiones directas, asaltos y relaciones violentas.",
+        "avatares_ids": ["rodrigo", "larissa"],
+        "avatares_nombres": ["Rodrigo (Defensa Penal)", "Larissa (Trauma SE)"]
+    },
+    {
+        "id": "miedos_fobias",
+        "titulo": "🚪 Personas con Miedos y Fobias",
+        "descripcion": "Agorafobia, miedo a salir a la calle o pánico a transportes cerrados.",
+        "avatares_ids": ["camilo", "anastasia"],
+        "avatares_nombres": ["Camilo (Médico Integral)", "Anastasia (Neuropsicóloga)"]
+    },
+    {
+        "id": "duelo_perdida",
+        "titulo": "🕊️ Duelo y Pérdida de un Ser Querido",
+        "descripcion": "Fallecimiento repentino, duelo sin cuerpo y culpa del sobreviviente.",
+        "avatares_ids": ["camilo", "rodrigo"],
+        "avatares_nombres": ["Camilo (Médico)", "Rodrigo (Justicia Restaurativa)"]
+    },
+    {
+        "id": "trauma_complejo_desrealizacion",
+        "titulo": "🌫️ Traumas y Desrealización",
+        "descripcion": "Sensación de flotar o no estar en el propio cuerpo tras un shock.",
+        "avatares_ids": ["anastasia", "larissa"],
+        "avatares_nombres": ["Anastasia (Neuropsicóloga)", "Larissa (Arteterapia)"]
+    },
+    {
+        "id": "desregulacion_bipolar",
+        "titulo": "🎢 Desregulación Afectiva y Ánimo",
+        "descripcion": "Oscilaciones entre entusiasmo sin freno y agotamiento profundo.",
+        "avatares_ids": ["anastasia"],
+        "avatares_nombres": ["Anastasia (Neuropsicóloga Clínica)"]
+    },
+    {
+        "id": "conversacion_abierta",
+        "titulo": "☕ Solo Deseo Conversar y Desahogarme",
+        "descripcion": "Acompañamiento humano, soledad, empatía y escucha sin juicios.",
+        "avatares_ids": ["mariana", "camilo"],
+        "avatares_nombres": ["Mariana (Venezolana)", "Camilo (Cubano)"]
+    },
+    {
+        "id": "aprender_habitos_neurociencia",
+        "titulo": "🧠 Aprender Neurociencia y Hábitos",
+        "descripcion": "Regulación del sistema nervioso, dosificación de energía y perdón.",
+        "avatares_ids": ["anastasia", "camilo"],
+        "avatares_nombres": ["Anastasia (Lingüista)", "Camilo (Fisioterapeuta)"]
+    }
+]
+
+GUIA_NOMBRES = {
+    "mariana": {"nombre": "Mariana Elena Rivas Delgado", "pais": "Venezuela", "bandera": "🇻🇪"},
+    "camilo": {"nombre": "Camilo Ernesto Valdés Portuondo", "pais": "Cuba", "bandera": "🇨🇺"},
+    "rodrigo": {"nombre": "Rodrigo Javier Navas Serrano", "pais": "España", "bandera": "🇪🇸"},
+    "larissa": {"nombre": "Larissa Beatriz Fonseca de Oliveira", "pais": "Brasil", "bandera": "🇧🇷"},
+    "anastasia": {"nombre": "Anastasia Yurievna Volkova", "pais": "Rusia", "bandera": "🇷🇺"}
+}
 
 def comprimir_imagen(imagen_archivo) -> str:
     try:
@@ -308,7 +419,6 @@ def comprimir_imagen(imagen_archivo) -> str:
         return ""
 
 def resolver_imagen_pil(avatar_id_o_dict):
-    """Resuelve la imagen abriendo el archivo local directamente con PIL de forma infalible."""
     if isinstance(avatar_id_o_dict, dict):
         avatar_id = avatar_id_o_dict.get("id", "")
     else:
@@ -384,7 +494,7 @@ if not st.session_state.authenticated:
                             st.session_state.user_apodo = d.get("apodo", "")
                             st.session_state.token = d.get("access_token")
                             st.session_state.horas_restantes_plan = d.get("horas_restantes")
-                            st.session_state.menu_nav_seleccionado = "Seleccionar Avatar"
+                            st.session_state.menu_nav_seleccionado = "¿Cómo te sientes hoy?"
                             st.session_state.last_profile_sync = datetime.now().timestamp()
                             st.success(f"¡Bienvenido/a {st.session_state.user_apodo}!")
                             if d.get("pensamiento_dia"):
@@ -397,7 +507,7 @@ if not st.session_state.authenticated:
                                 err_msg = f"Error del servidor ({res.status_code}). Intenta de nuevo en unos segundos."
                             st.error(err_msg)
                     except requests.exceptions.Timeout:
-                        st.error("El servidor demoró en responder. Si estaba en reposo, espera 30 segundos y vuelve a presionar el botón.")
+                        st.error("El servidor demoró en responder. Espera 30 segundos y vuelve a presionar el botón.")
                     except Exception as e:
                         st.error(f"Falla de conexión con el servidor: {e}")
 
@@ -423,10 +533,10 @@ if not st.session_state.authenticated:
             **1. Naturaleza No Médica y Deslinde Sanitario Absoluto:**
             * «Somos Libres de Ansiedad» es una plataforma digital de carácter estrictamente educativo, reflexivo y de acompañamiento emocional asistido por Inteligencia Artificial[cite: 1, 2, 6].
             * **NO constituye un servicio médico, psiquiátrico, psicológico clínico ni psicoterapéutico[cite: 1, 2, 6].**
-            * El software, sus creadores, colaboradores y avatares virtuales **NO son médicos colegiados ni terapeutas facultativos**, y bajo ninguna circunstancia emiten diagnósticos clínicos, altas, dictámenes patológicos ni prescripción, retiro o modificación de medicamentos o psicofármacos[cite: 1, 6].
+            * El software, sus creadores, colaboradores y avatares virtuales **NO son médicos colegiados ni terapeutas facultativos**, y bajo ninguna circunstancia emiten diagnósticos clínicos, altas ni prescripción de psicofármacos[cite: 1, 6].
             
             **2. Protocolo de Crisis y Exención en Emergencias:**
-            * Si estás atravesando una emergencia médica, angustia invalidante, crisis aguda de pánico o pensamientos relacionados con autolesión o ideación suicida, acude de inmediato a un centro asistencial o a las líneas de auxilio gratuitas de tu país[cite: 1, 2, 6].
+            * Si estás atravesando una emergencia médica, angustia invalidante o pensamientos de autolesión, acude de inmediato a un centro asistencial o a las líneas de auxilio gratuitas de tu país[cite: 1, 2, 6].
             """)
 
         t1 = st.checkbox("He leído, comprendo y acepto los Términos de Servicio y la Política de Privacidad. (*)", key="chk_terms")
@@ -467,8 +577,6 @@ if not st.session_state.authenticated:
                             except Exception:
                                 detalle_error = f"Error en el servidor ({res.status_code}). Verifica los datos."
                             st.error(f"⚠️ {detalle_error}")
-                    except requests.exceptions.Timeout:
-                        st.error("El servidor tardó en responder durante el registro. Si estaba en reposo, espera 30 segundos e inténtalo de nuevo.")
                     except Exception as e:
                         st.error(f"No se pudo conectar con el servidor: {e}")
 
@@ -490,36 +598,25 @@ else:
         except Exception:
             pass
 
-    catalogo_completo = []
+    # Sincronización de cuota de mensajes
     chats_disp_semana = 25
     try:
-        r_cat = requests.get(f"{API_URL}/avatares/catalogo", headers=headers_auth, timeout=12)
+        r_cat = requests.get(f"{API_URL}/avatares/catalogo", headers=headers_auth, timeout=10)
         if r_cat.status_code == 200:
-            d_c = r_cat.json()
-            catalogo_completo = d_c.get("avatares", [])
-            chats_disp_semana = d_c.get("chats_restantes", 25)
-            vinculados = [av for av in catalogo_completo if av.get("is_activo")]
-            st.session_state.avatares_vinculados = vinculados
-            
-            if not st.session_state.avatar_activo and vinculados:
-                st.session_state.avatar_activo = vinculados[0]
-            elif st.session_state.avatar_activo and vinculados:
-                matching = [v for v in vinculados if v.get("id") == st.session_state.avatar_activo.get("id")]
-                if matching:
-                    st.session_state.avatar_activo = matching[0]
+            chats_disp_semana = r_cat.json().get("chats_restantes", 25)
     except Exception:
         pass
 
     mis_contactos_dm = []
     if st.session_state.menu_nav_seleccionado == "Red Social y Comunidad":
         try:
-            r_dm_contacts = requests.get(f"{API_URL}/comunidad/mis-chats", headers=headers_auth, timeout=12)
+            r_dm_contacts = requests.get(f"{API_URL}/comunidad/mis-chats", headers=headers_auth, timeout=10)
             if r_dm_contacts.status_code == 200:
                 mis_contactos_dm = r_dm_contacts.json().get("contactos", [])
         except Exception:
             pass
 
-    opciones = ["Seleccionar Avatar", "Chat con Avatar", "Red Social y Comunidad", "Planes y Suscripción"]
+    opciones = ["¿Cómo te sientes hoy?", "Chat con el Guía", "Red Social y Comunidad", "Planes y Suscripción"]
     if st.session_state.user_role == "admin":
         opciones.append("Panel de Administración")
 
@@ -556,24 +653,18 @@ else:
             st.query_params["ref"] = saved_ref
         st.rerun()
 
-    # Barra lateral: Guías Activos
-    if menu in ["Seleccionar Avatar", "Chat con Avatar"]:
+    # Barra lateral de información y guía activo
+    if menu in ["¿Cómo te sientes hoy?", "Chat con el Guía"]:
         st.sidebar.markdown("---")
-        st.sidebar.markdown("### 🌿 Tus Guías Activos")
-        
-        if not st.session_state.avatares_vinculados:
-            st.sidebar.caption("Aún no tienes ningún avatar vinculado.")
-        else:
-            for av_vinc in st.session_state.avatares_vinculados:
-                es_actual = (st.session_state.avatar_activo and st.session_state.avatar_activo.get("id") == av_vinc.get("id"))
-                label_boton = f"👉 {av_vinc.get('nombre')}" if es_actual else f"{av_vinc.get('nombre')}"
-                
-                if st.sidebar.button(label_boton, key=f"side_av_{av_vinc.get('id')}"):
-                    st.session_state.avatar_activo = av_vinc
-                    st.session_state.menu_nav_seleccionado = "Chat con Avatar"
-                    st.rerun()
-                    
-            st.sidebar.caption(f"Mensajes semanales disponibles: **{chats_disp_semana}**")
+        if st.session_state.avatar_activo:
+            av_info = GUIA_NOMBRES.get(st.session_state.avatar_activo, {})
+            st.sidebar.markdown("### 🌿 Tu Guía Asignado")
+            st.sidebar.write(f"**{av_info.get('nombre', st.session_state.avatar_activo.capitalize())}**")
+            st.sidebar.caption(f"Origen: {av_info.get('pais', '')}")
+            if st.sidebar.button("💬 Abrir Conversación", key="btn_side_open_chat"):
+                st.session_state.menu_nav_seleccionado = "Chat con el Guía"
+                st.rerun()
+        st.sidebar.caption(f"Mensajes semanales disponibles: **{chats_disp_semana}**")
 
     elif menu == "Red Social y Comunidad":
         st.sidebar.markdown("---")
@@ -588,136 +679,163 @@ else:
                     st.session_state.dm_activo_contacto = c_dm
                     st.rerun()
 
-    if menu == "Red Social y Comunidad":
-        banner_msg = "Bienvenido a tu red de apoyo emocional y crecimiento mutuo."
-    elif menu == "Planes y Suscripción":
-        banner_msg = "Adquiere o extiende tu plan para disfrutar de mayor acompañamiento y funciones exclusivas."
-    elif menu == "Panel de Administración":
-        banner_msg = "Consola Maestra de Operaciones, Finanzas y Métricas de la Comunidad."
-    elif st.session_state.avatar_activo:
-        banner_msg = f"Tu guía activo es {st.session_state.avatar_activo.get('nombre')}. Puedes consultar en 'Chat con Avatar'."
-    else:
-        banner_msg = "Selecciona tu avatar guía para iniciar tu acompañamiento reflexivo."
+    banner_msg = "Selecciona qué situación o síntoma estás experimentando hoy para activar a tu guía especializado."
+    if st.session_state.avatar_activo:
+        av_name = GUIA_NOMBRES.get(st.session_state.avatar_activo, {}).get("nombre", st.session_state.avatar_activo)
+        banner_msg = f"Tu guía activo es {av_name}. Puedes continuar tu sesión en 'Chat con el Guía'."
 
     st.markdown(f"""
         <div class="welcome-banner">
-            <h2>🌟 Espacio Activo de {st.session_state.user_apodo}</h2>
+            <h2>🌟 Espacio de Acompañamiento de {st.session_state.user_apodo}</h2>
             <p>{banner_msg}</p>
         </div>
     """, unsafe_allow_html=True)
 
     # ----------------------------------------------------------------------------------------------
-    # 1. SELECCIONAR AVATAR (DISEÑO LIMPIO EN TARJETAS CON IMÁGENES RESUELTAS)
+    # 1. SELECCIONAR MOTIVO O PROBLEMÁTICA (CATÁLOGO DE 13 SITUACIONES)
     # ----------------------------------------------------------------------------------------------
-    if menu == "Seleccionar Avatar":
-        st.subheader("🛠️ Catálogo de Guías de Serenidad")
-        
-        avatares = catalogo_completo
-        chats_disp = chats_disp_semana
+    if menu == "¿Cómo te sientes hoy?":
+        st.subheader("🎯 ¿Qué situación o dolor necesitas ordenar hoy?")
+        st.caption("Selecciona tu motivo de consulta. El sistema asignará al guía con mayor experiencia clínica y biográfica para acompañarte.")
 
-        if st.session_state.avatar_activo:
-            st.success(f"✅ Tu guía activo es **{st.session_state.avatar_activo.get('nombre')}**. Te quedan **{chats_disp} mensajes semanales** disponibles.")
-        else:
-            if st.session_state.user_plan == "gratis":
-                st.info("ℹ️ Tu **Plan Gratis** te permite vincular **1 Avatar activo** y disfrutar de **25 chats reflexivos semanales**.")
-            elif st.session_state.user_plan == "comunicador":
-                st.info("ℹ️ Tu **Plan Comunicador** te permite alternar entre **hasta 2 Avatares activos** con **100 chats semanales**.")
-            else:
-                st.info("ℹ️ Tu **Plan Amigo de Todos** te permite acceder a los **5 Avatares en simultáneo** de forma ilimitada.")
-
-        # Cuadrícula estilizada
-        c1, c2, c3 = st.columns(3)
-        cols = [c1, c2, c3]
-        for idx, av in enumerate(avatares):
-            with cols[idx % 3]:
-                st.markdown("<div class='avatar-card'>", unsafe_allow_html=True)
-                mostrar_imagen_avatar(av.get("id"), ancho=110)
-                st.markdown(f"<h4>{av.get('nombre')}</h4>", unsafe_allow_html=True)
-                st.markdown(f"<div class='avatar-spec'>📍 {av.get('pais')}</div>", unsafe_allow_html=True)
+        cols = st.columns(2)
+        for idx, prob in enumerate(LOCAL_PROBLEMAS):
+            col = cols[idx % 2]
+            with col:
+                st.markdown(f"""
+                    <div class="problem-card">
+                        <div>
+                            <h4>{prob['titulo']}</h4>
+                            <p class="problem-desc">{prob['descripcion']}</p>
+                            <span class="badge-guides">Especialistas asignados: {', '.join(prob['avatares_nombres'])}</span>
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
                 
-                # Descripción concisa
-                desc_resumida = {
-                    "mariana": "Relacionista Industrial: sobrecarga laboral, burnout y límites saludables.",
-                    "camilo": "Médico General y Fisioterapeuta: regulación somática, palpitaciones y calma física.",
-                    "rodrigo": "Abogado Penalista y Mediador: sentido común, deudas y resolución de conflictos.",
-                    "larissa": "Psicóloga Somática: anclaje sensorial 5-4-3-2-1 y autocompasión.",
-                    "anastasia": "Neuropsicóloga Clínica: desarticulación de bucles mentales y rumiación."
-                }.get(av.get("id"), av.get("tono", "")[:85] + "...")
-                
-                st.markdown(f"<div class='avatar-desc'>{desc_resumida}</div>", unsafe_allow_html=True)
-                
-                esta_seleccionado = av.get("is_activo", False)
-                if esta_seleccionado:
-                    if st.button("Conversar con este Guía", key=f"sel_act_{av.get('id')}"):
-                        st.session_state.avatar_activo = av
-                        st.session_state.menu_nav_seleccionado = "Chat con Avatar"
-                        st.rerun()
-                else:
-                    if st.button("Seleccionar este Guía", key=f"sel_{av.get('id')}"):
-                        try:
-                            r = requests.post(f"{API_URL}/avatares/seleccionar", headers=headers_auth, json={"avatar_id": av.get("id")}, timeout=30)
-                            if r.status_code == 200:
-                                st.session_state.avatar_activo = av
-                                st.session_state.menu_nav_seleccionado = "Chat con Avatar"
-                                st.rerun()
-                            else:
-                                st.error(r.json().get("detail", "Límite de avatares alcanzado en tu plan."))
-                        except Exception as e:
-                            st.error(f"Error: {e}")
-                st.markdown("</div>", unsafe_allow_html=True)
+                # Botones para seleccionar al guía primario o secundario
+                c_btn1, c_btn2 = st.columns(len(prob["avatares_ids"]))
+                for b_idx, a_id in enumerate(prob["avatares_ids"]):
+                    c_btn = c_btn1 if b_idx == 0 else c_btn2
+                    with c_btn:
+                        nom_g = GUIA_NOMBRES.get(a_id, {}).get("nombre", a_id).split()[0]
+                        if st.button(f"Hablar con {nom_g}", key=f"btn_sel_{prob['id']}_{a_id}"):
+                            st.session_state.avatar_activo = a_id
+                            st.session_state.problema_activo = prob["id"]
+                            st.session_state.menu_nav_seleccionado = "Chat con el Guía"
+                            st.rerun()
 
     # ----------------------------------------------------------------------------------------------
-    # 2. CHAT CON AVATAR (RUTAS PREDETERMINADAS + INPUT LIBRE)
+    # 2. CHAT CON EL GUÍA (BANCO CLÍNICO DETERMINISTA + INPUT LIBRE)
     # ----------------------------------------------------------------------------------------------
-    elif menu == "Chat con Avatar":
+    elif menu == "Chat con el Guía":
         if not st.session_state.avatar_activo:
-            st.warning("Selecciona un guía primero en la pestaña 'Seleccionar Avatar'.")
+            st.warning("Por favor selecciona primero un motivo de consulta en la pestaña '¿Cómo te sientes hoy?'.")
         else:
-            av = st.session_state.avatar_activo
-            av_id = av.get("id")
+            av_id = st.session_state.avatar_activo
+            av_info = GUIA_NOMBRES.get(av_id, {"nombre": av_id.capitalize(), "pais": "Internacional"})
+            prob_id = st.session_state.problema_activo or "ansiedad_panico"
 
             with st.container():
                 st.markdown(f"""
                     <div class="avatar-header-box">
                         <div style="display: flex; align-items: center; justify-content: space-between;">
                             <div>
-                                <h3 style="margin: 0; font-size: 1.4rem !important;">{av.get('nombre')}</h3>
-                                <p class="avatar-subtitle" style="margin: 2px 0 0 0;">📍 {av.get('pais')} | Guía Activo</p>
+                                <h3 style="margin: 0; font-size: 1.4rem !important;">{av_info['nombre']}</h3>
+                                <p class="avatar-subtitle" style="margin: 2px 0 0 0;">📍 {av_info['pais']} | Guía en línea</p>
                             </div>
                             <span style="background:#EBF7F2; padding:4px 12px; border-radius:12px; font-weight:bold; color:#4E8A72; font-size:14px;">Mensajes disponibles: {chats_disp_semana}</span>
                         </div>
                     </div>
                 """, unsafe_allow_html=True)
 
-            chat_key = f"messages_{st.session_state.user_id}_{av_id}"
-            opciones_key = f"opciones_activas_{st.session_state.user_id}_{av_id}"
+            chat_key = f"messages_{st.session_state.user_id}_{av_id}_{prob_id}"
+            opciones_key = f"opciones_activas_{st.session_state.user_id}_{av_id}_{prob_id}"
 
+            # Opciones iniciales por defecto según el problema
             if opciones_key not in st.session_state:
-                st.session_state[opciones_key] = av.get("opciones_iniciales", [])
+                # Opciones iniciales del banco clínico
+                opciones_base = {
+                    "ansiedad_panico": [
+                        {"id": "p1_panico", "texto": "💓 Siento que el corazón se me va a salir y me falta el aire"},
+                        {"id": "sub_p1_nudo", "texto": "🫁 ¿Cómo aflojo el nudo en la garganta o el estómago ahora mismo?"},
+                        {"id": "sub_p2_desmayo", "texto": "🌫️ Siento que me voy a desmayar por respirar corto"},
+                        {"id": "sub_p3_infarto", "texto": "🩺 ¿Qué diferencia hay entre este pánico y un infarto real?"}
+                    ],
+                    "depresion_vacio": [
+                        {"id": "p2_vacio", "texto": "🌧️ Siento un vacío que no se quita y no tengo ganas de nada"},
+                        {"id": "sub_p4_atencion", "texto": "🧠 No logro concentrarme ni leer dos páginas seguidas"},
+                        {"id": "sub_p5_pesimismo", "texto": "🔄 ¿Cómo desarmo la idea de que todo me saldrá mal?"},
+                        {"id": "sub_p6_culpa_triste", "texto": "😔 Me siento culpable por estar triste teniendo 'todo'"}
+                    ],
+                    "angustia_deudas": [
+                        {"id": "p3_deudas", "texto": "🌙 No puedo dormir pensando en deudas y siento vergüenza"},
+                        {"id": "sub_p15_familia", "texto": "👨‍👩‍👧 ¿Cómo le explico a mi familia la quiebra sin derrumbarlos?"},
+                        {"id": "mar_micro_accion", "texto": "📋 ¿Cómo ordeno los pagos para salir de la parálisis?"}
+                    ],
+                    "bullying_acoso_escolar": [
+                        {"id": "p4_bullying", "texto": "📱 Se burlan de mí en WhatsApp y no quiero volver a clases"},
+                        {"id": "sub_p7_pasillo", "texto": "🚶‍♂️ ¿Cómo reacciono si me acorralan en el pasillo o la salida?"},
+                        {"id": "sub_p8_perfil_falso", "texto": "🛡️ Crearon un perfil falso con mis fotos, ¿qué hago?"},
+                        {"id": "sub_p9_panico_lunes", "texto": "🚪 Tengo terror de pisar el aula el lunes"}
+                    ],
+                    "acoso_sexual": [
+                        {"id": "p5_acoso_sex", "texto": "🛑 Un conocido/superior me tocó sin permiso y me amenazó"},
+                        {"id": "sub_p10_asco", "texto": "🪞 ¿Cómo manejo el asco y el rechazo a mi propio cuerpo?"},
+                        {"id": "sub_p11_credibilidad", "texto": "⚖️ Me da pánico denunciar y que no me crean"},
+                        {"id": "sub_p12_contacto", "texto": "✋ No soporto que nadie se me acerque físicamente"}
+                    ],
+                    "acoso_laboral_mobbing": [
+                        {"id": "p6_mobbing", "texto": "💼 Mi jefe me descalifica delante de todos y me satura"},
+                        {"id": "sub_p13_puerta_cerrada", "texto": "🚪 Me grita o presiona a solas donde no hay testigos"},
+                        {"id": "sub_p14_miedo_renuncia", "texto": "⏳ Tengo pánico de renunciar y quedarme sin sustento"},
+                        {"id": "mar_limites", "texto": "🛡️ Enséñame a responder con firmeza sin perder el empleo"}
+                    ],
+                    "victimas_abuso_violencia": [
+                        {"id": "p7_violencia", "texto": "⚡ Fui víctima de una agresión violenta y vivo con terror"},
+                        {"id": "sub_p17_sirenas", "texto": "🚨 Un sonido fuerte o seco me hace temblar incontrolable"},
+                        {"id": "sub_p18_repeticion", "texto": "🌪️ Siento que en cualquier momento se repetirá el ataque"}
+                    ],
+                    "miedos_fobias": [
+                        {"id": "p8_miedo_calle", "texto": "🚪 Tengo terror a salir a la calle después de lo ocurrido"},
+                        {"id": "sub_p16_transporte", "texto": "🚌 Pánico a subir a un autobús o transporte cerrado"},
+                        {"id": "cam_respiracion_vago", "texto": "🫀 ¿Cómo desactivo la señal de alarma de mi cuerpo?"}
+                    ],
+                    "duelo_perdida": [
+                        {"id": "p9_duelo", "texto": "🕊️ Perdí a alguien muy amado de golpe y siento culpa por vivir"},
+                        {"id": "sub_p19_habitacion", "texto": "📦 No he sido capaz de mover ni tocar sus cosas"},
+                        {"id": "sub_p20_rabia", "texto": "🔥 Siento mucha rabia con Dios y con la vida por esto"},
+                        {"id": "sub_p21_fuerte", "texto": "💔 Me dicen que 'debo ser fuerte', pero ya no aguanto más"}
+                    ],
+                    "trauma_complejo_desrealizacion": [
+                        {"id": "p10_desrealizacion", "texto": "🌫️ Siento que floto o no estoy en mi cuerpo; temo enloquecer"},
+                        {"id": "ana_rumiacion", "texto": "🔄 Pensamientos en bucle que no se apagan"},
+                        {"id": "lar_anclaje_54321", "texto": "🌿 Guíame en un anclaje sensorial inmediato (5-4-3-2-1)"}
+                    ],
+                    "desregulacion_bipolar": [
+                        {"id": "sub_p22_montana_rusa", "texto": "🎢 Paso de días sin dormir a semanas postrado sin energía"},
+                        {"id": "sub_p23_alarma_euforia", "texto": "⚡ ¿Cómo distingo entusiasmo sano de una fase hipomaníaca?"},
+                        {"id": "sub_p24_incomprension", "texto": "👥 Siento que nadie a mi alrededor comprende estos cambios"}
+                    ],
+                    "conversacion_abierta": [
+                        {"id": "sub_p25_soledad", "texto": "☕ Hoy no tengo crisis grave, solo me siento solo/a y quiero hablar"},
+                        {"id": "sub_p26_esperanza", "texto": "🌱 ¿Cómo haces tú para tener fe tras lo que viviste?"},
+                        {"id": "sub_p27_desconfianza", "texto": "🛡️ Me cuesta confiar en la gente porque siempre me fallan"}
+                    ],
+                    "aprender_habitos_neurociencia": [
+                        {"id": "sub_p28_pacing", "texto": "🔋 ¿Qué es la técnica del 'pacing' para no fundirme a media tarde?"},
+                        {"id": "sub_p29_mente_blanco", "texto": "🧠 ¿Qué ejercicio hago si mi mente se nubla en el trabajo?"},
+                        {"id": "sub_p30_perdon_sabio", "texto": "🕊️ ¿Cómo perdono sin volverme ingenuo/a ante quien me dañó?"}
+                    ]
+                }
+                st.session_state[opciones_key] = opciones_base.get(prob_id, opciones_base["ansiedad_panico"])
 
             if chat_key not in st.session_state:
-                st.session_state[chat_key] = []
-                try:
-                    r_hist = requests.get(f"{API_URL}/chat/historial/{av_id}", headers=headers_auth, timeout=12)
-                    if r_hist.status_code == 200:
-                        mensajes_remotos = r_hist.json().get("mensajes", [])
-                        for mr in mensajes_remotos:
-                            st.session_state[chat_key].append({
-                                "role": mr.get("role"),
-                                "content": mr.get("content"),
-                                "is_crisis": mr.get("is_crisis", False),
-                                "timestamp": mr.get("timestamp")
-                            })
-                except Exception:
-                    pass
-
-                if not st.session_state[chat_key]:
-                    st.session_state[chat_key].append({
-                        "role": "assistant",
-                        "content": av.get("disparador_inicial", "Hola, estoy aquí para acompañarte en tu calma."),
-                        "is_crisis": False,
-                        "timestamp": datetime.now(timezone.utc).isoformat()
-                    })
+                st.session_state[chat_key] = [{
+                    "role": "assistant",
+                    "content": f"Hola, soy {av_info['nombre']}. Estoy aquí para escucharte y darte orientación en lo que estás viviendo. Puedes seleccionar una de las opciones guiadas o escribirme con total confianza.",
+                    "is_crisis": False,
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }]
 
             chat_container = st.container(height=460)
             with chat_container:
@@ -729,7 +847,7 @@ else:
                         with st.chat_message(m["role"], avatar=icono):
                             st.markdown(m["content"])
 
-            # BOTONERA INTERACTIVA DE RUTAS PREDEFINIDAS ($0 USD)
+            # BOTONERA INTERACTIVA DE RUTAS DETERMINISTAS ($0 USD)
             opciones_actuales = st.session_state.get(opciones_key, [])
             if opciones_actuales:
                 st.markdown("<p style='font-size:16px; font-weight:600; margin-bottom:4px; color:#4E8A72;'>💡 Opciones recomendadas para continuar:</p>", unsafe_allow_html=True)
@@ -749,7 +867,8 @@ else:
                                 payload = {
                                     "avatar_id": av_id,
                                     "message": opc["texto"],
-                                    "opcion_id": opc["id"]
+                                    "opcion_id": opc["id"],
+                                    "problema_id": prob_id
                                 }
                                 r = requests.post(f"{API_URL}/chat", headers=headers_auth, json=payload, timeout=25)
                                 if r.status_code == 200:
@@ -783,6 +902,7 @@ else:
                         "avatar_id": av_id,
                         "message": user_text,
                         "opcion_id": None,
+                        "problema_id": prob_id,
                         "historial_previo": historial_reciente
                     }
                     r = requests.post(f"{API_URL}/chat", headers=headers_auth, json=payload, timeout=30)
@@ -803,8 +923,6 @@ else:
                         except Exception:
                             detalle = r.text[:250] if r.text else f"Error HTTP {r.status_code}"
                         st.error(f"Aviso del servidor ({r.status_code}): {detalle}")
-                except requests.exceptions.Timeout:
-                    st.error("El servidor demoró en responder. Espera un instante y vuelve a intentarlo.")
                 except Exception as e:
                     st.error(f"Falla de conexión con el backend: {e}")
 
@@ -1130,9 +1248,9 @@ else:
 
         with tab_p:
             c1, c2, c3 = st.columns(3)
-            c1.markdown("### 🌿 Gratis\n- $0 USD\n- 1 Avatar activo\n- 25 chats semanales\n- Comunidad en modo lectura")
-            c2.markdown("### ⭐ Comunicador\n- $5 USD / 30 días\n- 2 Avatares activos\n- 100 chats semanales\n- Muro y salas activas\n- Envío de solicitudes de amistad")
-            c3.markdown("### 👑 Amigo de Todos\n- $10 USD / 40 días\n- 5 Avatares activos (Catálogo Completo)\n- Chats ilimitados\n- Acceso total sin restricciones")
+            c1.markdown("### 🌿 Gratis\n- $0 USD\n- Acceso guiado a problemáticas\n- 25 chats semanales\n- Comunidad en modo lectura")
+            c2.markdown("### ⭐ Comunicador\n- $5 USD / 30 días\n- Acceso total a los 5 guías\n- 100 chats semanales\n- Muro y salas activas\n- Envío de solicitudes de amistad")
+            c3.markdown("### 👑 Amigo de Todos\n- $10 USD / 40 días\n- Acceso irrestricto\n- Chats ilimitados\n- Acceso total sin restricciones")
 
         with tab_c:
             st.markdown("### 🎟️ Canjear Cupón Promocional")

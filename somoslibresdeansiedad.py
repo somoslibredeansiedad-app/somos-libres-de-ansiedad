@@ -16,9 +16,11 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, select, o
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, selectinload
 
-# Delegación estricta al motor cognitivo asíncrono (5 Avatares con Rutas Predeterminadas)
+# Delegación estricta al motor cognitivo asíncrono (5 Avatares y 13 Problemáticas)
 from cerebro_avatares import (
     obtener_catalogo_formateado,
+    obtener_catalogo_problemas,
+    obtener_avatar_por_defecto,
     existe_avatar,
     procesar_respuesta_avatar
 )
@@ -285,6 +287,7 @@ class UserMessage(BaseModel):
     avatar_id: str
     message: Optional[str] = ""
     opcion_id: Optional[str] = None
+    problema_id: Optional[str] = None
     historial_previo: Optional[List[str]] = None
 
 class DirectMessageCreate(BaseModel):
@@ -341,7 +344,6 @@ class BuzonCreate(BaseModel):
 # --------------------------------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Inicialización de tablas y auto-seed del administrador maestro
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
@@ -364,7 +366,7 @@ async def lifespan(app: FastAPI):
             await db.commit()
     yield
 
-app = FastAPI(title="Somos Libres de Ansiedad Core API", version="5.0.0", lifespan=lifespan)
+app = FastAPI(title="Somos Libres de Ansiedad Core API", version="5.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -420,7 +422,7 @@ async def root():
     return {
         "status": "online",
         "app": "Somos Libres de Ansiedad Core API",
-        "version": "5.0.0",
+        "version": "5.1.0",
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
@@ -817,7 +819,7 @@ async def responder_pago_admin(data: PaymentMessageCreate, admin: UserModel = De
     return {"status": "success", "message": "Respuesta de pago enviada."}
 
 # --------------------------------------------------------------------------------------------------
-# CATÁLOGO Y CHAT DELEGADO AL CEREBRO (5 AVATARES CON RUTAS GUIADAS)
+# CATÁLOGO Y CHAT DELEGADO AL CEREBRO (13 PROBLEMÁTICAS Y 5 GUÍAS)
 # --------------------------------------------------------------------------------------------------
 @app.get("/api/avatares/catalogo")
 async def obtener_avatares(current_user: UserModel = Depends(get_current_user)):
@@ -831,13 +833,24 @@ async def obtener_avatares(current_user: UserModel = Depends(get_current_user)):
         "total_chats_plan": limite_texto
     }
 
+@app.get("/api/problemas/catalogo")
+async def obtener_problemas(current_user: UserModel = Depends(get_current_user)):
+    """Retorna la matriz de las 13 situaciones con sus guías y opciones de inicio."""
+    catalogo_p = obtener_catalogo_problemas()
+    limite_texto = {"gratis": 25, "comunicador": 100, "amigo_todos": 999999}.get(current_user.plan_nivel, 25)
+    return {
+        "status": "success",
+        "problemas": catalogo_p,
+        "chats_restantes": max(0, limite_texto - current_user.chats_usados_semana),
+        "total_chats_plan": limite_texto
+    }
+
 @app.post("/api/avatares/seleccionar")
 async def seleccionar_avatar(data: AvatarSelectRequest, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     if not existe_avatar(data.avatar_id):
         raise HTTPException(status_code=404, detail="Avatar no encontrado en el catálogo de los 5 guías.")
 
     activos = json.loads(current_user.avatares_activos)
-    # Ajuste de cupos máximos al simplificar el catálogo a 5 avatares
     max_permitidos = {"gratis": 1, "comunicador": 2, "amigo_todos": 5}.get(current_user.plan_nivel, 1)
 
     if data.avatar_id in activos:
@@ -880,8 +893,13 @@ async def obtener_historial_chat(avatar_id: str, current_user: UserModel = Depen
 
 @app.post("/api/chat")
 async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    if not existe_avatar(data.avatar_id):
-        raise HTTPException(status_code=404, detail="Avatar no encontrado.")
+    # Si no se pasó avatar pero se pasó problema, asignar el avatar por defecto del tema
+    avatar_id_efectivo = data.avatar_id
+    if (not avatar_id_efectivo or not existe_avatar(avatar_id_efectivo)) and data.problema_id:
+        avatar_id_efectivo = obtener_avatar_por_defecto(data.problema_id)
+
+    if not existe_avatar(avatar_id_efectivo):
+        raise HTTPException(status_code=404, detail="Guía o Avatar no encontrado.")
 
     limite_texto = {"gratis": 25, "comunicador": 100, "amigo_todos": 999999}.get(current_user.plan_nivel, 25)
 
@@ -899,7 +917,7 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
     # Registro del mensaje del usuario
     msg_user = ChatMessageModel(
         user_id=current_user.id,
-        avatar_id=data.avatar_id,
+        avatar_id=avatar_id_efectivo,
         role="user",
         content=contenido_entrada,
         is_crisis=False
@@ -918,11 +936,12 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
         "biografia": current_user.biografia
     }
 
-    # Procesamiento con retorno de respuestas estructuradas y opciones siguientes
+    # Procesamiento con soporte para problema_id en cerebro_avatares
     nombre_av, resp, es_crisis, opciones_siguientes = await procesar_respuesta_avatar(
-        avatar_id=data.avatar_id, 
+        avatar_id=avatar_id_efectivo, 
         mensaje_usuario=contenido_entrada, 
         opcion_id=data.opcion_id,
+        problema_id=data.problema_id,
         perfil_usuario=perfil_dict, 
         historial_reciente=data.historial_previo or []
     )
@@ -930,7 +949,7 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
     # Persistencia de la respuesta del avatar
     msg_avatar = ChatMessageModel(
         user_id=current_user.id,
-        avatar_id=data.avatar_id,
+        avatar_id=avatar_id_efectivo,
         role="assistant",
         content=resp,
         is_crisis=es_crisis
@@ -941,6 +960,7 @@ async def chat_con_avatar(data: UserMessage, current_user: UserModel = Depends(g
     return {
         "status": "success",
         "avatar_nombre": nombre_av,
+        "avatar_id": avatar_id_efectivo,
         "respuesta": resp,
         "opciones_siguientes": opciones_siguientes,
         "is_crisis": es_crisis,
