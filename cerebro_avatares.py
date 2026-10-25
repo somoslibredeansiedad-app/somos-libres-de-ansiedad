@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ==================================================================================================
-# CATÁLOGO DE LOS 5 AVATARES OFICIALES SIMPLIFICADOS
+# CATÁLOGO OFICIAL CONSOLIDAD: 5 GUÍAS DE SERENIDAD Y SUS ÁRBOLES PREDEFINIDOS ($0 USD)
 # ==================================================================================================
 AVATARES_5 = {
     "mariana": {
@@ -17,7 +17,7 @@ AVATARES_5 = {
         "nombre": "Mariana Elena Rivas Delgado",
         "pais": "Venezuela",
         "bandera": "🇻🇪",
-        "especialidad": "Relacionista Industrial y Clima Laboral",
+        "especialidad": "Relacionista Industrial, Consultora de RRHH y Clima Laboral",
         "tono": "Cálido, espontáneo ('epa'), resolutivo y enfocado en límites humanos y laborales.",
         "imagen": "avatares/mariana.png",
         "disparador_inicial": "¡Epa! Aquí estoy para escucharte y ayudarte a poner orden sin que te gane el estrés.",
@@ -72,7 +72,7 @@ AVATARES_5 = {
         "nombre": "Camilo Ernesto Valdés Portuondo",
         "pais": "Cuba",
         "bandera": "🇨🇺",
-        "especialidad": "Médico General y Fisioterapeuta",
+        "especialidad": "Médico General Integral y Fisioterapeuta",
         "tono": "Cálido, fraterno ('mi hermano'), clínico preventivo y con sabiduría de sentido común.",
         "imagen": "avatares/camilo.png",
         "disparador_inicial": "Oye, mi hermano/a, pasa y descansa un momento. Dime qué señales te está enviando el cuerpo hoy.",
@@ -115,7 +115,7 @@ AVATARES_5 = {
         "nombre": "Rodrigo Javier Navas Serrano",
         "pais": "España",
         "bandera": "🇪🇸",
-        "especialidad": "Abogado Penalista y Mediador",
+        "especialidad": "Abogado Penalista y Mediador Penitenciario",
         "tono": "Sobrio, pragmático, castellano directo, realista y con profundo sentido común.",
         "imagen": "avatares/rodrigo.png",
         "disparador_inicial": "Hola. Vamos a aplicar sentido común y a ordenar las cosas que de verdad están en tu mano resolver.",
@@ -242,7 +242,7 @@ AVATARES_5 = {
 }
 
 # ==================================================================================================
-# CARGA DE BIBLIOTECA RAG COMPLEMENTARIA
+# CARGA DE LA BIBLIOTECA RAG DE 70 OBRAS CLÍNICAS
 # ==================================================================================================
 LIBROS_CACHE: List[Dict[str, Any]] = []
 if os.path.exists("catalogo_rag_avatares.json"):
@@ -254,7 +254,7 @@ if os.path.exists("catalogo_rag_avatares.json"):
         print(f"[CEREBRO AVATARES] Aviso: No se pudo cargar biblioteca RAG: {e}")
 
 # ==================================================================================================
-# PATRONES DE PROTECCIÓN ÉTICA Y SEGURIDAD CLÍNICA
+# PATRONES DE PROTECCIÓN ÉTICA Y SEGURIDAD CLÍNICA (FILTRO ROJO INMEDIATO)
 # ==================================================================================================
 PATRONES_CRISIS_SOS = [
     r"\bsuicid", r"\bmatarme\b", r"\bquitarme la vida\b", r"\bno quiero vivir\b",
@@ -267,6 +267,24 @@ PATRONES_CRISIS_SOS = [
 PATRONES_AGRESION_SEXUAL = [
     r"\b(violaci[oó]n|violaron|me violaron|violada|violado|abuso sexual|abusaron de m[ií]|me tocaron|agresi[oó]n sexual)\b"
 ]
+
+# ==================================================================================================
+# RESOLUCIÓN DETERMINISTA DE BIOGRAFÍAS (CARPETA AVATARES Y RAÍZ)
+# ==================================================================================================
+def cargar_biografia_completa(avatar_id: str) -> str:
+    """Lee el archivo de biografía buscando tanto en avatares/ como en la raíz."""
+    rutas = [
+        os.path.join("avatares", f"{avatar_id}.txt"),
+        f"{avatar_id}.txt"
+    ]
+    for ruta in rutas:
+        if os.path.exists(ruta):
+            try:
+                with open(ruta, "r", encoding="utf-8") as f:
+                    return f.read()[:3500]
+            except Exception as e:
+                print(f"[CEREBRO AVATARES] Aviso: No se pudo leer {ruta}: {e}")
+    return ""
 
 def obtener_catalogo_formateado(activos_usuario: list) -> list:
     """Devuelve la lista estructurada de los 5 avatares con su ruta de opciones raíz."""
@@ -293,8 +311,10 @@ def obtener_opciones_raiz(avatar_id: str) -> List[Dict[str, str]]:
         return AVATARES_5[avatar_id]["arbol_opciones"]["raiz"]
     return []
 
+# ==================================================================================================
+# ENLACE ASÍNCRONO CON LA API DE GEMINI REST MODERNA (TIMEOUT 10s)
+# ==================================================================================================
 async def llamar_gemini_avatar_async(prompt_sistema: str, historial: list, mensaje_actual: str) -> str:
-    """Enlace asíncrono con Gemini REST moderno para peticiones libres que requieran IA generativa."""
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
     if not api_key:
         return ""
@@ -329,7 +349,7 @@ async def llamar_gemini_avatar_async(prompt_sistema: str, historial: list, mensa
     return ""
 
 # ==================================================================================================
-# PROCESADOR PRINCIPAL (4 VALORES DE RETORNO)
+# PROCESADOR PRINCIPAL (RETORNA 4 VALORES SINCRONIZADOS CON EL BACKEND)
 # ==================================================================================================
 async def procesar_respuesta_avatar(
     avatar_id: str, 
@@ -339,8 +359,7 @@ async def procesar_respuesta_avatar(
     historial_reciente: Optional[list] = None
 ) -> Tuple[str, str, bool, List[Dict[str, str]]]:
     """
-    Procesa la interacción con el avatar entregando:
-    (nombre_avatar, respuesta_texto, es_crisis, opciones_siguientes)
+    Retorno: (nombre_avatar, respuesta_texto, es_crisis, opciones_siguientes)
     """
     perfil = perfil_usuario or {}
     avatar_info = AVATARES_5.get(avatar_id, AVATARES_5["mariana"])
@@ -353,7 +372,7 @@ async def procesar_respuesta_avatar(
     texto = (mensaje_usuario or "").strip()
     texto_lower = texto.lower()
 
-    # 1. FILTRO ROJO DE CRISIS (SOS INMEDIATO)
+    # 1. FILTRO ROJO DE CRISIS (SOS INMEDIATO PRIORIZANDO LA VIDA)
     for patron in PATRONES_CRISIS_SOS:
         if re.search(patron, texto_lower):
             respuesta_sos = (
@@ -379,7 +398,7 @@ async def procesar_respuesta_avatar(
         )
         return nombre_avatar, respuesta_abuso, False, arbol["raiz"]
 
-    # 3. NAVEGACIÓN DETERMINISTA POR ÁRBOL DE OPCIONES (COSTO $0 USD Y RESPUESTA INMEDIATA)
+    # 3. NAVEGACIÓN POR ÁRBOL DE OPCIONES GUIADAS ($0 USD Y 0ms LATENCIA)
     if opcion_id:
         if opcion_id == "raiz":
             return nombre_avatar, f"¿Qué aspecto te gustaría abordar ahora, {apodo}?", False, arbol["raiz"]
@@ -401,13 +420,26 @@ async def procesar_respuesta_avatar(
     if any(s in texto_lower for s in ["hola", "buenos días", "buenas tardes", "buenas noches", "qué tal", "cómo estás"]):
         return nombre_avatar, f"¡Hola, {apodo}! Qué alegría coincidir contigo. Selecciona una de las opciones guiadas o cuéntame con tus palabras cómo te sientes hoy.", False, arbol["raiz"]
 
-    # 6. LLAMADA GENERATIVA A GEMINI PARA MENSAJES LIBRES ABIERTOS
+    # 6. LLAMADA GENERATIVA A GEMINI CON INYECCIÓN DE BIOGRAFÍA Y RAG
+    bio = cargar_biografia_completa(avatar_id)
+    consejos_rag = [
+        lib.get("consejo_aplicable") for lib in LIBROS_CACHE[:3] 
+        if lib.get("consejo_aplicable")
+    ]
+    contexto_rag_str = "\n- ".join(consejos_rag) if consejos_rag else "Respira hondo y da un paso a la vez."
+
     prompt_sistema = f"""Eres {nombre_avatar}, originario de {avatar_info['pais']}.
 Tu especialidad: {avatar_info['especialidad']}.
 Tu tono característico: {avatar_info['tono']}.
 Estás conversando con {apodo}.
 Marco ético: Espacio reflexivo y psicoeducativo de acompañamiento. Prohibido diagnosticar clínicamente o prescribir fármacos.
-Jerarquía de dolor sobre datos: si el usuario manifiesta dolor por un familiar o hijo, prioriza la contención compasiva sin confrontar con registros de la base de datos."""
+Jerarquía de dolor sobre datos: si el usuario manifiesta dolor por un familiar o hijo, prioriza la contención compasiva sin confrontar con registros de la base de datos.
+
+TU MEMORIA BIOGRÁFICA CANÓNICA:
+{bio if bio else "Acompañante de serenidad con experiencia en superación personal."}
+
+PRINCIPIOS RAG APLICABLES:
+- {contexto_rag_str}"""
 
     resp_llm = await llamar_gemini_avatar_async(prompt_sistema, historial_reciente or [], texto)
     if resp_llm:
