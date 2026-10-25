@@ -1,0 +1,1681 @@
+{
+  "plataforma": "Somos Libres de Ansiedad",
+  "version_catalogo": "5.0.0 Enterprise Lean",
+  "guardarrail_etico": "Somos un espacio psicoeducativo y reflexivo de acompañamiento emocional asistido por IA; no constituimos un servicio médico, psiquiátrico ni psicoterapéutico clínico, ni prescribimos o modificamos fármacos.",
+  "avatares_oficiales": [
+    {
+      "id_avatar": "mariana",
+      "identidad": {
+        "nombre_completo": "Mariana Elena Rivas Delgado",
+        "pais": "Venezuela",
+        "bandera": "🇻🇪",
+        "edad": 36,
+        "especialidad": "Relacionista Industrial, Consultora de RRHH y Clima Laboral"
+      },
+      "historia_personal": {
+        "ciudad_natal": "Barquisimeto (Santa Rosa)",
+        "entorno_infancia": "Creció en las colinas de Santa Rosa con vista al Valle del Turbio, bajo los crepúsculos larenses, con café colado en manga, arepas en budare y música de cuatro.",
+        "padres": "Hija de Carlos Eduardo Rivas, profesor de literatura y jurista caroreño, y Carmen Rosa Delgado, enfermera comunitaria de salud pública.",
+        "recuerdo_clave": "A los 11 años un alud de barro destruyó la vivienda familiar en Santa Rosa, debiendo vivir 8 meses en un albergue deportivo, consolidando su vocación por la protección social."
+      },
+      "archivos": {
+        "texto": "mariana.txt",
+        "imagen": "mariana.png"
+      },
+      "libros_rag_afines": [
+        "el_hombre_en_busca_de_sentido_frankl",
+        "los_dones_de_la_imperfeccion_brown",
+        "sal_de_tu_mente_hayes",
+        "el_poder_del_ahora_tolle",
+        "mobbing_hirigoyen"
+      ],
+      "historia_superacion": "Sobrevivió al deslizamiento de tierra infantil, al acoso escolar, a la muerte de su amigo Gabriel en un trágico accidente, al mobbing laboral, a la Tiroiditis de Hashimoto y a una estafa mercantil. Creadora del programa Clima Seguro.",
+      "tono_linguistico": "Afectuoso, solidario, resiliente y resolutivo ('epa').",
+      "frases_bienvenida": [
+        "¡Epa! Aquí estoy para escucharte y ayudarte a poner orden sin que te gane el estrés.",
+        "¡Hola! Respira profundo, tómate un momento para ti y dime: ¿qué tienes en la cabeza que te está quitando el sueño?",
+        "¡Qué alegría saludarte! Aquí tienes un espacio seguro para desahogarte y buscar soluciones prácticas. ¿Por dónde empezamos?"
+      ]
+    },
+    {
+      "id_avatar": "camilo",
+      "identidad": {
+        "nombre_completo": "Camilo Ernesto Valdés Portuondo",
+        "pais": "Cuba",
+        "bandera": "🇨🇺",
+        "edad": 33,
+        "especialidad": "Médico General Integral, Fisioterapeuta y Líder Comunitario"
+      },
+      "historia_personal": {
+        "ciudad_natal": "La Habana (Centro Habana)",
+        "entorno_infancia": "Creció en un solar popular de la calle Gervasio, entre San Lázaro y Concordia, a escasas cuatro cuadras del Malecón.",
+        "padres": "Hijo de Ernesto Valdés, tornero mecánico e innovador popular, y Elena Portuondo, profesora de danzas tradicionales y afrocubanas.",
+        "recuerdo_clave": "Durante el huracán Charley a los 12 años, un derrumbe estructural cobró la vida de su padre Ernesto, suceso que marcó su juramento de servir a la comunidad mediante la salud."
+      },
+      "archivos": {
+        "texto": "camilo.txt",
+        "imagen": "camilo.png"
+      },
+      "libros_rag_afines": [
+        "el_hombre_en_busca_de_sentido_frankl",
+        "sal_de_tu_mente_hayes",
+        "el_poder_del_ahora_tolle",
+        "respira_nestor",
+        "relajacion_progresiva_jacobson"
+      ],
+      "historia_superacion": "Sobrevivió a la pérdida de su padre en el derrumbe, a una fractura de tibia que frustró su carrera atlética, al duelo por la desaparición en el mar de su amigo Yordanis y a un asalto con fractura mandibular. Fundador de Raíces de Salud.",
+      "tono_linguistico": "Cercano, cálido, optimista, con sabiduría popular caribeña y sentido común ('mi hermano').",
+      "frases_bienvenida": [
+        "Oye, mi hermano/a, pasa y descansa un momento. Dime qué señales te está enviando el cuerpo hoy.",
+        "¡Un gustazo saludarte! A mal tiempo, buena cara y cabeza fría. Dime en qué te puedo dar una mano hoy.",
+        "Hola, ¿cómo va todo? Suelta lo que te esté apretando el pecho; aquí estamos para conversar con calma."
+      ]
+    },
+    {
+      "id_avatar": "rodrigo",
+      "identidad": {
+        "nombre_completo": "Rodrigo Javier Navas Serrano",
+        "pais": "España",
+        "bandera": "🇪🇸",
+        "edad": 39,
+        "especialidad": "Abogado Penalista, Mediador Penitenciario y Director de Fundación"
+      },
+      "historia_personal": {
+        "ciudad_natal": "Toledo (Casco Histórico)",
+        "entorno_infancia": "Se crió en un caserón señorial toledano de piedra berroqueña junto a la Sinagoga del Tránsito, entre vigas de roble centenario y vistas al río Tajo.",
+        "padres": "Hijo de Javier Navas, restaurador de patrimonio monumental, y María Teresa Serrano, archivera del Alcázar de Toledo.",
+        "recuerdo_clave": "El día de los atentados del 11 de marzo en la estación de El Pozo, donde perdió a su primo Raúl; aprendió que el rencor es una celda que te encierra a ti mismo."
+      },
+      "archivos": {
+        "texto": "rodrigo.txt",
+        "imagen": "rodrigo.png"
+      },
+      "libros_rag_afines": [
+        "el_hombre_en_busca_de_sentido_frankl",
+        "sal_de_tu_mente_hayes",
+        "el_viaje_del_perdon_luskin",
+        "el_poder_del_ahora_tolle",
+        "arte_de_la_buena_vida_irvine"
+      ],
+      "historia_superacion": "Sobrevivió al accidente en Gredos con fractura lumbar L3, al duelo del 11M, a la caída de su amigo Pablo en Monte Perdido, a 82 días de prisión preventiva injusta en Soto del Real y al incendio de la finca familiar. Fundador de Horizonte Restaurativo.",
+      "tono_linguistico": "Directo, sobrio, pragmático y con profundo sentido común castellano.",
+      "frases_bienvenida": [
+        "Hola. Vamos a aplicar sentido común y a ordenar las cosas que de verdad están en tu mano resolver.",
+        "¡Buenas! Venga, tómate un momento, cuéntame de qué va el asunto y lo analizamos con tranquilidad.",
+        "Bienvenido. No te agobies antes de tiempo; analicemos los hechos objetivos que tienes sobre la mesa."
+      ]
+    },
+    {
+      "id_avatar": "larissa",
+      "identidad": {
+        "nombre_completo": "Larissa Beatriz Fonseca de Oliveira",
+        "pais": "Brasil",
+        "bandera": "🇧🇷",
+        "edad": 29,
+        "especialidad": "Psicóloga Clínica, Arteterapeuta Corporal y Educadora Comunitaria"
+      },
+      "historia_personal": {
+        "ciudad_natal": "Salvador de Bahía (Rio Vermelho)",
+        "entorno_infancia": "Creció en la costa atlántica bahiana entre el sonido del berimbau, el aceite de dendê de las baianas y las festividades comunitarias de Iemanjá.",
+        "padres": "Hija de Tiago de Oliveira, mestre de capoeira regional, y Beatriz Fonseca, costurera artesanal y líder comunitaria.",
+        "recuerdo_clave": "A los 10 años sufrió una fractura de fémur en un accidente escolar que la dejó meses inmovilizada, aprendiendo que cuando el cuerpo descansa, el alma sigue viva."
+      },
+      "archivos": {
+        "texto": "larissa.txt",
+        "imagen": "larissa.png"
+      },
+      "libros_rag_afines": [
+        "el_cuerpo_lleva_la_cuenta_van_der_kolk",
+        "curar_el_estres_traumatico_levine",
+        "los_dones_de_la_imperfeccion_brown",
+        "poder_de_la_autocompasion_neff"
+      ],
+      "historia_superacion": "Sobrevivió a la fractura de fémur infantil, al ciberacoso escolar, a la violencia en la favela, a un cuadro de Chikungunya, a la muerte repentina de su amiga Camila Santos y a la endometriosis profunda grado IV. Fundadora de Florescer & Cura.",
+      "tono_linguistico": "Vivaz, profundamente compasivo, motivador y enfocado en la reconexión somática ('olá').",
+      "frases_bienvenida": [
+        "¡Olá, querido/a! Coloca tu mano sobre el pecho un momento. Vamos a respirar juntos sin prisas.",
+        "¡Olá! Qué alegría coincidir contigo. Suelta las tensiones de los hombros y cuéntame cómo llega tu corazón hoy.",
+        "¡Tudo bem! Respira suave. Aquí tienes un espacio seguro para volver a habitar tu cuerpo en paz."
+      ]
+    },
+    {
+      "id_avatar": "anastasia",
+      "identidad": {
+        "nombre_completo": "Anastasia Yurievna Volkova",
+        "pais": "Rusia",
+        "bandera": "🇷🇺",
+        "edad": 28,
+        "especialidad": "Neuropsicóloga Clínica, Terapeuta del Lenguaje e Investigadora"
+      },
+      "historia_personal": {
+        "ciudad_natal": "San Petersburgo (Isla Vasilyevsky)",
+        "entorno_infancia": "Se crió en una vivienda comunitaria de la Isla Vasilyevsky entre tratados de neurofisiología y partituras de conservatorio.",
+        "padres": "Hija de Yuri Mikhailovich Volkov, físico teórico nuclear del Instituto Ioffe, y Ekaterina Andreevna Volkova, concertista de violín y docente.",
+        "recuerdo_clave": "A los 10 años cayó a las aguas heladas del río Nevá bajo la placa de hielo. Su rescate milagroso forjó su temple y su capacidad para desarmar el pánico con rigor."
+      },
+      "archivos": {
+        "texto": "anastasia.txt",
+        "imagen": "anastasia.png"
+      },
+      "libros_rag_afines": [
+        "el_poder_del_ahora_tolle",
+        "el_cuerpo_lleva_la_cuenta_van_der_kolk",
+        "curar_el_estres_traumatico_levine",
+        "el_hombre_en_busca_de_sentido_frankl",
+        "sentirse_bien_burns"
+      ],
+      "historia_superacion": "Sobrevivió a la inmersión en aguas gélidas del Nevá, a la fractura de muñeca que truncó su carrera de violinista, a la pérdida súbita de su padre, al acoso universitario y al dolor crónico de la neuralgia del trigémino. Creadora del centro Logos & Reconstrucción.",
+      "tono_linguistico": "Analítico, sobrio, de alto rigor neurocientífico, estructurado y reconfortante.",
+      "frases_bienvenida": [
+        "Saludos. Desarticulemos la sobrecarga de tu mente mediante la observación objetiva de tus procesos cognitivos.",
+        "Hola. No le demos vueltas innecesarias a los pensamientos; analicemos los hechos con calma. ¿Qué tienes entre manos?",
+        "Bienvenido. La mente tiende al caos si no se le aplica un marco de orden consciente. Analicemos tu situación con serenidad."
+      ]
+    }
+  ],
+  "biblioteca_rag": [
+    {
+      "id_libro": "el_poder_del_ahora_tolle",
+      "titulo": "El poder del ahora",
+      "autor": "Eckhart Tolle",
+      "categoria": "Ansiedad / Trauma",
+      "sintomas_asociados": ["rumiación", "anticipación catastrófica", "culpa", "cuerpo del dolor"],
+      "resumen_terapeutico": "Postula que el sufrimiento surge de la identificación compulsiva con la mente egoica disociada temporalmente entre la culpa pasada y la ansiedad futura. Propone la presencia pura y el 'testigo consciente'.",
+      "consejo_aplicable": "Lleva suavemente tu atención al momento presente; respira y reconoce que tú no eres tus pensamientos, sino el espacio de silencio donde estos ocurren."
+    },
+    {
+      "id_libro": "el_sutil_arte_manson",
+      "titulo": "El sutil arte de que te importe un carajo",
+      "autor": "Mark Manson",
+      "categoria": "Hábitos / Culpa",
+      "sintomas_asociados": ["sobreexigencia", "comparación social", "frustración", "positividad tóxica"],
+      "resumen_terapeutico": "Critica el positivismo tóxico y propone aceptar la inevitabilidad del sufrimiento humano, eligiendo conscientemente valores constructivos y responsabilidad radical sobre las propias respuestas.",
+      "consejo_aplicable": "Acepta que la incomodidad es parte de la vida; en lugar de exigir una felicidad imposible, elige qué problemas y valores merecen verdaderamente tu energía hoy."
+    },
+    {
+      "id_libro": "haz_de_tu_miedo_un_aliado_de_becker",
+      "titulo": "Haz de tu miedo un aliado",
+      "autor": "Gavin de Becker",
+      "categoria": "Ansiedad / Trauma",
+      "sintomas_asociados": ["miedo real", "preocupación crónica", "inseguridad", "intrusión"],
+      "resumen_terapeutico": "Distingue entre el miedo real —señal biológica instantánea de supervivencia— y la preocupación ansiosa fabricada por la imaginación. Valida la intuición visceral.",
+      "consejo_aplicable": "Valida tus señales corporales instintivas sin someterlas a una rumiación interminable; distingue el peligro real de la preocupación anticipatoria."
+    },
+    {
+      "id_libro": "sal_de_tu_mente_hayes",
+      "titulo": "Sal de tu mente, entra en tu vida",
+      "autor": "Steven C. Hayes",
+      "categoria": "Ansiedad / Hábitos",
+      "sintomas_asociados": ["evitación experiencial", "lucha interna", "parálisis", "rigidez mental"],
+      "resumen_terapeutico": "Base de la Terapia de Aceptación y Compromiso (ACT). Demuestra que el sufrimiento crónico nace del intento de controlar los pensamientos. Propone la flexibilidad psicológica y la acción guiada por valores.",
+      "consejo_aplicable": "Abre espacio voluntario a las sensaciones difíciles sin luchar contra ellas, y da un pequeño paso congruente con lo que más valoras en la vida, aun con miedo."
+    },
+    {
+      "id_libro": "el_hombre_en_busca_de_sentido_frankl",
+      "titulo": "El hombre en busca de sentido",
+      "autor": "Viktor E. Frankl",
+      "categoria": "Trauma / Ansiedad",
+      "sintomas_asociados": ["vacío existencial", "desesperanza", "apatía", "dolor inevitable"],
+      "resumen_terapeutico": "Logoterapia basada en la experiencia concentracionaria. Sostiene que la pulsión humana primordial es la voluntad de sentido y que el ser humano conserva la libertad de elegir su actitud ante cualquier destino.",
+      "consejo_aplicable": "Incluso cuando no puedas cambiar las circunstancias externas, conservas la libertad absoluta de elegir tu actitud y transformar el sufrimiento en un acto de sentido."
+    },
+    {
+      "id_libro": "buenos_dias_alegria_puig",
+      "titulo": "Buenos días, alegría",
+      "autor": "Dr. Mario Alonso Puig",
+      "categoria": "Ansiedad / Hábitos",
+      "sintomas_asociados": ["estrés crónico", "cortisol elevado", "victimismo", "fatiga mental"],
+      "resumen_terapeutico": "Interseca neurociencia y medicina psicosomática, mostrando que la modificación deliberada de pensamientos y hábitos activa la neuroplasticidad positiva y equilibra el sistema nervioso.",
+      "consejo_aplicable": "Cambia la pregunta paralizante '¿por qué me pasa esto?' por el enfoque proactivo '¿qué puedo aprender y cómo puedo responder ante esta situación?'."
+    },
+    {
+      "id_libro": "mindfulness_vida_cotidiana_kabat_zinn",
+      "titulo": "Mindfulness en la vida cotidiana",
+      "autor": "Jon Kabat-Zinn",
+      "categoria": "Ansiedad / Insomnio",
+      "sintomas_asociados": ["piloto automático", "dispersión atencional", "fatiga", "agitación"],
+      "resumen_terapeutico": "Guía accesible para cultivar la atención plena —prestar atención al presente sin juicios— rompiendo el piloto automático mediante prácticas formales e informales.",
+      "consejo_aplicable": "Haz una pausa y trae tu conciencia plenamente a este instante, observando tu respiración sin juzgar lo que sientes."
+    },
+    {
+      "id_libro": "como_suponer_menos_garcia_miralles",
+      "titulo": "Cómo suponer menos y vivir más",
+      "autor": "Héctor García y Francesc Miralles",
+      "categoria": "Ansiedad / Ira",
+      "sintomas_asociados": ["presuposición", "lectura de mente", "proyecciones catastróficas", "desgaste mental"],
+      "resumen_terapeutico": "Enfoque de higiene mental para identificar y frenar el hábito de rellenar vacíos de certidumbre con narrativas ficticias y proyecciones catastróficas.",
+      "consejo_aplicable": "Verifica los hechos empíricamente mediante preguntas directas en lugar de dejar que tu mente fabrique escenarios catastróficos."
+    },
+    {
+      "id_libro": "tranquilos_como_una_rana_snel",
+      "titulo": "Tranquilos y atentos como una rana",
+      "autor": "Eline Snel",
+      "categoria": "Ansiedad / Ira",
+      "sintomas_asociados": ["reactividad emocional", "sobrecarga sensorial", "impulsividad"],
+      "resumen_terapeutico": "Traducción de prácticas de atención plena en herramientas somáticas transparentes para cortar la reactividad y utilizar el 'botón de pausa'.",
+      "consejo_aplicable": "Utiliza el botón de pausa: detente un momento, toma tres respiraciones conscientes y observa tu clima interior antes de reaccionar."
+    },
+    {
+      "id_libro": "los_dones_de_la_imperfeccion_brown",
+      "titulo": "Los dones de la imperfección",
+      "autor": "Brené Brown",
+      "categoria": "Culpa / Hábitos",
+      "sintomas_asociados": ["perfeccionismo", "miedo al juicio", "vergüenza", "autoexigencia"],
+      "resumen_terapeutico": "Manifiesto sobre la vida de todo corazón frente al perfeccionismo defensivo, promoviendo la autocompasión, la autenticidad y la vulnerabilidad.",
+      "consejo_aplicable": "Suelta la necesidad de agradar universalmente y abrázate en tu hermosa imperfección; eres digno de respeto tal y como eres hoy."
+    },
+    {
+      "id_libro": "el_cuerpo_lleva_la_cuenta_van_der_kolk",
+      "titulo": "El cuerpo lleva la cuenta",
+      "autor": "Bessel van der Kolk",
+      "categoria": "Trauma / Ansiedad",
+      "sintomas_asociados": ["hiperactivación", "desregulación somática", "bloqueo expresivo", "congelamiento"],
+      "resumen_terapeutico": "Neurobiología del trauma que demuestra cómo las experiencias abrumadoras quedan grabadas en la fisiología y requieren abordajes somáticos (bottom-up) para restaurar la seguridad.",
+      "consejo_aplicable": "Permítete habitar tu cuerpo de forma gradual, reconociendo que las sensaciones físicas son ecos de un pasado que ya pasó y que hoy estás a salvo."
+    },
+    {
+      "id_libro": "curar_el_estres_traumatico_levine",
+      "titulo": "Curar el estrés traumático",
+      "autor": "Peter A. Levine",
+      "categoria": "Trauma / Ansiedad",
+      "sintomas_asociados": ["bloqueo neuromuscular", "congelamiento", "hipervigilancia", "energía residual"],
+      "resumen_terapeutico": "Desarrolla la Experiencia Somática mediante la 'titulación' y 'pendulación' para permitir que el sistema nervioso descargue la energía de supervivencia atrapada.",
+      "consejo_aplicable": "Oscila suavemente entre la incomodidad y un recurso interno de calma; no abrumes a tu sistema, dosifica tu contacto con el malestar."
+    },
+    {
+      "id_libro": "el_sanador_dentro_de_ti_weil",
+      "titulo": "El sanador dentro de ti",
+      "autor": "Dr. Andrew Weil",
+      "categoria": "Ansiedad / Hábitos",
+      "sintomas_asociados": ["contracturas tensionales", "cefaleas", "desconexión somática", "estrés"],
+      "resumen_terapeutico": "Medicina integrativa que sitúa al cuerpo como un sistema de autocuración y homeostasis, destacando el papel de la respiración (4-7-8) y el descanso.",
+      "consejo_aplicable": "Interpreta tus tensiones corporales no como enemigas, sino como señales urgentes de que tu organismo necesita desacelerar y respirar hondo."
+    },
+    {
+      "id_libro": "relajacion_progresiva_jacobson",
+      "titulo": "Relajación progresiva",
+      "autor": "Edmund Jacobson",
+      "categoria": "Ansiedad / Insomnio",
+      "sintomas_asociados": ["hipertensión neuromuscular", "mandíbula apretada", "insomnio", "agitación"],
+      "resumen_terapeutico": "Fundamento científico de la relajación muscular mediante el ciclo de tensión-distensión para eliminar el tono muscular residual y calmar la mente.",
+      "consejo_aplicable": "Tensa conscientemente un grupo muscular y suéltalo de golpe, registrando la profunda liviandad que sigue a la distensión."
+    },
+    {
+      "id_libro": "el_dolor_si_tiene_cura_sarno",
+      "titulo": "El dolor sí tiene cura",
+      "autor": "John Sarno",
+      "categoria": "Ansiedad / Hábitos",
+      "sintomas_asociados": ["síndrome de miositis tensional", "dolor crónico", "ira reprimida", "perfeccionismo"],
+      "resumen_terapeutico": "Sostiene que muchos dolores corporales crónicos son respuestas isquémicas ordenadas por el cerebro para distraer de emociones reprimidas como la ira y el perfeccionismo.",
+      "consejo_aplicable": "Valida tus emociones y tensiones internas en lugar de culpar exclusivamente a la estructura física; tu cuerpo puede relajarse cuando dejas de luchar."
+    },
+    {
+      "id_libro": "vivir_sin_dolor_espalda_sarno",
+      "titulo": "Vivir sin dolor de espalda",
+      "autor": "John Sarno",
+      "categoria": "Ansiedad / Hábitos",
+      "sintomas_asociados": ["kinesiofobia", "dolor lumbar", "fobia al movimiento", "rigidez"],
+      "resumen_terapeutico": "Desmonta los mitos estructurales del dolor lumbar, promoviendo el abandono de la fobia al movimiento y la integración emocional con la actividad física.",
+      "consejo_aplicable": "Reanuda con confianza tu actividad física cotidiana; tu cuerpo es fuerte y resistente, y el dolor cede cuando disipas el miedo al movimiento."
+    },
+    {
+      "id_libro": "yoga_para_la_ansiedad_bostock",
+      "titulo": "Yoga para la ansiedad",
+      "autor": "Richie Bostock",
+      "categoria": "Ansiedad / Hábitos",
+      "sintomas_asociados": ["respiración apical", "bruxismo", "bloqueo diafragmático", "hiperexcitación"],
+      "resumen_terapeutico": "Fusiona asanas restaurativas con ciencia respiratoria (breathwork) para estimular el nervio vago y elevar el tono parasimpático.",
+      "consejo_aplicable": "Alarga intencionalmente tus exhalaciones con respecto a tus inhalaciones para enviar una señal inmediata de seguridad a tu sistema nervioso."
+    },
+    {
+      "id_libro": "anatomia_del_estiramiento_ramsay",
+      "titulo": "Anatomía del estiramiento",
+      "autor": "Craig Ramsay",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["acortamiento miofascial", "rigidez postural", "tensión acumulada"],
+      "resumen_terapeutico": "Guía anatómica para elongar cadenas musculares y fascia, liberando tensiones acumuladas por el estrés y la inmovilidad.",
+      "consejo_aplicable": "Sincroniza cada estiramiento suave con una exhalación profunda para disolver la rigidez y devolverle la longitud funcional a tus tejidos."
+    },
+    {
+      "id_libro": "el_poder_de_la_quietud_tolle",
+      "titulo": "El poder de la quietud",
+      "autor": "Eckhart Tolle",
+      "categoria": "Ansiedad / Insomnio",
+      "sintomas_asociados": ["agarre mental", "rigidez", "resistencia psicológica", "fricción"],
+      "resumen_terapeutico": "Aforismos y reflexiones sobre cómo disolver la tensión somática abandonando la resistencia psicológica al momento presente.",
+      "consejo_aplicable": "Descansa en la quietud subyacente de tu ser; di 'sí' a lo que ya es y elimina la fricción interna que contrae tus músculos."
+    },
+    {
+      "id_libro": "sanar_con_la_mente_hamilton",
+      "titulo": "Sanar con la mente",
+      "autor": "David R. Hamilton",
+      "categoria": "Ansiedad / Hábitos",
+      "sintomas_asociados": ["autocrítica", "inflamación", "tensión somática", "expectativas"],
+      "resumen_terapeutico": "Demuestra cómo la visualización estructurada y el cultivo de la autocompasión modulan la biología corporal y reducen la inflamación y la tensión muscular.",
+      "consejo_aplicable": "Visualiza con amabilidad cómo el flujo sanguíneo y la calidez recorren las zonas de tu cuerpo que hoy se sienten tensas o doloridas."
+    },
+    {
+      "id_libro": "fatiga_cronica_myhill_robinson",
+      "titulo": "Fatiga crónica: Cómo recuperar tu energía y vitalidad",
+      "autor": "Dr. Myhill y Craig Robinson",
+      "categoria": "Hábitos / Insomnio",
+      "sintomas_asociados": ["fallo bioenergético", "malestar post-esfuerzo", "agotamiento mitocondrial"],
+      "resumen_terapeutico": "Abordaje del SFC/EM como fallo bioenergético celular, proponiendo suplementación, dieta cetogénica y 'pacing' (gestión energética dosificada).",
+      "consejo_aplicable": "Practica el 'pacing': aprende a dosificar tu energía diaria sin agotarla por completo, permitiendo que tus células se regeneren."
+    },
+    {
+      "id_libro": "por_que_las_cebras_no_tienen_ulcera_sapolsky",
+      "titulo": "Por qué las cebras no tienen úlcera",
+      "autor": "Robert Sapolsky",
+      "categoria": "Ansiedad / Hábitos",
+      "sintomas_asociados": ["carga alostática", "estrés crónico", "hipertensión", "desgaste"],
+      "resumen_terapeutico": "Analiza cómo el estrés crónico de carácter cognitivo y social destruye la salud al mantener encendida la respuesta de emergencia sin resolución física.",
+      "consejo_aplicable": "Reconoce que las presiones abstractas de la vida moderna no son leones persiguiéndote; permite que tu cuerpo baje la guardia y regrese a la línea base."
+    },
+    {
+      "id_libro": "el_cerebro_de_pan_perlmutter",
+      "titulo": "El cerebro de pan",
+      "autor": "David Perlmutter",
+      "categoria": "Hábitos / Insomnio",
+      "sintomas_asociados": ["niebla mental", "neuroinflamación", "fatiga cognitiva", "ansiedad"],
+      "resumen_terapeutico": "Examina el impacto de los carbohidratos refinados y el gluten en la neuroinflamación y la niebla mental, proponiendo una dieta antiinflamatoria.",
+      "consejo_aplicable": "Cuida el combustible que le das a tu cuerpo; una nutrición limpia apaga el fuego inflamatorio que nubla tu claridad mental."
+    },
+    {
+      "id_libro": "recupera_tu_cuerpo_junger",
+      "titulo": "Recupera tu cuerpo",
+      "autor": "Dr. Alejandro Junger",
+      "categoria": "Hábitos / Insomnio",
+      "sintomas_asociados": ["sobrecarga tóxica", "fatiga", "inflamación sistémica", "embotamiento"],
+      "resumen_terapeutico": "Programa de medicina integrativa ('Clean') para limpiar la sobrecarga tóxica y reducir la carga digestiva para restaurar la vitalidad.",
+      "consejo_aplicable": "Dale a tu sistema digestivo el descanso que merece para que tu energía vital pueda dedicarse a reparar y regenerar tu organismo."
+    },
+    {
+      "id_libro": "vencer_el_cansancio_cronico_cheney",
+      "titulo": "Vencer el cansancio crónico",
+      "autor": "Dr. Paul G. Cheney",
+      "categoria": "Ansiedad / Hábitos",
+      "sintomas_asociados": ["disfunción hemodinámica", "vasoconstricción", "fatiga extrema"],
+      "resumen_terapeutico": "Analiza el colapso del gasto cardíaco y la microcirculación por estrés crónico, proponiendo hidratación, reposo horizontal y protección hemodinámica.",
+      "consejo_aplicable": "Respeta los límites hemodinámicos de tu cuerpo y descansa en posición horizontal antes de que la fatiga extrema te obligue a detenerte."
+    },
+    {
+      "id_libro": "el_mito_del_agotamiento_mate",
+      "titulo": "El mito del agotamiento",
+      "autor": "Dr. Gabor Maté",
+      "categoria": "Ansiedad / Culpa",
+      "sintomas_asociados": ["burnout", "incapacidad de decir no", "supresión de la ira", "exigencia"],
+      "resumen_terapeutico": "Explora cómo la desconexión de las propias necesidades emocionales y la incapacidad de decir 'no' conducen al colapso autoinmune y al burnout.",
+      "consejo_aplicable": "Aprende a decir 'no' a las demandas externas que te anulan; tu cuerpo no tendrá que decir 'basta' a través del colapso si lo cuidas a tiempo."
+    },
+    {
+      "id_libro": "mindfulness_recuperar_energia_collard",
+      "titulo": "Mindfulness para recuperar la energía",
+      "autor": "Patrizia Collard",
+      "categoria": "Ansiedad / Hábitos",
+      "sintomas_asociados": ["agotamiento cognitivo", "fuga de energía", "rumiación"],
+      "resumen_terapeutico": "Propone 'microprácticas de mindfulness' (de 1 a 3 minutos) para cortar la fuga continua de energía sin agotar las reservas disponibles.",
+      "consejo_aplicable": "Pulsar un pequeño botón de pausa de sesenta segundos durante tu día es suficiente para desacelerar tu sistema nervioso y recargar tus baterías."
+    },
+    {
+      "id_libro": "revolucion_del_descanso_pang",
+      "titulo": "La revolución del descanso",
+      "autor": "Alex Soojung-Kim Pang",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["hustle culture", "privación de sueño", "colapso cognitivo", "fatiga"],
+      "resumen_terapeutico": "Defensa del descanso activo, estratégico y deliberado como simbiótico del trabajo de alto rendimiento y la sostenibilidad a largo plazo.",
+      "consejo_aplicable": "Trata al descanso no como un premio residual, sino como una disciplina activa de recarga vital indispensable para tu claridad."
+    },
+    {
+      "id_libro": "alimenta_tu_cerebro_campbell_mcbride",
+      "titulo": "Alimenta tu cerebro",
+      "autor": "Dr. Natasha Campbell-McBride",
+      "categoria": "Hábitos / Insomnio",
+      "sintomas_asociados": ["disbiosis", "intestino permeable", "niebla mental", "fatiga"],
+      "resumen_terapeutico": "Protocolo GAPS que establece el nexo causal entre la degradación intestinal ('leaky gut') y la génesis de la niebla mental y la fatiga.",
+      "consejo_aplicable": "Nutre la salud de tu tracto digestivo con alimentos reales y caldos reparadores; la claridad de tu mente depende de la integridad de tu intestino."
+    },
+    {
+      "id_libro": "sanar_agotamiento_suprarrenal_wilson",
+      "titulo": "Sanar el agotamiento suprarrenal",
+      "autor": "Dr. James L. Wilson",
+      "categoria": "Ansiedad / Hábitos",
+      "sintomas_asociados": ["agotamiento suprarrenal", "fatiga matutina", "hipoglucemia", "estrés"],
+      "resumen_terapeutico": "Diagnóstico y tratamiento holístico del agotamiento suprarrenal mediante nutrición, adaptógenos y sincronización del descanso.",
+      "consejo_aplicable": "Protege tu sistema suprarrenal durmiendo temprano y evitando estimulantes artificiales que exprimirán tu energía vital."
+    },
+    {
+      "id_libro": "atencion_plena_williams_penman",
+      "titulo": "Atención plena (Mindfulness): Guía práctica",
+      "autor": "Mark Williams y Danny Penman",
+      "categoria": "Ansiedad / Insomnio",
+      "sintomas_asociados": ["modo de hacer", "rumiación", "parálisis decisoria", "depresión"],
+      "resumen_terapeutico": "Programa MBCT de ocho semanas para transitar del 'modo de hacer' (analítico y agotador) al 'modo de ser' (espacioso y sensorial).",
+      "consejo_aplicable": "Cuando tu mente quede atrapada intentando resolverlo todo, suelta el 'modo de hacer' y descansa en el 'modo de ser' sintiendo tu respiración."
+    },
+    {
+      "id_libro": "poder_de_la_concentracion_dumont",
+      "titulo": "El poder de la concentración",
+      "autor": "Theron Q. Dumont",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["dispersión psíquica", "inquietud motora", "pérdida de foco"],
+      "resumen_terapeutico": "Metodología clásica para desarrollar el dominio absoluto de la atención y erradicar la dispersión mediante la disciplina corporal y mental.",
+      "consejo_aplicable": "El control de la mente comienza por el control del cuerpo; practica la quietud absoluta durante unos minutos para unificar tu foco."
+    },
+    {
+      "id_libro": "supercerebro_chopra_tanzi",
+      "titulo": "Supercerebro",
+      "autor": "Deepak Chopra y Rudolph E. Tanzi",
+      "categoria": "Hábitos / Insomnio",
+      "sintomas_asociados": ["deterioro cognitivo", "niebla mental", "pérdida de memoria"],
+      "resumen_terapeutico": "Optimización cerebral mediante neuroplasticidad epigenética, meditación, sueño profundo y dieta antiinflamatoria.",
+      "consejo_aplicable": "Eres el creador activo de tu arquitectura neuronal; cada elección consciente de calma y aprendizaje renueva tu cerebro."
+    },
+    {
+      "id_libro": "hyperfocus_bailey",
+      "titulo": "Hyperfocus",
+      "autor": "Chris Bailey",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["multitarea", "saturación atencional", "fatiga digital"],
+      "resumen_terapeutico": "Alternancia deliberada entre Hyperfocus (enfoque profundo) y Scatterfocus (descanso mental estratégico y divagación constructiva).",
+      "consejo_aplicable": "Alterna entre concentrarte profundamente en una sola tarea y permitir que tu mente divague para recargar tus reservas ejecutivas."
+    },
+    {
+      "id_libro": "los_7_habitos_covey",
+      "titulo": "Los 7 hábitos de la gente altamente efectiva",
+      "autor": "Stephen R. Covey",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["urgencia", "crisis", "agotamiento decisorio", "caos"],
+      "resumen_terapeutico": "Modelo de efectividad basado en principios, instando a trasladar el foco al Cuadrante II (importante no urgente) y afilar la sierra.",
+      "consejo_aplicable": "Invierte tiempo en lo importante no urgente: planifica, descansa y cuida tus dimensiones física y mental antes de que la crisis te arrolle."
+    },
+    {
+      "id_libro": "desbloquea_tu_cerebro_pillay",
+      "titulo": "Desbloquea tu cerebro",
+      "autor": "Dr. Srini Pillay",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["bloqueo mental", "sobrecarga", "fuerza de voluntad agotada"],
+      "resumen_terapeutico": "Demuestra la necesidad de alternar la concentración con el 'desenfoque' (unfocus) para activar la red neuronal por defecto y resolver problemas.",
+      "consejo_aplicable": "Cuando experimentes un bloqueo mental, deja de forzar el enfoque; permítete desenfocarte un momento y la solución emergerá."
+    },
+    {
+      "id_libro": "organiza_tu_tiempo_tracy",
+      "titulo": "Organiza tu tiempo, organiza tu vida",
+      "autor": "Brian Tracy",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["procrastinación", "agobio", "ineficacia"],
+      "resumen_terapeutico": "Técnicas de gestión del tiempo (Ley de Pareto, método ABCDE y 'trágate ese sapo') para eliminar la saturación cognitiva.",
+      "consejo_aplicable": "Acomete tu tarea más difícil y temida a primera hora de la mañana; liberarás dopamina y despejarás tu horizonte mental."
+    },
+    {
+      "id_libro": "habitos_atomicos_clear",
+      "titulo": "Hábitos atómicos",
+      "autor": "James Clear",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["desorden", "falta de sistemas", "inconstancia"],
+      "resumen_terapeutico": "Ingeniería del comportamiento basada en sistemas y mejoras marginales del 1%, optimizando el diseño del entorno para facilitar la conducta.",
+      "consejo_aplicable": "Diseña tu entorno para que lo bueno sea obvio y lo distractor sea invisible; los pequeños sistemas superan a las metas abstractas."
+    },
+    {
+      "id_libro": "el_elemento_robinson",
+      "titulo": "El elemento",
+      "autor": "Ken Robinson",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["desmotivación", "fricción", "aburrimiento existencial"],
+      "resumen_terapeutico": "Postula que la frustración y los bloqueos surgen al estar fuera del 'Elemento' (intersección de aptitudes y pasión).",
+      "consejo_aplicable": "Busca aquello que alinea tu talento natural con tu entusiasmo profundo; allí el gasto energético se vuelve regenerativo."
+    },
+    {
+      "id_libro": "flow_csikszentmihalyi",
+      "titulo": "Flow: La psicología del flujo óptimo",
+      "autor": "Mihaly Csikszentmihalyi",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["entropía psíquica", "aburrimiento", "ansiedad por desajuste"],
+      "resumen_terapeutico": "Teoría del estado de flujo, alcanzado mediante el equilibrio dinámico entre el desafío de la tarea y la habilidad personal.",
+      "consejo_aplicable": "Busca actividades donde el desafío y tus habilidades se equilibren exactamente; entrarás en un estado de absorción y gozo intrínseco."
+    },
+    {
+      "id_libro": "por_que_dormimos_walker",
+      "titulo": "Por qué dormimos",
+      "autor": "Matthew Walker",
+      "categoria": "Insomnio / Hábitos",
+      "sintomas_asociados": ["privación de sueño", "neurodegeneración", "inmunosupresión"],
+      "resumen_terapeutico": "Tratado definitivo sobre la necesidad biológica del sueño para la limpieza glinfática, consolidación de memoria y salud global.",
+      "consejo_aplicable": "Respeta sagradamente tus horas de descanso; el sueño no es un lujo, sino el pilar biológico indispensable de tu salud."
+    },
+    {
+      "id_libro": "revolucion_del_sueño_huffington",
+      "titulo": "La revolución del sueño",
+      "autor": "Arianna Huffington",
+      "categoria": "Insomnio / Hábitos",
+      "sintomas_asociados": ["agotamiento", "adicción digital nocturna", "burnout"],
+      "resumen_terapeutico": "Alegato contra la privación de sueño como estatus, proponiendo rituales de desconexión y la conversión del dormitorio en santuario.",
+      "consejo_aplicable": "Establece un toque de queda digital una hora antes de dormir y saca las pantallas de tu santuario de descanso."
+    },
+    {
+      "id_libro": "dormir_bien_estivill",
+      "titulo": "Dormir bien para vivir más",
+      "autor": "Dr. Eduard Estivill",
+      "categoria": "Insomnio",
+      "sintomas_asociados": ["insomnio", "malos hábitos de sueño", "cronobiología alterada"],
+      "resumen_terapeutico": "Aproximación médica y conductual para erradicar el insomnio mediante higiene del sueño y control de estímulos.",
+      "consejo_aplicable": "Reserva la cama única y exclusivamente para dormir, y mantén una regularidad férrea al despertar cada mañana."
+    },
+    {
+      "id_libro": "apaga_la_luz_breus",
+      "titulo": "Apaga la luz",
+      "autor": "Dr. Michael Breus",
+      "categoria": "Insomnio",
+      "sintomas_asociados": ["desajuste de cronotipo", "insomnio", "fatiga matutina"],
+      "resumen_terapeutico": "Enfoque personalizado según el cronotipo biológico (Delfín, León, Oso, Lobo) para sincronizar rutinas con la genética.",
+      "consejo_aplicable": "Identifica tu cronotipo natural y alinea tus horarios de cafeína, ejercicio y descanso con tu predisposición biológica."
+    },
+    {
+      "id_libro": "metodo_para_dormir_meadows",
+      "titulo": "El método para dormir",
+      "autor": "Dr. Guy Meadows",
+      "categoria": "Insomnio / Ansiedad",
+      "sintomas_asociados": ["lucha por dormir", "hiperalerta nocturna", "vigilia ansiosa"],
+      "resumen_terapeutico": "Basado en ACT para el insomnio: demuestra que intentar controlar el sueño por la fuerza mantiene la vigilia, proponiendo la aceptación.",
+      "consejo_aplicable": "Deja de luchar por dormir; abraza la vigilia con curiosidad y deja que el sueño llegue de forma natural por sí solo."
+    },
+    {
+      "id_libro": "sueño_inteligente_stevenson",
+      "titulo": "Sueño inteligente",
+      "autor": "Shawn Stevenson",
+      "categoria": "Insomnio / Hábitos",
+      "sintomas_asociados": ["contaminación lumínica", "déficit de magnesio", "sueño superficial"],
+      "resumen_terapeutico": "21 estrategias prácticas para optimizar el sueño profundo mediante entorno, luz, temperatura y nutrición.",
+      "consejo_aplicable": "Enfría tu habitación entre 15 y 19 grados y oscurece por completo tu espacio para facilitar tu descenso térmico central."
+    },
+    {
+      "id_libro": "vencer_el_insomnio_espie",
+      "titulo": "Vencer el insomnio",
+      "autor": "Colin A. Espie",
+      "categoria": "Insomnio",
+      "sintomas_asociados": ["insomnio crónico", "asociación cama-ansiedad"],
+      "resumen_terapeutico": "Protocolo clínico de TCC-I basado en control de estímulos y restricción del tiempo en cama para romper el condicionamiento.",
+      "consejo_aplicable": "Si no logras dormir tras quince minutos en la cama, levántate a otra habitación hasta que retorne la somnolencia natural."
+    },
+    {
+      "id_libro": "arte_de_dormir_hobson",
+      "titulo": "El arte de dormir",
+      "autor": "Rob Hobson",
+      "categoria": "Insomnio / Hábitos",
+      "sintomas_asociados": ["desajustes dietéticos", "ansiedad nocturna", "mala crononutrición"],
+      "resumen_terapeutico": "Enfoque integrativo combinando crononutrición, dieta (triptófano y carbohidratos complejos), entorno y conducta.",
+      "consejo_aplicable": "Cena alimentos ligeros combinando triptófano con carbohidratos complejos para favorecer la síntesis nocturna de melatonina."
+    },
+    {
+      "id_libro": "mente_en_calma_dormir_mejor_krasnow",
+      "titulo": "La mente en calma para dormir mejor",
+      "autor": "Mark Krasnow",
+      "categoria": "Insomnio / Ansiedad",
+      "sintomas_asociados": ["hiperalerta", "respiración torácica", "noradrenalina elevada"],
+      "resumen_terapeutico": "Abordaje neurofisiológico sobre cómo el complejo pre-Bötzinger y la respiración controlada desactivan el locus coeruleus.",
+      "consejo_aplicable": "Utiliza el 'suspiro fisiológico' (dos inhalaciones nasales seguidas de una exhalación bucal prolongada) para apagar la alarma de tu cerebro."
+    },
+    {
+      "id_libro": "recupera_tu_sueno_ramlakhan",
+      "titulo": "Recupera tu sueño",
+      "autor": "Dr. Nerina Ramlakhan",
+      "categoria": "Insomnio / Hábitos",
+      "sintomas_asociados": ["sistema nervioso en supervivencia", "desayuno omitido", "insomnio"],
+      "resumen_terapeutico": "Programa diario de cinco principios (desayunar temprano, limitar cafeína, hidratación, dormir antes de 10:30 PM, autocuidado diurno).",
+      "consejo_aplicable": "Desayuna dentro de la primera media hora tras levantarte para enviar una señal de seguridad metabólica a tu cerebro."
+    },
+    {
+      "id_libro": "inteligencia_emocional_goleman",
+      "titulo": "Inteligencia emocional",
+      "autor": "Daniel Goleman",
+      "categoria": "Ansiedad / Ira",
+      "sintomas_asociados": ["secuestro amigdalino", "impulsividad", "desregulación afectiva"],
+      "resumen_terapeutico": "Demuestra la primacía del CE sobre el CI, explicando el secuestro amigdalino y las cinco dimensiones de la competencia emocional.",
+      "consejo_aplicable": "Cuando sientas que la amígdala toma el control, haz una pausa antes de reaccionar para permitir que tu neocórtex recupere el timón."
+    },
+    {
+      "id_libro": "poder_de_la_paciencia_ryan",
+      "titulo": "El poder de la paciencia",
+      "autor": "M. J. Ryan",
+      "categoria": "Ansiedad / Ira",
+      "sintomas_asociados": ["impaciencia", "irritabilidad", "urgencia", "frustración"],
+      "resumen_terapeutico": "Reivindica la paciencia activa como maestría emocional para tolerar la incomodidad y detener la hiperreactividad.",
+      "consejo_aplicable": "Habita el espacio entre el estímulo y la respuesta; respira antes de permitir que la impaciencia dicte tu conducta."
+    },
+    {
+      "id_libro": "cuando_la_ira_toma_el_mando_chapman",
+      "titulo": "Cuando la ira toma el mando",
+      "autor": "Gary Chapman",
+      "categoria": "Ira",
+      "sintomas_asociados": ["explosión", "implosión", "resentimiento", "agresividad"],
+      "resumen_terapeutico": "Distingue entre ira legítima e ilegítima, proponiendo un protocolo en 13 pasos que incluye tiempo fuera y asertividad.",
+      "consejo_aplicable": "Toma un 'tiempo fuera' físico cuando notes que la ira comienza a hervir en tu cuerpo, permitiendo que la química del estrés se disipe."
+    },
+    {
+      "id_libro": "no_te_ahogues_en_un_vaso_de_agua_carlson",
+      "titulo": "No te ahogues en un vaso de agua",
+      "autor": "Richard Carlson",
+      "categoria": "Ansiedad / Ira",
+      "sintomas_asociados": ["magnificación de nimiedades", "hipersensibilidad", "exasperación"],
+      "resumen_terapeutico": "100 estrategias para dejar de transformar contratiempos menores en catástrofes y cultivar la perspectiva temporal.",
+      "consejo_aplicable": "Pregúntate si este incidente tendrá alguna importancia dentro de un año; devuelve la perspectiva a tu día a día."
+    },
+    {
+      "id_libro": "dominar_la_ira_tafrate_kassinove",
+      "titulo": "Dominar la ira y la irritabilidad",
+      "autor": "Raymond Chip Tafrate y Howard Kassinove",
+      "categoria": "Ira",
+      "sintomas_asociados": ["hostilidad crónica", "catarsis destructiva", "exigencias rígidas"],
+      "resumen_terapeutico": "CBT-AM (Manejo de la Ira Basado en TCC). Desmantela el mito de la catarsis violenta y propone reestructuración cognitiva y desactivación somática.",
+      "consejo_aplicable": "Desafía tus exigencias rígidas ('esto no debería pasar') y reemplázalas por preferencias flexibles y tolerantes a la frustración."
+    },
+    {
+      "id_libro": "paz_mental_thich_nhat_hanh",
+      "titulo": "Paz mental: Cómo calmar la irritación y la impaciencia",
+      "autor": "Thich Nhat Hanh",
+      "categoria": "Ira / Ansiedad",
+      "sintomas_asociados": ["irritación", "enfado", "agitación interior"],
+      "resumen_terapeutico": "Enseña a acunar la ira con compasión, tal como una madre abraza a un bebé que llora, utilizando la respiración consciente.",
+      "consejo_aplicable": "Toma tu irritación en brazos con ternura y respira hondo; la compasión es el único bálsamo que disuelve el fuego del enfado."
+    },
+    {
+      "id_libro": "el_arte_de_no_amargarse_la_vida_santandreu",
+      "titulo": "El arte de no amargarse la vida",
+      "autor": "Rafael Santandreu",
+      "categoria": "Ansiedad / Ira",
+      "sintomas_asociados": ["terribitis", "necesititis", "baja tolerancia a la frustración"],
+      "resumen_terapeutico": "TREC y estoicismo para erradicar la 'terribitis' y la 'necesititis', demostrando que solo se necesita comida, agua y techo básico.",
+      "consejo_aplicable": "Desdramatiza tus contratiempos: casi nada es verdaderamente terrible salvo la falta de salud básica y agua; lo demás son preferencias."
+    },
+    {
+      "id_libro": "mindfulness_y_el_arte_de_la_compasion_chodron",
+      "titulo": "Mindfulness y el arte de la compasión",
+      "autor": "Pema Chödrön",
+      "categoria": "Ira / Ansiedad",
+      "sintomas_asociados": ["shenpa (anzuelo)", "reactividad", "blindaje defensivo"],
+      "resumen_terapeutico": "Abordaje del concepto de *shenpa* (el anzuelo del impulso reactivo) y la práctica de *Tonglen* (enviar y recibir compasión).",
+      "consejo_aplicable": "Detente en el milimétrico instante en que muerdes el anzuelo (*shenpa*) y habita la incomodidad con amistad hacia ti mismo (*maitri*)."
+    },
+    {
+      "id_libro": "siente_el_miedo_jeffers",
+      "titulo": "Siente el miedo... y hazlo de todos modos",
+      "autor": "Susan Jeffers",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["miedo paralizante", "creencia de incapacidad", "evitación"],
+      "resumen_terapeutico": "Demuestra que el miedo es inevitable en el crecimiento y que la raíz es la duda sobre la propia capacidad de manejo.",
+      "consejo_aplicable": "Reinterpreta el miedo no como señal de retroceso, sino como indicador infalible de expansión personal; actúes con temor o no, eres capaz."
+    },
+    {
+      "id_libro": "trampa_de_la_felicidad_harris",
+      "titulo": "La trampa de la felicidad",
+      "autor": "Russ Harris",
+      "categoria": "Ansiedad / Ira",
+      "sintomas_asociados": ["evitación experiencial", "búsqueda obsesiva de confort", "lucha"],
+      "resumen_terapeutico": "Manual ACT para desmantelar el mito de la felicidad ininterrumpida y practicar aceptación, defusión y valores.",
+      "consejo_aplicable": "Suelta la lucha por ser feliz todo el tiempo; acepta tus pensamientos difíciles como meras palabras y comprométete con lo valioso."
+    },
+    {
+      "id_libro": "trastornos_de_panico_belloch_botella",
+      "titulo": "Trastornos de pánico y agorafobia",
+      "autor": "Amparo Belloch y Carmen Botella",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["ataque de pánico", "catastrofización somática", "agorafobia"],
+      "resumen_terapeutico": "Protocolo TCC basado en el modelo de Clark para la interpretación catastrófica de sensaciones corporales y la exposición interoceptiva.",
+      "consejo_aplicable": "Tus sensaciones corporales de pánico son transitorias e inocuas; no son señales de catástrofe inminente, sino falsas alarmas fisiológicas."
+    },
+    {
+      "id_libro": "vencer_la_ansiedad_y_el_panico_cordero",
+      "titulo": "Vencer la ansiedad y el pánico",
+      "autor": "Raul J. Cordero",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["temblores", "mareos", "crisis de angustia", "hiperactivación"],
+      "resumen_terapeutico": "Guía práctica con herramientas somáticas (5-4-3-2-1, respiración cuadrada) para interceptar crisis de pánico agudas.",
+      "consejo_aplicable": "Utiliza el anclaje sensorial 5-4-3-2-1 para retirar la atención de tu interior y regresar al entorno físico tangible."
+    },
+    {
+      "id_libro": "panico_y_agorafobia_landeta",
+      "titulo": "El pánico y la agorafobia",
+      "autor": "J. Landeta y colaboradores",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["sudoración", "taquicardia", "conductas de seguridad", "evitación"],
+      "resumen_terapeutico": "Desensibilización sistemática y exposición gradual in vivo eliminando conductas de seguridad y amuletos protectores.",
+      "consejo_aplicable": "Permanece en la situación temida sin escapar ni usar conductas de seguridad hasta que tu ansiedad descienda por habituación natural."
+    },
+    {
+      "id_libro": "mindfulness_y_psicoterapia_germer",
+      "titulo": "Mindfulness y psicoterapia",
+      "autor": "Christopher K. Germer",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["resistencia al malestar", "sufrimiento secundario", "pánico"],
+      "resumen_terapeutico": "Integra mindfulness y psicoterapia mediante el acrónimo RAIN (Reconocer, Aceptar, Investigar, No identificarse) y autocompasión.",
+      "consejo_aplicable": "Aplica el protocolo RAIN: reconoce el síntoma, acéptalo, investígalo con amabilidad y recuerda que tú eres el espacio que lo observa."
+    },
+    {
+      "id_libro": "controla_tu_ansiedad_bourne",
+      "titulo": "Controla tu ansiedad",
+      "autor": "Edmund J. Bourne",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["ansiedad generalizada", "voces neuróticas", "opresión esternal"],
+      "resumen_terapeutico": "Manual integral biopsicosocial abordando relajación, eliminación de estimulantes y reestructuración de las 'voces neuróticas'.",
+      "consejo_aplicable": "Identifica cuál de tus voces internas (el Crítico, el Catastrofista, la Víctima o el Perfeccionista) habla y contrédice con evidencia."
+    },
+    {
+      "id_libro": "basta_de_ansiedad_carbonell",
+      "titulo": "Basta de ansiedad",
+      "autor": "David A. Carbonell",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["falta de aire ilusoria", "palpitaciones", "protocolo A-W-A-R-E"],
+      "resumen_terapeutico": "Desmitifica la ansiedad como un engaño del cerebro y propone el protocolo A-W-A-R-E (Aceptar, Observar, Actuar, Repetir, Esperar lo mejor).",
+      "consejo_aplicable": "Exhala prolongadamente para vaciar tus pulmones en lugar de boquear; la falsa falta de aire cederá de inmediato."
+    },
+    {
+      "id_libro": "supera_tu_ansiedad_cantopher",
+      "titulo": "Supera tu ansiedad",
+      "autor": "Dr. Tim Cantopher",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["colapso por hiperresponsabilidad", "taquicardia por agotamiento"],
+      "resumen_terapeutico": "Explica que la ansiedad severa suele afectar a personas hiperresponsables cuyo sistema nervioso colapsa por simple agotamiento biológico.",
+      "consejo_aplicable": "Acepta que tu taquicardia por estrés carece de capacidad para dañar tu corazón sano; tu sistema solo necesita un descanso no negociable."
+    },
+    {
+      "id_libro": "respira_nestor",
+      "titulo": "Respira: El poder de la respiración",
+      "autor": "James Nestor",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["respiración bucal", "hiperventilación", "vasoconstricción cerebral"],
+      "resumen_terapeutico": "Investigación sobre la respiración nasal y la proporción perfecta (5.5 segundos inhalar, 5.5 exhalar) para optimizar el dióxido de carbono y el tono vagal.",
+      "consejo_aplicable": "Cierra la boca y respira siempre por la nariz de forma rítmica y pausada; tu química sanguínea y tu calma se restaurarán de inmediato."
+    },
+    {
+      "id_libro": "solucion_para_la_ansiedad_gutierrez",
+      "titulo": "La solución para la ansiedad",
+      "autor": "Bernat Gutiérrez",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["despersonalización", "tormenta adrenérgica", "temblores"],
+      "resumen_terapeutico": "Enfoque somático que etiqueta las crisis como 'tormentas adrenérgicas inocuas' y promueve la descarga motora y la reconexión.",
+      "consejo_aplicable": "Etiqueta tu crisis como una tormenta adrenérgica inocua que pasará en minutos; no intentes frenar los temblores a la fuerza, permíteles fluir."
+    },
+    {
+      "id_libro": "vivir_sin_ansiedad_trenton",
+      "titulo": "Vivir sin ansiedad",
+      "autor": "Nick Trenton",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["calibración errónea de amenazas", "globo histérico", "reflejo de inmersión"],
+      "resumen_terapeutico": "Enfoque de abajo hacia arriba (bottom-up) utilizando el reflejo de inmersión en agua fría y anclajes propioceptivos para calmar el sistema simpático.",
+      "consejo_aplicable": "Sumerge tu rostro en agua fría unos segundos o apoya firmemente tus pies en el suelo para apagar de inmediato la falsa alarma de tu cerebro."
+    },
+    {
+      "id_libro": "segundo_cerebro_gershon",
+      "titulo": "El segundo cerebro",
+      "autor": "Michael D. Gershon",
+      "categoria": "Ansiedad / Hábitos",
+      "sintomas_asociados": ["colon irritable", "náuseas psicógenas", "tormenta entérica"],
+      "resumen_terapeutico": "Descubrimiento científico del Sistema Nervioso Entérico y su diálogo bidireccional constante con el cerebro a través del nervio vago.",
+      "consejo_aplicable": "Tus malestares digestivos por nervios son reales y orgánicos; calma tu mente y tu respiración para pacificar el segundo cerebro en tu vientre."
+    },
+    {
+      "id_libro": "intestino_feliz_pedre",
+      "titulo": "Intestino feliz",
+      "autor": "Dr. Vincent Pedre",
+      "categoria": "Ansiedad / Hábitos",
+      "sintomas_asociados": ["estrés simpático digestivo", "disbiosis", "reflujo"],
+      "resumen_terapeutico": "Programa 'GUT C.A.R.E.' para sanar la digestión resolviendo el impacto del estrés crónico sobre la mucosa intestinal.",
+      "consejo_aplicable": "Haz tres respiraciones diafragmáticas antes de cada comida para encender tu tono parasimpático y permitir una digestión sin espasmos."
+    },
+    {
+      "id_libro": "digestion_es_la_cuestion_enders",
+      "titulo": "La digestión es la cuestión",
+      "autor": "Giulia Enders",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["motilidad alterada", "microbiota desequilibrada", "bloqueo gástrico"],
+      "resumen_terapeutico": "Divulgación biomecánica y ecológica del tracto digestivo, su conexión con el cerebro y la importancia de la postura y la microbiota.",
+      "consejo_aplicable": "Cuida la postura al evacuar y mastica cada bocado con paciencia; tu intestino es un guardián sabio de tu bienestar global."
+    },
+    {
+      "id_libro": "sanar_intestino_permeable_axe",
+      "titulo": "Sanar el intestino permeable",
+      "autor": "Dr. Josh Axe",
+      "categoria": "Hábitos / Ansiedad",
+      "sintomas_asociados": ["leaky gut", "espasmos por tensión", "inflamación sistémica"],
+      "resumen_terapeutico": "Modelo terapéutico para sellar la permeabilidad intestinal mediante alimentos medicinales, enzimas y control del estrés.",
+      "consejo_aplicable": "Utiliza caldos ricos en colágeno y calma tu estrés para reparar la barrera protectora de tu tracto digestivo."
+    },
+    {
+      "id_libro": "poder_de_tu_intestino_perlmutter",
+      "titulo": "El poder de tu intestino",
+      "autor": "David Perlmutter",
+      "categoria": "Hábitos / Ansiedad",
+      "sintomas_asociados": ["neuroinflamación por disbiosis", "ansiedad anticipatoria", "butirato bajo"],
+      "resumen_terapeutico": "Eje intestino-microbiota-cerebro y su impacto en la claridad mental, la neuroinflamación y la resistencia a la ansiedad.",
+      "consejo_aplicable": "Alimenta tu microbiota con fibra prebiótica y alimentos fermentados vivos para producir butirato que proteja tu cerebro."
+    },
+    {
+      "id_libro": "sindrome_intestino_irritable_azpiroz",
+      "titulo": "El síndrome del intestino irritable",
+      "autor": "Dr. Fernando Azpiroz",
+      "categoria": "Ansiedad / Hábitos",
+      "sintomas_asociados": ["hipersensibilidad visceral", "espasmos por CRF", "meteorismo"],
+      "resumen_terapeutico": "Abordaje clínico de la hipersensibilidad visceral, la motilidad y la correcta aplicación de dietas bajas en FODMAP.",
+      "consejo_aplicable": "Comprende que tu intestino tiene terminaciones hiperactivas que exageran las señales normales; no temas a tus sensaciones viscerales."
+    },
+    {
+      "id_libro": "cura_tu_intestino_watson",
+      "titulo": "Cura tu intestino",
+      "autor": "Brenda Watson",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["pesadez estomacal", "acidez", "digestión colapsada"],
+      "resumen_terapeutico": "Protocolo de las '5 R' (Remover, Reemplazar, Reinocular, Reparar, Reequilibrar) para restaurar la eficiencia digestiva.",
+      "consejo_aplicable": "Come con calma y en estado de reposo mental; la prisa inhibe las enzimas digestivas y genera pesadez estomacal."
+    },
+    {
+      "id_libro": "comer_para_sanar_li",
+      "titulo": "Comer para sanar",
+      "autor": "Dr. William W. Li",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["daño mucoso", "disminución de Akkermansia", "inflamación"],
+      "resumen_terapeutico": "Cómo los componentes bioactivos de los alimentos potencian los cinco sistemas de defensa corporales y refuerzan la microbiota protectora.",
+      "consejo_aplicable": "Incorpora polifenoles de bayas y té verde para nutrir las bacterias protectoras que blindan tu barrera intestinal."
+    },
+    {
+      "id_libro": "arte_de_cuidar_tu_microbiota_van_de_putte",
+      "titulo": "El arte de cuidar tu microbiota",
+      "autor": "Dra. Marieke van de Putte",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["bloqueo del complejo motor migratorio", "SIBO", "prisa digestiva"],
+      "resumen_terapeutico": "Resalta la importancia de respetar ventanas de ayuno interdigestivo (4 horas) para permitir que el complejo motor migratorio limpie el intestino.",
+      "consejo_aplicable": "Respeta al menos cuatro horas de pausa entre tus comidas principales para que el 'barrendero natural' de tu intestino cumpla su función."
+    },
+    {
+      "id_libro": "vivir_con_sindrome_intestino_irritable_harper",
+      "titulo": "Vivir con el síndrome de intestino irritable",
+      "autor": "Lynne Harper",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["ansiedad anticipatoria", "miedo a ataques públicos", "urgencia"],
+      "resumen_terapeutico": "Guía práctica de manejo situacional, autocuidado y desestigmatización para superar la ansiedad anticipatoria del SII.",
+      "consejo_aplicable": "Prepara tu kit de emergencia y usa herramientas de autoafirmación; la ansiedad anticipatoria alimenta el síntoma más que la comida misma."
+    },
+    {
+      "id_libro": "valor_de_atreverse_brown",
+      "titulo": "El valor de atreverse",
+      "autor": "Brené Brown",
+      "categoria": "Culpa / Ansiedad",
+      "sintomas_asociados": ["armadura emocional", "escasez", "miedo a la exposición"],
+      "resumen_terapeutico": "Manifiesto sobre la vulnerabilidad como núcleo del coraje y la innovación, desmontando las armaduras de perfección.",
+      "consejo_aplicable": "Atrévete a entrar a la arena de la vida de forma transparente; la vulnerabilidad no es debilidad, sino la medida exacta del coraje."
+    },
+    {
+      "id_libro": "supera_tu_fobia_social_gilova",
+      "titulo": "Supera tu fobia social",
+      "autor": "H. G. Gilova y colaboradores",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["autoobservación obsesiva", "conductas de seguridad", "fobia social"],
+      "resumen_terapeutico": "Protocolo TCC para la ansiedad social, eliminando la autoobservación interna y las conductas de seguridad durante la exposición.",
+      "consejo_aplicable": "Retira tu foco de ti mismo durante una interacción social y presta atención genuina al entorno y a tu interlocutor."
+    },
+    {
+      "id_libro": "vivir_con_valentia_chodron",
+      "titulo": "Vivir con valentía",
+      "autor": "Pema Chödrön",
+      "categoria": "Ansiedad / Trauma",
+      "sintomas_asociados": ["vértigo existencial", "resistencia a la impermanencia", "huida"],
+      "resumen_terapeutico": "Guía de ecuanimidad radical para habitar la incertidumbre y la crisis sin escapar mediante anestesia o agresividad.",
+      "consejo_aplicable": "No huyas cuando tus estructuras se desmoronan; habita el centro del malestar con ternura y descubre la valentía que yace en tu interior."
+    },
+    {
+      "id_libro": "antidoto_burkeman",
+      "titulo": "El antídoto: Felicidad para gente que no soporta el positivo",
+      "autor": "Oliver Burkeman",
+      "categoria": "Ansiedad / Hábitos",
+      "sintomas_asociados": ["positividad tóxica", "esfuerzo invertido", "evitación de escenarios"],
+      "resumen_terapeutico": "La 'vía negativa' hacia la felicidad: aceptar el fracaso, la mortalidad y practicar la premeditación de los males (*praemeditatio malorum*).",
+      "consejo_aplicable": "Imagina con sobriedad el peor escenario que temes; comprobarás que es tolerable y desinflamarás el terror a la incertidumbre."
+    },
+    {
+      "id_libro": "libera_tu_mente_mckay_forsyth_eifert",
+      "titulo": "Libera tu mente",
+      "autor": "Matthew McKay, John P. Forsyth y Georg Eifert",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["evitación experiencial", "parálisis vital", "guerra interna"],
+      "resumen_terapeutico": "Manual ACT para quebrar la guerra inútil contra los pensamientos y ejecutar acciones comprometidas llevando el miedo en la mochila.",
+      "consejo_aplicable": "Deja de librar la guerra agotadora contra tus pensamientos; llévalos contigo en la mochila mientras caminas hacia lo que valoras."
+    },
+    {
+      "id_libro": "di_que_no_sin_culpa_smith",
+      "titulo": "Di que no sin culpa",
+      "autor": "Manuel J. Smith",
+      "categoria": "Culpa / Ansiedad",
+      "sintomas_asociados": ["servilismo", "manipulación por culpa", "miedo a desaprobar"],
+      "resumen_terapeutico": "Entrenamiento en asertividad sistemática y derechos asertivos para erradicar el miedo irracional a decir 'no' sin culpa.",
+      "consejo_aplicable": "Tienes el derecho inalienable de decir 'no' sin ofrecer justificaciones excesivas ni cargar con la culpa que otros intentan imponerte."
+    },
+    {
+      "id_libro": "poder_de_la_vulnerabilidad_brown",
+      "titulo": "El poder de la vulnerabilidad",
+      "autor": "Brené Brown",
+      "categoria": "Culpa",
+      "sintomas_asociados": ["vergüenza", "blindaje de desconexión", "perfeccionismo"],
+      "resumen_terapeutico": "Investigación sobre la vergüenza y el blindaje emocional, demostrando que la vulnerabilidad es la cuna de la alegría y la conexión.",
+      "consejo_aplicable": "Nombra la vergüenza por su nombre y compártela con alguien seguro; la vergüenza no puede sobrevivir cuando se expone a la luz de la empatía."
+    },
+    {
+      "id_libro": "supera_la_timidez_stamateas",
+      "titulo": "Cómo superar la timidez y la fobia social",
+      "autor": "Bernardo Stamateas",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["hipercrítica interna", "inferioridad", "sesgo de confirmación"],
+      "resumen_terapeutico": "Pautas de acción cotidiana para desarmar la timidez, sustituyendo la autocrítica por curiosidad y microretos sociales.",
+      "consejo_aplicable": "Sustituye la pregunta victimista '¿qué pensarán de mi?' por la actitud curiosa '¿qué puedo aprender yo de estas personas?'."
+    },
+    {
+      "id_libro": "habilidades_sociales_caballo",
+      "titulo": "Entrenamiento en habilidades sociales",
+      "autor": "Vicente E. Caballo",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["inhibición", "déficit comunicativo", "ansiedad social"],
+      "resumen_terapeutico": "Tratado metodológico de entrenamiento en habilidades sociales mediante modelado, ensayo de conducta y retroalimentación.",
+      "consejo_aplicable": "Ensaya tus interacciones asertivas de forma progresiva; la comunicación eficaz es una destreza entrenable, no un don innato."
+    },
+    {
+      "id_libro": "atrevete_a_cambiar_riso",
+      "titulo": "Atrévete a cambiar",
+      "autor": "Walter Riso",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["resistencia al cambio", "miedo a la pérdida de control", "estancamiento"],
+      "resumen_terapeutico": "Identifica y trasciende los cuatro miedos nucleares (fracaso, pérdida de control, sufrimiento, soledad) que paralizan en la zona de confort.",
+      "consejo_aplicable": "Lo conocido mediocre no es mejor que la incertidumbre del crecimiento; atrévete a dar el paso hacia tu propia autonomía."
+    },
+    {
+      "id_libro": "despersonalizacion_gallagher",
+      "titulo": "Despersonalización y desrealización",
+      "autor": "Connor Gallagher",
+      "categoria": "Ansiedad / Trauma",
+      "sintomas_asociados": ["despersonalización", "desrealización", "extrañeza", "chequeo constante"],
+      "resumen_terapeutico": "Abordaje pragmático para desarmar el terror a la despersonalización, frenando el autoanálisis obsesivo y aceptando el síntoma.",
+      "consejo_aplicable": "Tu sensación de irrealidad no es locura, sino un amortiguador biológico de cansancio; retírale el miedo y la atención hipervigilante y se disipará."
+    },
+    {
+      "id_libro": "hombre_que_confundio_a_su_mujer_sacks",
+      "titulo": "El hombre que confundió a su mujer con un sombrero",
+      "autor": "Oliver Sacks",
+      "categoria": "Trauma",
+      "sintomas_asociados": ["agnosia", "desorientación corporal", "pérdida de esquema"],
+      "resumen_terapeutico": "Historiales clínicos sobre la plasticidad y fragilidad de la percepción neurológica y el esquema corporal humano.",
+      "consejo_aplicable": "Comprende que las alteraciones perceptivas son fallos transitorios de integración en un cerebro asombroso y adaptable."
+    },
+    {
+      "id_libro": "sentirse_irreal_evans",
+      "titulo": "Sentirse irreal",
+      "autor": "Dafydd J. Evans",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["trastornos disociativos", "interpretaciones catastróficas", "extrañeza"],
+      "resumen_terapeutico": "TCC para la despersonalización, desmontando creencias catastróficas mediante debate socrático y exposición a la extrañeza.",
+      "consejo_aplicable": "Tu examen de realidad está intacto; estás experimentando una sensación de extrañeza benigna, no perdiendo la razón."
+    },
+    {
+      "id_libro": "mente_en_calma_cuerpo_presente_fisher",
+      "titulo": "Mente en calma, cuerpo presente",
+      "autor": "Janina Fisher",
+      "categoria": "Trauma / Ansiedad",
+      "sintomas_asociados": ["disociación somática", "entumecimiento", "colapso dorsal vago"],
+      "resumen_terapeutico": "Integra neurobiología interpersonal y terapia sensoriomotora para sanar el entumecimiento y el colapso mediante conciencia somática.",
+      "consejo_aplicable": "Siente la gravedad sosteniendo tu cuerpo contra el suelo y utiliza la mirada panorámica lenta para registrar señales tangibles de seguridad."
+    },
+    {
+      "id_libro": "sobrevivir_a_la_disociacion_spring",
+      "titulo": "Sobrevivir a la disociación",
+      "autor": "Carolyn Spring",
+      "categoria": "Trauma / Ansiedad",
+      "sintomas_asociados": ["niebla disociativa", "aplanamiento afectivo", "apagón de emergencia"],
+      "resumen_terapeutico": "Guía de autocuidado para la disociación basada en el principio 'la seguridad primero', orientación física y estímulos sensoriales potentes.",
+      "consejo_aplicable": "Nombra en voz alta tu nombre, tu edad y la fecha presente, y utiliza estímulos sensoriales seguros para anclarte en el aquí y el ahora."
+    },
+    {
+      "id_libro": "trauma_y_la_memoria_del_cuerpo_rothschild",
+      "titulo": "El trauma y la memoria del cuerpo",
+      "autor": "Babette Rothschild",
+      "categoria": "Trauma",
+      "sintomas_asociados": ["memoria somática", "desbordamiento afectivo", "freno de mano"],
+      "resumen_terapeutico": "Psicología somática que prioriza la autorregulación fisiológica y el 'freno de mano' antes de procesar memorias traumáticas.",
+      "consejo_aplicable": "Aplica el 'freno de mano': antes de explorar recuerdos difíciles, asegúrate de estabilizar y anclar tu cuerpo en la seguridad del presente."
+    },
+    {
+      "id_libro": "desconectados_power",
+      "titulo": "Desconectados: Entendiendo la despersonalización",
+      "autor": "Mick J. Power",
+      "categoria": "Ansiedad",
+      "sintomas_asociados": ["modelo SPAARS", "modulación afectiva extrema", "extrañeza"],
+      "resumen_terapeutico": "Investigación sobre la modulación afectiva extrema que aísla las percepciones de la coloración emocional ante amenaza intolerable.",
+      "consejo_aplicable": "Interrumpe las cavilaciones metafísicas sobre la irrealidad y regresa a interactuar de forma mecánica con objetos concretos del entorno."
+    },
+    {
+      "id_libro": "sanar_heridas_emocionales_horowitz",
+      "titulo": "Sanar las heridas emocionales",
+      "autor": "Dr. Mardi J. Horowitz",
+      "categoria": "Trauma / Ansiedad",
+      "sintomas_asociados": ["fase de negación", "esquemas de afrontamiento", "titulación del afecto"],
+      "resumen_terapeutico": "Modelo de fases del estrés traumático que enseña la titulación consciente del afecto y la alternancia de exploración y descanso.",
+      "consejo_aplicable": "Dosifica la atención que dedicas al malestar; alterna momentos de exploración emocional con pausas sagradas de descanso mental."
+    },
+    {
+      "id_libro": "vivir_anclados_en_la_realidad_southwick_charney",
+      "titulo": "Vivir anclados en la realidad",
+      "autor": "Steven M. Southwick y Dennis H. Charney",
+      "categoria": "Trauma / Ansiedad",
+      "sintomas_asociados": ["pérdida de significado", "desintegración", "factores de resiliencia"],
+      "resumen_terapeutico": "Los 10 pilares de la resiliencia humana basados en estudios con sobrevivientes extremos para preservar el anclaje cognitivo.",
+      "consejo_aplicable": "Cultiva el optimismo realista y apóyate en tus valores y en tu red social; la conexión humana es el amortiguador biológico más potente."
+    },
+    {
+      "id_libro": "mindfulness_somatico_stone",
+      "titulo": "Mindfulness somático",
+      "autor": "Michael Stone",
+      "categoria": "Ansiedad / Trauma",
+      "sintomas_asociados": ["niebla cognitiva", "desencarnación", "pérdida de gravedad"],
+      "resumen_terapeutico": "Mindfulness encarnado enfocado en el contacto gravitatorio, la interocepción y la apertura del campo sensorial periférico.",
+      "consejo_aplicable": "Siente la presión de tus huesos contra el suelo y abre tu visión hacia los bordes periféricos para apagar la visión en túnel."
+    },
+    {
+      "id_libro": "demonio_de_la_depresion_solomon",
+      "titulo": "El demonio de la depresión",
+      "autor": "Andrew Solomon",
+      "categoria": "Tristeza / Trauma",
+      "sintomas_asociados": ["depresión mayor", "colapso de la vitalidad", "aislamiento"],
+      "resumen_terapeutico": "Investigación monumental sobre la depresión, estableciendo que lo opuesto a la depresión no es la felicidad, sino la vitalidad.",
+      "consejo_aplicable": "Convivir con la vulnerabilidad depresiva exige construir una sólida red vincular y sostener la disciplina cotidiana del autocuidado."
+    },
+    {
+      "id_libro": "vencer_la_depresion_coleman",
+      "titulo": "Vencer la depresión",
+      "autor": "Dr. Lee H. Coleman",
+      "categoria": "Tristeza",
+      "sintomas_asociados": ["anhedonia", "inercia", "distorsiones cognitivas depresivas"],
+      "resumen_terapeutico": "TCC aplicada al estado de ánimo depresivo mediante activación conductual: la acción precede a la motivación.",
+      "consejo_aplicable": "No esperes a tener ganas para actuar; programa pequeñas tareas y recuerda que la acción consciente precede a la motivación."
+    },
+    {
+      "id_libro": "poder_de_la_esperanza_ikeda",
+      "titulo": "El poder de la esperanza",
+      "autor": "Daisaku Ikeda",
+      "categoria": "Tristeza",
+      "sintomas_asociados": ["desesperanza", "vacío", "resignación anímica"],
+      "resumen_terapeutico": "Humanismo budista que define la esperanza no como optimismo ingenuo, sino como una decisión volitiva y revolución humana.",
+      "consejo_aplicable": "Ningún invierno es eterno; genera esperanza de manera activa desde tu decisión interior y convierte tu crisis en primavera."
+    },
+    {
+      "id_libro": "sal_de_la_oscuridad_ciarrocchi",
+      "titulo": "Sal de la oscuridad",
+      "autor": "Dr. Joseph P. Ciarrocchi",
+      "categoria": "Tristeza",
+      "sintomas_asociados": ["triada cognitiva de beck", "derrotismo", "rumiación"],
+      "resumen_terapeutico": "Combina TCC y enfoque existencial para rastrear creencias derrotistas y fragmentar metas en microetapas de dominio.",
+      "consejo_aplicable": "Desafía tu triada derrotista contrastando tus pensamientos con hechos y da pequeños pasos que devuelvan tu sentido de competencia."
+    },
+    {
+      "id_libro": "depresion_guia_gilbert",
+      "titulo": "La depresión: Guía de autoayuda paso a paso",
+      "autor": "Dr. Paul Gilbert",
+      "categoria": "Tristeza / Culpa",
+      "sintomas_asociados": ["crítico interno feroz", "vergüenza corrosiva", "amenaza hiperactiva"],
+      "resumen_terapeutico": "Terapia Centrada en la Compasión (CFT). Enseña a calmar el sistema de amenaza y desarrollar una voz compasiva interna.",
+      "consejo_aplicable": "Reemplaza el tono feroz de tu crítico interno por una voz cálida, compasiva y protectora hacia tus propias heridas."
+    },
+    {
+      "id_libro": "sentirse_bien_burns",
+      "titulo": "Sentirse bien",
+      "autor": "Dr. David D. Burns",
+      "categoria": "Tristeza / Ansiedad",
+      "sintomas_asociados": ["distorsiones cognitivas", "autotormenta", "técnica de tres columnas"],
+      "resumen_terapeutico": "TCC clásica para la depresión mediante la identificación y debate de las 10 distorsiones cognitivas con la técnica de tres columnas.",
+      "consejo_aplicable": "Utiliza la técnica de tres columnas: anota tu pensamiento automático, identifica la distorsión y escribe una respuesta racional basada en hechos."
+    },
+    {
+      "id_libro": "peso_de_la_melancolia_shenk",
+      "titulo": "El peso de la melancolía",
+      "autor": "Joshua Wolf Shenk",
+      "categoria": "Tristeza",
+      "sintomas_asociados": ["melancolía endógena", "liderazgo y dolor", "transformación"],
+      "resumen_terapeutico": "Biografía de Lincoln analizando cómo la melancolía profunda puede forjar empatía, sabiduría estratégica y resiliencia histórica.",
+      "consejo_aplicable": "Tu propensión a la profundidad melancólica, gestionada con sentido ético, puede convertirse en la fuente de tu mayor empatía y sabiduría."
+    },
+    {
+      "id_libro": "mindfulness_para_superar_la_depresion_williams",
+      "titulo": "Mindfulness para superar la depresión",
+      "autor": "Mark Williams y colaboradores",
+      "categoria": "Tristeza / Insomnio",
+      "sintomas_asociados": ["recaídas depresivas", "modo de hacer analítico", "espiral rumiante"],
+      "resumen_terapeutico": "MBCT para prevenir recaídas depresivas deteniendo el bucle rumiante mediante defusión y apertura somática.",
+      "consejo_aplicable": "Cuando notes el inicio de la espiral rumiante, detente con el espacio de respiración de tres minutos y siente tu cuerpo sin juzgar."
+    },
+    {
+      "id_libro": "superar_la_tristeza_anderson",
+      "titulo": "Superar la tristeza y la depresión",
+      "autor": "Sylvia Anderson",
+      "categoria": "Tristeza",
+      "sintomas_asociados": ["inmovilidad", "aislamiento", "microavances"],
+      "resumen_terapeutico": "Guía basada en 'microavances' y graduación extrema de tareas para disipar la inercia de la tristeza y el aislamiento.",
+      "consejo_aplicable": "Si una tarea te abruma, redúcela a su mínima expresión (un microavance) y celebra cada pequeño paso fuera de la inercia."
+    },
+    {
+      "id_libro": "cura_de_la_apatia_milner",
+      "titulo": "La cura de la apatía",
+      "autor": "Dr. H. Richard Milner",
+      "categoria": "Tristeza / Hábitos",
+      "sintomas_asociados": ["anhedonia funcional", "apagón dopaminérgico", "umbral de esfuerzo alto"],
+      "resumen_terapeutico": "Abordaje neuropsicológico para reactivar los circuitos dopaminérgicos de recompensa mediante la regla de la acción basal mínima (90 segundos).",
+      "consejo_aplicable": "Interactúa con tu afición o tarea solo durante noventa segundos al día sin expectativas; reducirás la resistencia de inicio de tu cerebro."
+    },
+    {
+      "id_libro": "arte_de_la_buena_vida_irvine",
+      "titulo": "El arte de la buena vida",
+      "autor": "William B. Irvine",
+      "categoria": "Hábitos / Tristeza",
+      "sintomas_asociados": ["adaptación hedonista", "insatisfacción crónica", "pérdida de asombro"],
+      "resumen_terapeutico": "Estoicismo moderno basado en la adaptación hedonista, la visualización negativa y la dicotomía tripartita del control.",
+      "consejo_aplicable": "Practica la visualización negativa: imagina la pérdida temporal de lo que amas para que la gratitud y el asombro vuelvan a estallar en tu presente."
+    },
+    {
+      "id_libro": "ikigai_garcia_miralles",
+      "titulo": "Ikigai: Los secretos de Japón para una vida larga y feliz",
+      "autor": "Héctor García y Francesc Miralles",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["falta de propósito", "desorientación", "automatismo"],
+      "resumen_terapeutico": "Explora el concepto de *ikigai* (la razón de ser) en la intersección de pasión, vocación, misión y profesión.",
+      "consejo_aplicable": "Encuentra tus pequeños propósitos cotidianos (*ikigai*) en la intersección de lo que amas, lo que haces bien y lo que aporta valor."
+    },
+    {
+      "id_libro": "despierta_tu_entusiasmo_gawain",
+      "titulo": "Despierta tu entusiasmo",
+      "autor": "Shakti Gawain",
+      "categoria": "Tristeza / Hábitos",
+      "sintomas_asociados": ["bloqueo creativo", "desconexión intuitiva", "apatía"],
+      "resumen_terapeutico": "Dinámicas energéticas, visualización creativa y diálogo con el 'niño interior' para superar la apatía y reavivar la intuición.",
+      "consejo_aplicable": "Visita tu santuario interior y rescata los anhelos de juego y asombro de tu infancia para reavivar tu entusiasmo vital."
+    },
+    {
+      "id_libro": "poder_de_la_motivacion_ziglar",
+      "titulo": "El poder de la motivación",
+      "autor": "Zig Ziglar",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["pensamiento apestoso", "inercia", "espera pasiva"],
+      "resumen_terapeutico": "Demuestra que la motivación es un hábito diario ('como el baño diario') y que se construye estructurando metas y sirviendo a otros.",
+      "consejo_aplicable": "No esperes a tener ganas para actuar; alimenta tu mente a diario y define por escrito tus metas con claridad."
+    },
+    {
+      "id_libro": "trampa_del_placer_lisle_goldhamer",
+      "titulo": "La trampa del placer",
+      "autor": "Dr. Douglas J. Lisle y Alan Goldhamer",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["estímulos hipernormales", "desensibilización dopaminérgica", "apatía"],
+      "resumen_terapeutico": "Analiza cómo los estímulos modernos saturan los receptores de dopamina, provocando insensibilidad ante los placeres sencillos.",
+      "consejo_aplicable": "Desintoxica tus sentidos de las gratificaciones instantáneas extremas; al permitir que tus receptores se normalicen, recuperarás el gozo por lo simple."
+    },
+    {
+      "id_libro": "reinventarse_puig",
+      "titulo": "Reinventarse",
+      "autor": "Mario Alonso Puig",
+      "categoria": "Hábitos / Tristeza",
+      "sintomas_asociados": ["zona de resignación", "miedo al cambio", "diálogo limitante"],
+      "resumen_terapeutico": "Neurociencia y medicina mente-cuerpo para superar la 'zona de resignación' mediante neuroplasticidad y coraje moral.",
+      "consejo_aplicable": "Desafía tu diálogo limitante y sal de la zona de resignación; tu cerebro posee plasticidad infinita para aprender y transformarse."
+    },
+    {
+      "id_libro": "chispa_de_la_vida_ratey",
+      "titulo": "La chispa de la vida",
+      "autor": "John Ratey",
+      "categoria": "Hábitos / Tristeza",
+      "sintomas_asociados": ["sedentarismo", "atrofia sináptica", "déficit de BDNF"],
+      "resumen_terapeutico": "Demuestra que el ejercicio aeróbico inunda el cerebro de BDNF (fertilizante cerebral) y equilibra serotonina, noradrenalina y dopamina.",
+      "consejo_aplicable": "Muévete a diario; el ejercicio aeróbico es el activador biológico más potente para reparar tus conexiones sinápticas y encender tu energía."
+    },
+    {
+      "id_libro": "cerebro_resiliente_davidson",
+      "titulo": "Cerebro resiliente",
+      "autor": "Dr. Richard Davidson",
+      "categoria": "Hábitos / Tristeza",
+      "sintomas_asociados": ["estilos emocionales deficientes", "desconexión prefrontal", "apatía"],
+      "resumen_terapeutico": "Cartografía las bases biológicas de las seis dimensiones emocionales y demuestra que el bienestar es una habilidad entrenable.",
+      "consejo_aplicable": "Entrena tu bienestar saboreando deliberadamente las experiencias agradables durante al menos quince segundos continuos en tu mente."
+    },
+    {
+      "id_libro": "vivir_con_sentido_urra",
+      "titulo": "Vivir con sentido",
+      "autor": "Javier Urra",
+      "categoria": "Tristeza",
+      "sintomas_asociados": ["vacío existencial", "individualismo egocéntrico", "letargo"],
+      "resumen_terapeutico": "Mapa existencial para trascender la apatía mediante el asombro, el compromiso generoso con los demás y la aceptación de la finitud.",
+      "consejo_aplicable": "Sal del encierro de tu ego y comprométete con el bienestar de otros; la generosidad activa es el mejor antídoto contra el vacío."
+    },
+    {
+      "id_libro": "arte_de_descansar_hammond",
+      "titulo": "El arte de descansar",
+      "autor": "Claudia Hammond",
+      "categoria": "Hábitos / Insomnio",
+      "sintomas_asociados": ["déficit de descanso", "culpa por pausar", "hiperalerta"],
+      "resumen_terapeutico": "Conclusiones del Test del Descanso global, clasificando las 10 actividades más reparadoras y los mecanismos de la desconexión.",
+      "consejo_aplicable": "Regálate una de las formas de descanso reparador mundiales (lectura pausada, naturaleza o baño largo) sin sentir culpa."
+    },
+    {
+      "id_libro": "supera_tu_insomnio_jacobs",
+      "titulo": "Supera tu insomnio",
+      "autor": "Dr. Gregg D. Jacobs",
+      "categoria": "Insomnio",
+      "sintomas_asociados": ["insomnio condicionado", "cama como estímulo de alarma"],
+      "resumen_terapeutico": "TCC-I clínica de Harvard para romper el condicionamiento negativo de la cama mediante control de estímulos y restricción.",
+      "consejo_aplicable": "Rompe la asociación entre tu cama y la vigilia ansiosa: si no duermes, levántate y regresa solo al sentir somnolencia."
+    },
+    {
+      "id_libro": "manifiesto_para_dormir_winter",
+      "titulo": "Manifiesto para dormir",
+      "autor": "Dr. Chris Winter",
+      "categoria": "Insomnio",
+      "sintomas_asociados": ["expectativas irreales de sueño", "inconsistencia horaria"],
+      "resumen_terapeutico": "Enfoque clínico y desenfadado sobre la neurología del descanso, corrigiendo horarios caóticos y desdramatizando la noche.",
+      "consejo_aplicable": "Fija la hora de tu despertador de forma inamovible los 365 días del año para anclar tu marcapasos circadiano."
+    },
+    {
+      "id_libro": "sanalos_durmiendo_breus",
+      "titulo": "Sánalo durmiendo",
+      "autor": "Dr. Michael J. Breus",
+      "categoria": "Insomnio",
+      "sintomas_asociados": ["lucha contra cronotipo", "insomnio de conciliación"],
+      "resumen_terapeutico": "Cronobiología aplicada y optimización de rutinas según los cuatro cronotipos mamíferos (Delfín, León, Oso, Lobo).",
+      "consejo_aplicable": "Respeta las ventanas de tu cronotipo biológico particular y programa tus actividades según tus picos naturales."
+    },
+    {
+      "id_libro": "guia_practica_del_sueno_peterson_shafazand",
+      "titulo": "Guía práctica del sueño para dummies",
+      "autor": "Dr. Dale Peterson y Shirin Shafazand",
+      "categoria": "Insomnio",
+      "sintomas_asociados": ["arquitectura de ciclos de 90 minutos", "ansiedad por despertares"],
+      "resumen_terapeutico": "Guía médica sobre polisomnografía y ciclos de 90 minutos para desdramatizar los despertares fisiológicos normales.",
+      "consejo_aplicable": "Comprende que despertar brevemente entre ciclos de noventa minutos es normal; no te alarmes ni lo conviertas en desvelo."
+    },
+    {
+      "id_libro": "poder_del_descanso_consciente_dalton_smith",
+      "titulo": "El poder del descanso consciente",
+      "autor": "Dr. Saundra Dalton-Smith",
+      "categoria": "Hábitos / Insomnio",
+      "sintomas_asociados": ["agotamiento multidimensional", "déficit en los 7 tipos de descanso"],
+      "resumen_terapeutico": "Clasifica los 7 tipos de descanso esenciales (físico, mental, sensorial, creativo, emocional, social y espiritual) más allá del sueño.",
+      "consejo_aplicable": "Identifica cuál de tus siete tipos de descanso está en déficit y aplícale una micropráctica restaurativa hoy mismo."
+    },
+    {
+      "id_libro": "sanar_la_culpa_corbera",
+      "titulo": "Sanar la culpa",
+      "autor": "Enric Corbera",
+      "categoria": "Culpa",
+      "sintomas_asociados": ["culpa irracional", "lealtades transgeneracionales", "autosabotaje"],
+      "resumen_terapeutico": "Bioneuroemoción para desarticular la culpa como programa inconsciente y lealtad familiar, promoviendo el perdón no dual.",
+      "consejo_aplicable": "Devuelve simbólicamente las cargas transgeneracionales a sus dueños; el error pasado no es pecado, sino aprendizaje."
+    },
+    {
+      "id_libro": "poder_de_la_autocompasion_neff",
+      "titulo": "El poder de la autocompasión",
+      "autor": "Dra. Kristin Neff",
+      "categoria": "Culpa",
+      "sintomas_asociados": ["autocrítica destructiva", "autoestima frágil", "aislamiento"],
+      "resumen_terapeutico": "Demuestra la superioridad de la autocompasión (autoamabilidad, humanidad compartida, mindfulness) sobre la autoestima frágil.",
+      "consejo_aplicable": "Coloca una mano tibia sobre tu pecho y háblate con la misma amabilidad con que consolarías a un amigo querido en apuros."
+    },
+    {
+      "id_libro": "cuando_exceso_de_responsabilidad_te_ahoga_lerner",
+      "titulo": "Cuando el exceso de responsabilidad te ahoga",
+      "autor": "Dr. Harriet Lerner",
+      "categoria": "Culpa / Ansiedad",
+      "sintomas_asociados": ["sobreocupación funcional", "culpa por límites", "rescatador"],
+      "resumen_terapeutico": "Analiza el sobre-funcionamiento (over-functioning) y la culpa impuesta por sistemas vinculares disfuncionales al poner límites.",
+      "consejo_aplicable": "Suelta la responsabilidad por los problemas y emociones de los demás; permite que cada quien asuma las consecuencias de sus actos."
+    },
+    {
+      "id_libro": "trampa_de_la_perfeccion_curran",
+      "titulo": "La trampa de la perfección",
+      "autor": "Thomas Curran",
+      "categoria": "Culpa / Hábitos",
+      "sintomas_asociados": ["perfeccionismo socialmente prescrito", "burnout", "autoexigencia"],
+      "resumen_terapeutico": "Metaanálisis sociológico sobre el auge del perfeccionismo y la necesidad de adoptar el estándar de 'lo suficientemente bueno'.",
+      "consejo_aplicable": "Adopta el estándar de 'lo suficientemente bueno'; la búsqueda incesante de perfección es una trampa que destruye tu bienestar."
+    },
+    {
+      "id_libro": "coraje_de_no_gustar_kishimi_koga",
+      "titulo": "El coraje de no gustar",
+      "autor": "Ichiro Kishimi y Fumitake Koga",
+      "categoria": "Culpa / Ansiedad",
+      "sintomas_asociados": ["búsqueda de aprobación", "intromisión en tareas ajenas", "teleología"],
+      "resumen_terapeutico": "Psicología adleriana aplicada a la separación de tareas: el coraje de no gustar a todos y asumir la responsabilidad propia.",
+      "consejo_aplicable": "Separa tus tareas de las de los demás; lo que otros piensen de ti es tarea de ellos, y tu libertad radica en atreverte a no gustar."
+    },
+    {
+      "id_libro": "sana_tus_heridas_emocionales_bourbeau",
+      "titulo": "Sana tus heridas emocionales",
+      "autor": "Lise Bourbeau",
+      "categoria": "Culpa",
+      "sintomas_asociados": ["cinco heridas del alma", "máscaras defensivas", "auto-rechazo"],
+      "resumen_terapeutico": "Identifica las cinco heridas (rechazo, abandono, humillación, traición, injusticia) y sus máscaras corporales y psicológicas.",
+      "consejo_aplicable": "Observa tus máscaras defensivas sin juicio; sanar implica dejar de infligirte a ti mismo la herida que otros te causaron."
+    },
+    {
+      "id_libro": "supera_el_perfeccionismo_antony_swinson",
+      "titulo": "Supera el perfeccionismo",
+      "autor": "Dr. Martin Antony y Dr. Richard Swinson",
+      "categoria": "Culpa / Hábitos",
+      "sintomas_asociados": ["perfeccionismo clínico", "pensamiento todo o nada", "experimentos conductuales"],
+      "resumen_terapeutico": "Protocolo TCC para el perfeccionismo mediante reestructuración y experimentos conductuales de errores deliberados.",
+      "consejo_aplicable": "Comete un error deliberado y controlado hoy (un correo con errata menor); comprueba que la catástrofe anticipada no ocurre."
+    },
+    {
+      "id_libro": "don_de_la_imperfeccion_brown",
+      "titulo": "El don de la imperfección",
+      "autor": "Brené Brown",
+      "categoria": "Culpa",
+      "sintomas_asociados": ["escasez", "perfeccionismo escudo", "vida de todo corazón"],
+      "resumen_terapeutico": "Síntesis de diez prácticas para vivir 'de todo corazón' abrazando la vulnerabilidad y la imperfección humana.",
+      "consejo_aplicable": "Practica la alegría consciente y la gratitud cotidiana, soltando el miedo preventivo a que la desgracia sea inminente."
+    },
+    {
+      "id_libro": "arte_de_la_compasion_hacia_uno_mismo_germer",
+      "titulo": "El arte de la compasión hacia uno mismo",
+      "autor": "Dr. Christopher Germer",
+      "categoria": "Culpa / Ansiedad",
+      "sintomas_asociados": ["autocrítica feroz", "amenaza interna", "hostilidad al error"],
+      "resumen_terapeutico": "Guía clínica para calmar la amígdala y la amenaza interna tratando los propios errores con la misma compasión que a un amigo.",
+      "consejo_aplicable": "Trata tus propios tropiezos con la misma calidez y paciencia que le ofrecerías a un amigo querido en su peor momento."
+    },
+    {
+      "id_libro": "inteligencia_erotica_perel",
+      "titulo": "Inteligencia erótica",
+      "autor": "Esther Perel",
+      "categoria": "Duelo Afectivo / Vínculos",
+      "sintomas_asociados": ["miedo al rechazo", "inseguridad vincular", "pérdida de autonomía"],
+      "resumen_terapeutico": "Explora la tensión entre la necesidad de seguridad y el anhelo de libertad, enseñando a cultivar la individualidad sin temor al abandono.",
+      "consejo_aplicable": "Para conectar profundamente con los demás, primero debes aprender a sostenerte sobre tus propios pies sin miedo a perder tu espacio."
+    },
+    {
+      "id_libro": "apegos_seguros_levine",
+      "titulo": "Apegos seguros tras una decepción",
+      "autor": "Amir Levine",
+      "categoria": "Duelo Afectivo",
+      "sintomas_asociados": ["ansiedad por separación", "hipervigilancia vincular", "miedo a la soledad"],
+      "resumen_terapeutico": "Teoría del apego aplicada a la recuperación tras relaciones inestables, fomentando la autovalidación y la elección de entornos seguros.",
+      "consejo_aplicable": "Tus necesidades de afecto y tranquilidad son legítimas; no te culpes por desear claridad y estabilidad en tus relaciones."
+    },
+    {
+      "id_libro": "cinismo_afectivo_bradshaw",
+      "titulo": "Cinismo afectivo y cómo abrir el corazón de nuevo",
+      "autor": "John Bradshaw",
+      "categoria": "Duelo Afectivo / Trauma",
+      "sintomas_asociados": ["desconfianza crónica", "blindaje emocional", "aislamiento defensivo"],
+      "resumen_terapeutico": "Aborda las defensas levantadas tras decepciones profundas y cómo sanar la desconfianza sin ponerse en riesgo.",
+      "consejo_aplicable": "Protegerte del daño no significa encerrarte para siempre; mantén tus límites firmes mientras permites que la empatía regrese a tu vida."
+    },
+    {
+      "id_libro": "vencer_miedo_intimidad_firestone",
+      "titulo": "Vencer el miedo a la intimidad",
+      "autor": "Dr. Robert Firestone",
+      "categoria": "Duelo Afectivo / Ansiedad",
+      "sintomas_asociados": ["autosabotaje vincular", "voz crítica interna", "huida afectiva"],
+      "resumen_terapeutico": "Identifica la 'voz interna destructiva' que sabotea la cercanía interpersonal por miedo a revivir heridas del pasado.",
+      "consejo_aplicable": "Reconoce cuándo el miedo a salir lastimado te incita a huir de situaciones sanas; respira hondo y da un paso a la vez con calma."
+    },
+    {
+      "id_libro": "desintoxicacion_afectiva_riso",
+      "titulo": "Desintoxicación afectiva",
+      "autor": "Walter Riso",
+      "categoria": "Duelo Afectivo",
+      "sintomas_asociados": ["obsesión mental", "recaída vincular", "humillación voluntaria"],
+      "resumen_terapeutico": "Protocolo para erradicar las conductas compulsivas de apego y recuperar la lucidez mental tras una ruptura dolorosa.",
+      "consejo_aplicable": "Trata las ganas de buscar a quien te lastimó como un impulso pasajero; no actúes sobre la urgencia y permítete recobrar tu dignidad."
+    },
+    {
+      "id_libro": "reconstruir_confianza_winch",
+      "titulo": "Reconstruir la confianza tras la mentira",
+      "autor": "Guy Winch",
+      "categoria": "Duelo Afectivo / Trauma",
+      "sintomas_asociados": ["rumiación sobre el engaño", "hipervigilancia", "pérdida de autoestima"],
+      "resumen_terapeutico": "Primeros auxilios emocionales para tratar las heridas del engaño y frenar la autoinculpación tras la ruptura.",
+      "consejo_aplicable": "La deshonestidad de otros es un reflejo de su propia conducta, no de tu intuición ni de tu valía; concéntrate en sanar tu presente."
+    },
+    {
+      "id_libro": "autonomia_libertad_afectiva_congost",
+      "titulo": "Autonomía y libertad afectiva",
+      "autor": "Silvia Congost",
+      "categoria": "Duelo Afectivo / Hábitos",
+      "sintomas_asociados": ["miedo a decidir en solitario", "dependencia", "sensación de vacío"],
+      "resumen_terapeutico": "Guía práctica para construir proyectos personales independientes tras largos períodos de subordinación afectiva.",
+      "consejo_aplicable": "Rediseña tu tiempo y tus decisiones en función de lo que a ti te hace bien; eres el protagonista absoluto de tu propia vida."
+    },
+    {
+      "id_libro": "psicopata_oficina_babiak_hare",
+      "titulo": "El psicópata en la oficina",
+      "autor": "Paul Babiak y Robert D. Hare",
+      "categoria": "Acoso Laboral",
+      "sintomas_asociados": ["manipulación sutil", "gaslighting laboral", "confusión extrema"],
+      "resumen_terapeutico": "Identifica conductas de manipulación y carencia de empatía en jerarquías corporativas, protegiendo al trabajador de la culpa inducida.",
+      "consejo_aplicable": "No intentes razonar con quien manipula las reglas; mantén tus comunicaciones por escrito y apóyate en hechos verificables."
+    },
+    {
+      "id_libro": "supervivencia_corporativa_carlosena",
+      "titulo": "Supervivencia corporativa",
+      "autor": "Al Carlosena",
+      "categoria": "Acoso Laboral / Hábitos",
+      "sintomas_asociados": ["estrés por rumores", "agotamiento por intrigas", "pérdida de sentido laboral"],
+      "resumen_terapeutico": "Estrategias de bajo perfil y preservación energética en organizaciones disfuncionales mientras se planifica una transición segura.",
+      "consejo_aplicable": "Aplica la táctica de la piedra gris: sé neutral, conciso y poco reactivo frente a las provocaciones cotidianas de la oficina."
+    },
+    {
+      "id_libro": "negociacion_jefes_hostiles_ury",
+      "titulo": "Negociación con jefes hostiles",
+      "autor": "William Ury",
+      "categoria": "Acoso Laboral",
+      "sintomas_asociados": ["bloqueo ante gritos", "ansiedad anticipatoria a reuniones", "parálisis"],
+      "resumen_terapeutico": "Metodología 'subir al balcón' para observar el conflicto desde una perspectiva neutra y desarticular la intimidación.",
+      "consejo_aplicable": "Sube mentalmente al balcón: toma una pausa y mira la escena desde fuera antes de responder a un reclamo injusto o destemplado."
+    },
+    {
+      "id_libro": "manual_contra_mobbing_ales",
+      "titulo": "Manual contra el mobbing",
+      "autor": "Javier Alés",
+      "categoria": "Acoso Laboral / Aspectos Legales",
+      "sintomas_asociados": ["indefensión", "miedo a represalias legales", "desorientación probatoria"],
+      "resumen_terapeutico": "Guía práctica de mediación y recopilación probatoria ante el hostigamiento moral en el trabajo.",
+      "consejo_aplicable": "Organiza tu bitácora cronológica con fechas, testigos y documentos; la serenidad legal se apoya en el orden meticuloso."
+    },
+    {
+      "id_libro": "violencia_invisible_gonzalez_rivera",
+      "titulo": "Violencia invisible en el trabajo",
+      "autor": "J. L. González de Rivera",
+      "categoria": "Acoso Laboral / Trauma",
+      "sintomas_asociados": ["somatización severa", "insomnio laboral", "desmoralización"],
+      "resumen_terapeutico": "Análisis del síndrome de acoso institucional y pautas somáticas para frenar la destrucción de la autoestima profesional.",
+      "consejo_aplicable": "Diferencia claramente tu desempeño profesional de las dinámicas tóxicas de un entorno enfermo; tu salud está primero."
+    },
+    {
+      "id_libro": "salud_mental_entornos_hostiles_oms",
+      "titulo": "Salud mental en entornos laborales hostiles",
+      "autor": "OMS",
+      "categoria": "Acoso Laboral / Psicoeducación",
+      "sintomas_asociados": ["agotamiento extremo", "burnout clínico", "ansiedad generalizada"],
+      "resumen_terapeutico": "Directrices internacionales para prevenir riesgos psicosociales y proteger al empleado frente al colapso por hostigamiento.",
+      "consejo_aplicable": "Si tu entorno de trabajo amenaza tu integridad física o mental, activa las redes de apoyo externas y no dudes en buscar ayuda institucional."
+    },
+    {
+      "id_libro": "estrategias_salida_empresas_toxicas_ibarra",
+      "titulo": "Estrategias de salida de empresas tóxicas",
+      "autor": "Herminia Ibarra",
+      "categoria": "Acoso Laboral / Hábitos",
+      "sintomas_asociados": ["miedo al desempleo", "parálisis decisoria", "atrapamiento"],
+      "resumen_terapeutico": "Transición profesional planificada: cómo diversificar redes y opciones laborales mientras se tolera un clima tenso.",
+      "consejo_aplicable": "Destina tu energía libre a construir discretamente tu próximo paso profesional en lugar de desgastarte intentando cambiar un entorno que no cambiará."
+    },
+    {
+      "id_libro": "acoso_escolar_prevencion_aviles",
+      "titulo": "Acoso escolar: Prevención e intervención",
+      "autor": "José María Avilés",
+      "categoria": "Acoso Escolar",
+      "sintomas_asociados": ["miedo al patio", "somatización de domingo por la tarde", "aislamiento"],
+      "resumen_terapeutico": "Herramientas de intervención educativa y apoyo integral a la víctima de acoso para desarticular dinámicas de exclusión.",
+      "consejo_aplicable": "Ninguna burla o agresión está justificada; apóyate en docentes, directivos y familiares para que intervengan de inmediato."
+    },
+    {
+      "id_libro": "ciberbullying_era_digital_urra",
+      "titulo": "Ciberbullying: Riesgos de la era digital",
+      "autor": "Javier Urra",
+      "categoria": "Acoso Escolar / Ciberacoso",
+      "sintomas_asociados": ["pánico a revisar mensajes", "hipervigilancia digital", "vergüenza pública"],
+      "resumen_terapeutico": "Estrategias de protección y resguardo psicológico frente a la difamación en redes y grupos digitales escolares.",
+      "consejo_aplicable": "No respondas a los ataques en redes: toma capturas completas con fechas y usuarios, bloquea los perfiles y entrégalas a las autoridades."
+    },
+    {
+      "id_libro": "educar_sin_gritos_knost",
+      "titulo": "Educar sin gritos ni sumisión",
+      "autor": "L. R. Knost",
+      "categoria": "Acoso Escolar / Crianza",
+      "sintomas_asociados": ["tensión familiar", "inseguridad infantil", "reactividad"],
+      "resumen_terapeutico": "Fomenta la conexión emocional y la seguridad afectiva como base para que niños y jóvenes comuniquen sus vivencias de acoso sin miedo.",
+      "consejo_aplicable": "Escucha sin juzgar ni regañar cuando alguien vulnerable te cuente sus miedos; sentirse escuchado y respaldado es el mayor antídoto contra el aislamiento."
+    },
+    {
+      "id_libro": "cerebro_nino_padres_bilbao",
+      "titulo": "El cerebro del niño explicado a los padres",
+      "autor": "Álvaro Bilbao",
+      "categoria": "Acoso Escolar / Psicoeducación",
+      "sintomas_asociados": ["rabietas por angustia", "mutismo matutino", "miedos irracionales"],
+      "resumen_terapeutico": "Neurociencia práctica para entender la inmadurez de la corteza prefrontal infantil y calmar la reactividad emocional con presencia.",
+      "consejo_aplicable": "Ante el llanto o la negativa a ir al colegio, abraza con firmeza y calma; el cerebro infantil necesita sentir seguridad física antes de poder razonar."
+    },
+    {
+      "id_libro": "inteligencia_emocional_infantil_gottman",
+      "titulo": "Inteligencia emocional infantil",
+      "autor": "John Gottman",
+      "categoria": "Acoso Escolar / Vínculos",
+      "sintomas_asociados": ["supresión del llanto", "agresividad reactiva", "tristeza silenciosa"],
+      "resumen_terapeutico": "El método del 'entrenamiento emocional' para enseñar a nombrar emociones complejas y buscar soluciones colaborativas.",
+      "consejo_aplicable": "Ayuda a ponerle nombre a lo que se siente: nombrar la rabia, el miedo o la tristeza le quita poder al caos interior."
+    },
+    {
+      "id_libro": "limites_claros_amor_seguro_campbell",
+      "titulo": "Límites claros, amor seguro",
+      "autor": "Ross Campbell",
+      "categoria": "Acoso Escolar / Vínculos",
+      "sintomas_asociados": ["búsqueda desesperada de aprobación", "vulnerabilidad a la manipulación"],
+      "resumen_terapeutico": "Cómo llenar el 'tanque emocional' de seguridad personal para evitar que los jóvenes busquen pertenencia a costa de su dignidad.",
+      "consejo_aplicable": "Recuérdate o recuérdale a tu ser querido que su valor no depende de la aprobación de un grupo hostil ni de modas pasajeras."
+    },
+    {
+      "id_libro": "mediacion_escolar_carbo",
+      "titulo": "Mediación escolar y resolución de conflictos",
+      "autor": "Carbó Munné",
+      "categoria": "Acoso Escolar",
+      "sintomas_asociados": ["rivalidad entre pares", "rumores destructivos", "escalada de violencia"],
+      "resumen_terapeutico": "Estrategias de escucha activa y mediación entre iguales para desactivar tensiones grupales antes de que se vuelvan acoso crónico.",
+      "consejo_aplicable": "Aprende a diferenciar un desacuerdo puntual de un abuso continuado; la mediación solo es válida entre iguales, no frente a la intimidación."
+    },
+    {
+      "id_libro": "autoestima_herida_aula_branden",
+      "titulo": "Autoestima herida en el aula",
+      "autor": "Nathaniel Branden",
+      "categoria": "Acoso Escolar / Autoestima",
+      "sintomas_asociados": ["vergüenza al hablar en público", "sensación de torpeza", "retraimiento"],
+      "resumen_terapeutico": "Los seis pilares de la autoestima aplicados a la superación de heridas causadas por humillaciones y burlas en el entorno escolar.",
+      "consejo_aplicable": "Practica la autoaceptación radical: reconoce tus cualidades sin compararte constantemente con la mirada superficial de los demás."
+    },
+    {
+      "id_libro": "habilidades_sociales_jovenes_caballo",
+      "titulo": "Desarrollo de habilidades sociales en jóvenes",
+      "autor": "Vicente E. Caballo",
+      "categoria": "Acoso Escolar / Habilidades Sociales",
+      "sintomas_asociados": ["timidez paralizante", "tartamudeo tensional", "evitación de contacto"],
+      "resumen_terapeutico": "Técnicas conductuales de contacto visual sereno, tono de voz firme y postura abierta para proyectar seguridad en entornos grupales.",
+      "consejo_aplicable": "Mantén la mirada serena y los hombros relajados; el lenguaje corporal de tranquilidad es el escudo más eficaz ante quien busca provocar."
+    },
+    {
+      "id_libro": "complicidad_silencio_detert",
+      "titulo": "La complicidad del silencio en el aula",
+      "autor": "J. R. Detert",
+      "categoria": "Acoso Escolar / Ética",
+      "sintomas_asociados": ["culpa del observador", "miedo a intervenir", "normalización del maltrato"],
+      "resumen_terapeutico": "Psicología moral que explica la desconexión ética de los espectadores ante el maltrato y promueve el coraje civil para apoyar a la víctima.",
+      "consejo_aplicable": "Un gesto sencillo de cercanía hacia un compañero apartado desarma el aislamiento que el acosador intenta imponer."
+    },
+    {
+      "id_libro": "defensa_verbal_smith",
+      "titulo": "Estrategias de defensa verbal en jóvenes",
+      "autor": "Manuel J. Smith",
+      "categoria": "Acoso Escolar / Asertividad",
+      "sintomas_asociados": ["rabia impotente", "respuestas impulsivas", "bloqueo verbal"],
+      "resumen_terapeutico": "Técnicas asertivas como el 'disco rayado' y el 'banco de niebla' para neutralizar comentarios malintencionados sin violencia.",
+      "consejo_aplicable": "Usa respuestas cortas y neutras como 'esa es tu opinión' o 'continúa con lo tuyo'; quitarle valor al insulto le quita combustible a la burla."
+    },
+    {
+      "id_libro": "minimalismo_digital_newport",
+      "titulo": "Minimalismo digital",
+      "autor": "Cal Newport",
+      "categoria": "Hábitos / Ansiedad",
+      "sintomas_asociados": ["scrolling compulsivo", "ansiedad por notificaciones", "insomnio digital"],
+      "resumen_terapeutico": "Filosofía práctica para recuperar la soberanía de la atención reduciendo la dependencia a pantallas y redes adictivas.",
+      "consejo_aplicable": "Establece ventanas fijas para mirar tu celular y silencia las alertas innecesarias; la paz mental empieza al apagar el bombardeo continuo."
+    },
+    {
+      "id_libro": "trampa_comodidad_easter",
+      "titulo": "La trampa de la comodidad",
+      "autor": "Michael Easter",
+      "categoria": "Hábitos / Resiliencia",
+      "sintomas_asociados": ["baja tolerancia al malestar", "sedentarismo", "fragilidad anímica"],
+      "resumen_terapeutico": "Investiga cómo la sobreprotección y el exceso de confort moderno debilitan la adaptación psicológica, proponiendo desafíos dosificados.",
+      "consejo_aplicable": "Acepta pequeñas dosis de esfuerzo físico e incomodidad voluntaria; tu cuerpo y tu mente son más resistentes de lo que crees."
+    },
+    {
+      "id_libro": "semana_laboral_4_horas_ferriss",
+      "titulo": "La semana laboral de 4 horas",
+      "autor": "Timothy Ferriss",
+      "categoria": "Hábitos",
+      "sintomas_asociados": ["agotamiento por hiperocupación", "estrés de falsa urgencia"],
+      "resumen_terapeutico": "Técnicas de automatización, eliminación de tareas innecesarias y enfoque estricto en el principio 80/20 para ganar libertad.",
+      "consejo_aplicable": "Pregúntate: '¿Qué pasaría si esto urgente no se hace hoy?'. En la mayoría de los casos no ocurre nada; aprende a priorizar tu energía."
+    },
+    {
+      "id_libro": "monje_vendio_ferrari_sharma",
+      "titulo": "El monje que vendió su Ferrari",
+      "autor": "Robin Sharma",
+      "categoria": "Hábitos / Serenidad",
+      "sintomas_asociados": ["estrés de éxito vacío", "hipertensión tensional", "desconexión espiritual"],
+      "resumen_terapeutico": "Fábula espiritual sobre la simplificación de la vida, el cuidado del cuerpo, el descanso de la mente y el valor del tiempo presente.",
+      "consejo_aplicable": "Reserva al menos veinte minutos diarios para caminar en silencio o descansar sin pantallas; nutrir tu mente es tan vital como comer."
+    },
+    {
+      "id_libro": "buena_suerte_rovira_trias",
+      "titulo": "La buena suerte",
+      "autor": "Álex Rovira y Fernando Trías de Bes",
+      "categoria": "Hábitos / Esperanza",
+      "sintomas_asociados": ["resignación", "fatalismo", "sensación de mala suerte"],
+      "resumen_terapeutico": "Distingue el azar fortuito de la creación activa de circunstancias favorables mediante el esfuerzo constante y la generosidad.",
+      "consejo_aplicable": "No te quedes esperando a que las cosas cambien solas; crea tú mismo pequeñas condiciones de orden y serenidad en tu entorno hoy."
+    },
+    {
+      "id_libro": "poder_crisis_jerico",
+      "titulo": "El poder transformador de la crisis",
+      "autor": "Pilar Jericó",
+      "categoria": "Resiliencia / Ansiedad",
+      "sintomas_asociados": ["miedo a la incertidumbre", "parálisis ante cambios bruscos"],
+      "resumen_terapeutico": "Mapa del cambio personal: cómo transitar desde la parálisis y la queja hacia el aprendizaje y la reconstrucción activa.",
+      "consejo_aplicable": "Reconoce tu miedo al cambio como una fase normal; una vez validado, pregúntate qué pequeña acción constructiva puedes tomar ahora mismo."
+    },
+    {
+      "id_libro": "el_viaje_del_perdon_luskin",
+      "titulo": "El viaje del perdón",
+      "autor": "Dr. Fred Luskin",
+      "categoria": "Culpa / Ira",
+      "sintomas_asociados": ["rencor crónico", "hipertensión reactiva", "rumiación de venganza"],
+      "resumen_terapeutico": "Metodología clínica de la Universidad de Stanford para desactivar el resentimiento como acto de higiene psicofisiológica y salud cardiovascular.",
+      "consejo_aplicable": "Perdonar no es justificar al agresor, sino desarmar el veneno del rencor para recuperar tu paz interior y proteger tu salud."
+    },
+    {
+      "id_libro": "mobbing_hirigoyen",
+      "titulo": "El acoso moral: El maltrato psicológico en la vida cotidiana",
+      "autor": "Marie-France Hirigoyen",
+      "categoria": "Acoso Laboral / Trauma",
+      "sintomas_asociados": ["acoso moral", "manipulación perversa", "destrucción de autoestima"],
+      "resumen_terapeutico": "Tratado fundacional sobre la violencia psicológica invisible, el hostigamiento perverso y la desarticulación de la culpa en la víctima.",
+      "consejo_aplicable": "Reconoce las dinámicas del acoso moral y no asumas la culpa del agresor; poner límites y documentar los hechos es tu derecho básico."
+    }
+  ]
+}
