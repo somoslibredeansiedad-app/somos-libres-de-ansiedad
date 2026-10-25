@@ -76,6 +76,34 @@ st.markdown(f"""
         color: #FFFFFF !important;
     }}
 
+    /* TARJETA VISUAL DE AVATARES */
+    .avatar-card {{
+        background-color: #FFFFFF;
+        border: 1.5px solid #C2EAD9;
+        border-radius: 14px;
+        padding: 16px;
+        text-align: center;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.04);
+        margin-bottom: 16px;
+    }}
+    .avatar-card h4 {{
+        margin: 8px 0 2px 0 !important;
+        font-size: 18px !important;
+        color: #1E4D3B !important;
+    }}
+    .avatar-card .avatar-spec {{
+        font-size: 14px !important;
+        color: #4E8A72 !important;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }}
+    .avatar-card .avatar-desc {{
+        font-size: 14px !important;
+        color: #5C7A6F !important;
+        line-height: 1.4 !important;
+        margin-bottom: 12px;
+    }}
+
     /* BOTONES DE RUTAS CONVERSACIONALES GUIADAS */
     .btn-opcion-chat button {{
         background-color: #FFFFFF !important;
@@ -148,7 +176,6 @@ st.markdown(f"""
         margin-bottom: 12px !important;
     }}
     
-    /* MENSAJE DEL USUARIO */
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {{
         background-color: #2D4036 !important;
         border-left: 6px solid #4E8A72 !important;
@@ -160,7 +187,6 @@ st.markdown(f"""
         line-height: 1.6 !important;
     }}
 
-    /* MENSAJE DEL ASISTENTE */
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {{
         background-color: #FFFFFF !important;
         border-left: 6px solid #2ECC71 !important;
@@ -281,27 +307,35 @@ def comprimir_imagen(imagen_archivo) -> str:
     except Exception:
         return ""
 
-def obtener_ruta_avatar(avatar_data: dict) -> str:
-    if not isinstance(avatar_data, dict):
-        return ""
-    img = avatar_data.get("imagen") or avatar_data.get("foto") or ""
-    if img.startswith("http"):
-        return img
-    # Búsqueda en ruta local avatares/
-    nombre_archivo = os.path.basename(img)
-    local_path = os.path.join("avatares", nombre_archivo)
-    if os.path.exists(local_path):
-        return local_path
-    if os.path.exists(img):
-        return img
-    return f"https://raw.githubusercontent.com/lacontadoraia-hub/somos-libres-de-ansiedad/main/avatares/{nombre_archivo}"
+def resolver_imagen_pil(avatar_id_o_dict):
+    """Resuelve la imagen abriendo el archivo local directamente con PIL de forma infalible."""
+    if isinstance(avatar_id_o_dict, dict):
+        avatar_id = avatar_id_o_dict.get("id", "")
+    else:
+        avatar_id = str(avatar_id_o_dict)
 
-def mostrar_imagen(avatar_data: dict, ancho: int = 120):
-    src = obtener_ruta_avatar(avatar_data)
-    try:
-        st.image(src, width=ancho)
-    except Exception:
-        st.markdown(f"<div style='width:{ancho}px; height:{ancho}px; background:#C2EAD9; display:flex; align-items:center; justify-content:center; border-radius:8px; font-size:36px;'>🌿</div>", unsafe_allow_html=True)
+    avatar_id = avatar_id.replace(".png", "").replace(".jpg", "").strip()
+
+    rutas = [
+        os.path.join("avatares", f"{avatar_id}.png"),
+        os.path.join("avatares", f"{avatar_id}.jpg"),
+        f"{avatar_id}.png",
+        f"{avatar_id}.jpg"
+    ]
+    for r in rutas:
+        if os.path.exists(r):
+            try:
+                return Image.open(r)
+            except Exception:
+                pass
+    return None
+
+def mostrar_imagen_avatar(avatar_id_o_dict, ancho: int = 120):
+    img = resolver_imagen_pil(avatar_id_o_dict)
+    if img:
+        st.image(img, width=ancho)
+    else:
+        st.markdown(f"<div style='width:{ancho}px; height:{ancho}px; margin:0 auto; background:#C2EAD9; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:36px;'>🌿</div>", unsafe_allow_html=True)
 
 if os.path.exists("Logo.png"):
     st.image("Logo.png", width=120)
@@ -309,7 +343,7 @@ if os.path.exists("Logo.png"):
 st.title("🌿 Somos Libres de Ansiedad")
 
 # ==================================================================================================
-# LOGIN / REGISTRO
+# INICIO DE SESIÓN / REGISTRO
 # ==================================================================================================
 if not st.session_state.authenticated:
     st.markdown("""
@@ -445,7 +479,6 @@ else:
     headers_auth = {"Authorization": f"Bearer {st.session_state.token}"}
     ahora_ts = datetime.now().timestamp()
     
-    # Sincronización optimizada de perfil cada 60 segundos
     if ahora_ts - st.session_state.last_profile_sync > 60:
         try:
             r_sync = requests.get(f"{API_URL}/usuario/mi-perfil", headers=headers_auth, timeout=12)
@@ -457,7 +490,6 @@ else:
         except Exception:
             pass
 
-    # Sincronización del catálogo oficial de 5 guías
     catalogo_completo = []
     chats_disp_semana = 25
     try:
@@ -478,7 +510,6 @@ else:
     except Exception:
         pass
 
-    # Sincronización contextual de contactos
     mis_contactos_dm = []
     if st.session_state.menu_nav_seleccionado == "Red Social y Comunidad":
         try:
@@ -517,7 +548,6 @@ else:
             st.session_state.horas_restantes_plan = None
             st.rerun()
 
-    # Cerrar Sesión conservando ref en la URL
     if st.sidebar.button("Cerrar Sesión"):
         saved_ref = st.query_params.get("ref", "")
         for key in list(st.session_state.keys()):
@@ -536,7 +566,7 @@ else:
         else:
             for av_vinc in st.session_state.avatares_vinculados:
                 es_actual = (st.session_state.avatar_activo and st.session_state.avatar_activo.get("id") == av_vinc.get("id"))
-                label_boton = f"👉 {av_vinc.get('bandera')} {av_vinc.get('nombre')}" if es_actual else f"{av_vinc.get('bandera')} {av_vinc.get('nombre')}"
+                label_boton = f"👉 {av_vinc.get('nombre')}" if es_actual else f"{av_vinc.get('nombre')}"
                 
                 if st.sidebar.button(label_boton, key=f"side_av_{av_vinc.get('id')}"):
                     st.session_state.avatar_activo = av_vinc
@@ -545,7 +575,6 @@ else:
                     
             st.sidebar.caption(f"Mensajes semanales disponibles: **{chats_disp_semana}**")
 
-    # Barra lateral: Chats con Miembros
     elif menu == "Red Social y Comunidad":
         st.sidebar.markdown("---")
         st.sidebar.markdown("### 💬 Chats con Miembros")
@@ -578,7 +607,7 @@ else:
     """, unsafe_allow_html=True)
 
     # ----------------------------------------------------------------------------------------------
-    # 1. SELECCIONAR AVATAR (MATRIZ ADAPTADA A 5 AVATARES)
+    # 1. SELECCIONAR AVATAR (DISEÑO LIMPIO EN TARJETAS CON IMÁGENES RESUELTAS)
     # ----------------------------------------------------------------------------------------------
     if menu == "Seleccionar Avatar":
         st.subheader("🛠️ Catálogo de Guías de Serenidad")
@@ -596,17 +625,29 @@ else:
             else:
                 st.info("ℹ️ Tu **Plan Amigo de Todos** te permite acceder a los **5 Avatares en simultáneo** de forma ilimitada.")
 
-        c1, c2 = st.columns(2)
-        cols = [c1, c2]
+        # Cuadrícula estilizada
+        c1, c2, c3 = st.columns(3)
+        cols = [c1, c2, c3]
         for idx, av in enumerate(avatares):
-            with cols[idx % 2]:
-                mostrar_imagen(av, ancho=130)
-                st.markdown(f"**{av.get('bandera')} {av.get('nombre')}**")
-                st.markdown(f"<p class='avatar-subtitle'>Origen: {av.get('pais')} | {av.get('tono')}</p>", unsafe_allow_html=True)
+            with cols[idx % 3]:
+                st.markdown("<div class='avatar-card'>", unsafe_allow_html=True)
+                mostrar_imagen_avatar(av.get("id"), ancho=110)
+                st.markdown(f"<h4>{av.get('nombre')}</h4>", unsafe_allow_html=True)
+                st.markdown(f"<div class='avatar-spec'>📍 {av.get('pais')}</div>", unsafe_allow_html=True)
+                
+                # Descripción concisa
+                desc_resumida = {
+                    "mariana": "Relacionista Industrial: sobrecarga laboral, burnout y límites saludables.",
+                    "camilo": "Médico General y Fisioterapeuta: regulación somática, palpitaciones y calma física.",
+                    "rodrigo": "Abogado Penalista y Mediador: sentido común, deudas y resolución de conflictos.",
+                    "larissa": "Psicóloga Somática: anclaje sensorial 5-4-3-2-1 y autocompasión.",
+                    "anastasia": "Neuropsicóloga Clínica: desarticulación de bucles mentales y rumiación."
+                }.get(av.get("id"), av.get("tono", "")[:85] + "...")
+                
+                st.markdown(f"<div class='avatar-desc'>{desc_resumida}</div>", unsafe_allow_html=True)
                 
                 esta_seleccionado = av.get("is_activo", False)
                 if esta_seleccionado:
-                    st.caption("✅ Ya forma parte de tus guías activos")
                     if st.button("Conversar con este Guía", key=f"sel_act_{av.get('id')}"):
                         st.session_state.avatar_activo = av
                         st.session_state.menu_nav_seleccionado = "Chat con Avatar"
@@ -623,6 +664,7 @@ else:
                                 st.error(r.json().get("detail", "Límite de avatares alcanzado en tu plan."))
                         except Exception as e:
                             st.error(f"Error: {e}")
+                st.markdown("</div>", unsafe_allow_html=True)
 
     # ----------------------------------------------------------------------------------------------
     # 2. CHAT CON AVATAR (RUTAS PREDETERMINADAS + INPUT LIBRE)
@@ -637,11 +679,12 @@ else:
             with st.container():
                 st.markdown(f"""
                     <div class="avatar-header-box">
-                        <div style="display: flex; align-items: center; gap: 16px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
                             <div>
-                                <h3 style="margin: 0; font-size: 1.5rem !important;">Conversando con {av.get('nombre')}</h3>
-                                <p class="avatar-subtitle" style="margin: 2px 0 0 0;">{av.get('bandera')} {av.get('pais')} | {av.get('tono')}</p>
+                                <h3 style="margin: 0; font-size: 1.4rem !important;">{av.get('nombre')}</h3>
+                                <p class="avatar-subtitle" style="margin: 2px 0 0 0;">📍 {av.get('pais')} | Guía Activo</p>
                             </div>
+                            <span style="background:#EBF7F2; padding:4px 12px; border-radius:12px; font-weight:bold; color:#4E8A72; font-size:14px;">Mensajes disponibles: {chats_disp_semana}</span>
                         </div>
                     </div>
                 """, unsafe_allow_html=True)
@@ -649,11 +692,9 @@ else:
             chat_key = f"messages_{st.session_state.user_id}_{av_id}"
             opciones_key = f"opciones_activas_{st.session_state.user_id}_{av_id}"
 
-            # Inicialización de opciones de árbol
             if opciones_key not in st.session_state:
                 st.session_state[opciones_key] = av.get("opciones_iniciales", [])
 
-            # Recuperación del historial persistente (72 horas)
             if chat_key not in st.session_state:
                 st.session_state[chat_key] = []
                 try:
@@ -670,7 +711,6 @@ else:
                 except Exception:
                     pass
 
-                # Inyección del saludo inicial si está vacío
                 if not st.session_state[chat_key]:
                     st.session_state[chat_key].append({
                         "role": "assistant",
@@ -679,7 +719,6 @@ else:
                         "timestamp": datetime.now(timezone.utc).isoformat()
                     })
 
-            # Contenedor de visualización de mensajes
             chat_container = st.container(height=460)
             with chat_container:
                 for m in st.session_state[chat_key]:
@@ -690,9 +729,7 @@ else:
                         with st.chat_message(m["role"], avatar=icono):
                             st.markdown(m["content"])
 
-            # --------------------------------------------------------------------------------------
-            # BOTONERA INTERACTIVA DE RUTAS PREDEFINIDAS ($0 USD Y RESPUESTA INMEDIATA)
-            # --------------------------------------------------------------------------------------
+            # BOTONERA INTERACTIVA DE RUTAS PREDEFINIDAS ($0 USD)
             opciones_actuales = st.session_state.get(opciones_key, [])
             if opciones_actuales:
                 st.markdown("<p style='font-size:16px; font-weight:600; margin-bottom:4px; color:#4E8A72;'>💡 Opciones recomendadas para continuar:</p>", unsafe_allow_html=True)
@@ -702,15 +739,12 @@ else:
                     with col_target:
                         st.markdown('<div class="btn-opcion-chat">', unsafe_allow_html=True)
                         if st.button(opc["texto"], key=f"btn_opc_{av_id}_{opc['id']}_{i}"):
-                            # Inyección inmediata del texto de la opción como mensaje de usuario
                             st.session_state[chat_key].append({
                                 "role": "user",
                                 "content": opc["texto"],
                                 "is_crisis": False,
                                 "timestamp": datetime.now(timezone.utc).isoformat()
                             })
-                            
-                            # Envío rápido al backend
                             try:
                                 payload = {
                                     "avatar_id": av_id,
@@ -726,7 +760,6 @@ else:
                                         "is_crisis": d_resp.get("is_crisis", False),
                                         "timestamp": datetime.now(timezone.utc).isoformat()
                                     })
-                                    # Actualización de la siguiente botonera
                                     st.session_state[opciones_key] = d_resp.get("opciones_siguientes", [])
                                     st.rerun()
                                 else:
@@ -735,7 +768,6 @@ else:
                                 st.error(f"Falla de conexión: {e_opc}")
                         st.markdown('</div>', unsafe_allow_html=True)
 
-            # Entrada libre por teclado para dudas abiertas
             if user_text := st.chat_input("O escribe tu propio pensamiento o inquietud libremente..."):
                 historial_reciente = [
                     f"{'Usuario' if m['role'] == 'user' else 'Guía'}: {m['content']}"
@@ -777,7 +809,7 @@ else:
                     st.error(f"Falla de conexión con el backend: {e}")
 
     # ----------------------------------------------------------------------------------------------
-    # 3. RED SOCIAL Y COMUNIDAD
+    # 3. RED SOCIAL Y COMUNIDAD (TODAS LAS PESTAÑAS Y FUNCIONES COMPLETAS)
     # ----------------------------------------------------------------------------------------------
     elif menu == "Red Social y Comunidad":
         tab_mi_perfil, tab_amigos, tab_muro, tab_reuniones, tab_buzon = st.tabs([
@@ -1091,7 +1123,7 @@ else:
                     st.warning("Completa el asunto y el mensaje.")
 
     # ----------------------------------------------------------------------------------------------
-    # 4. PLANES Y CONCILIACIÓN DE PAGOS PROTEGIDA
+    # 4. PLANES Y CONCILIACIÓN DE PAGOS PROTEGIDA (CON SUBIDA DE COMPROBANTE)
     # ----------------------------------------------------------------------------------------------
     elif menu == "Planes y Suscripción":
         tab_p, tab_c, tab_pago_guiado = st.tabs(["Planes Oficiales", "Canjear y Compartir Referido", "Coordinar Pago Privado con Admin"])
